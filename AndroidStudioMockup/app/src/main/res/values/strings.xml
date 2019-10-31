@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Gas Calculator</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigate">Start navigation</string>
+    <string name="payment">Make payment</string>
+    <string name="request">Request payment</string>
+    <string name="user_name">Brandon Nhem</string>
+    <string name="user_name1">Chris Tran</string>
+    <string name="user_name2">Meng Cha</string>
+    <string name="user_name3">Taylor Meyer</string>
+    <string name="user_name4">George Washington</string>
+    <string name="user_name5">Fei Hoffman</string>
+    <string name="user_name6">Peter Parker</string>
+    <string name="user_name7">Anthony Davis</string>
+    <string name="user_name8">Joe Mama</string>
+    <string name="user_name9">Nathan Drake</string>
+
+
+    <string name="user_email">brandonnhem@gmail.com</string>
+
+
+</resources>
