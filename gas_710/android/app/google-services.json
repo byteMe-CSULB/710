@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "310606083871",
+    "firebase_url": "https://calculator-17c8c.firebaseio.com",
+    "project_id": "calculator-17c8c",
+    "storage_bucket": "calculator-17c8c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310606083871:android:cb8438237c731711ffe22a",
+        "android_client_info": {
+          "package_name": "com.byteMe.gas_710"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "310606083871-h0geh6kk7kj66epdh3iur39gj9ug5vfb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5SF72MYOw0CaRqDCk5qI6zxmMFEKS6cg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "310606083871-h0geh6kk7kj66epdh3iur39gj9ug5vfb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "310606083871-dqemhlc019qhg0oduhk0hf536acuvogs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.byteMe.calc710"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
