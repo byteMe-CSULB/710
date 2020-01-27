@@ -12,7 +12,24 @@ class SettingsPage extends StatelessWidget {
         title: new Text("Settings Page"),
         backgroundColor: Colors.purple,
       ),
-      body: new Text("This is the settings page"),
+      body: Builder(
+        builder: (context) => Center(
+          child: RaisedButton(
+            child: Text("Sign In"),
+            onPressed: () => _showToast(context),
+            color: Colors.purple[300],
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            splashColor: Colors.purple[900],
+          ),
+        ),)
     );
   }
+}
+
+void _showToast(BuildContext context) {
+  final scaffold = Scaffold.of(context);
+  scaffold.showSnackBar(
+    SnackBar(content: const Text('Signing in..'),
+    action: SnackBarAction(label: 'LOGOUT', onPressed: scaffold.hideCurrentSnackBar))
+  );
 }
