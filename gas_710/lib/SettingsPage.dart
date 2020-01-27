@@ -14,7 +14,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return new Scaffold
     (
-      drawer: new DrawerCodeOnly(),
+      drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Settings Page"),
         backgroundColor: Colors.purple,
@@ -23,7 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _signInButton(),
+            _signInButton(), // log in with Google Button
           ],
         ),
       )
@@ -53,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image(image: AssetImage("assets/google_logo.png"), height: 35.0),
+            Image(image: AssetImage("assets/google_logo.png"), height: 35.0), // asset image
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Text(

@@ -40,7 +40,7 @@ class DrawerCodeOnly extends StatelessWidget {
         (
           children: <Widget>
           [
-            new UserAccountsDrawerHeader(
+            new UserAccountsDrawerHeader( // drawer header in navigation bar
                 accountName: new Text("User Name"),
                 accountEmail: new Text("username@gmail.com"),
                 currentAccountPicture: CircleAvatar(
@@ -48,6 +48,7 @@ class DrawerCodeOnly extends StatelessWidget {
                   child: Text('UN'),
                 ),
               ),
+              // Buttons in nav drawer
               new ListTile(
                 leading: Icon(Icons.navigation),
                 title: Text("Start trip"),
@@ -91,6 +92,7 @@ class DrawerCodeOnly extends StatelessWidget {
               Divider(
                 color: Colors.grey[400]
                 ),
+              // buttons below do not go anywhere at the moment 
               new ListTile(
                 leading: Icon(Icons.contacts),
                 title: Text("Open contacts"),

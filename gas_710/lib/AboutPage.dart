@@ -6,7 +6,7 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold
     (
-      drawer: new DrawerCodeOnly(),
+      drawer: new DrawerCodeOnly(), // provides the nav drawer
       appBar: new AppBar(
         title: new Text("About Page"),
         backgroundColor: Colors.purple,

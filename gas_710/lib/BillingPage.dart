@@ -6,7 +6,7 @@ class BillingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold
     (
-      drawer: new DrawerCodeOnly(),
+      drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,
