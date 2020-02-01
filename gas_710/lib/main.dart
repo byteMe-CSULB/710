@@ -116,7 +116,17 @@ class DrawerCodeOnly extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                 }
-              )
+              ),
+              Divider(
+                color: Colors.grey[400],
+              ),
+              new ListTile(
+                leading: Icon(Icons.exit_to_app),
+                title: Text("Log Out"),
+                onTap: () {
+                  Navigator.pop(context);
+                }
+              ),
           ],
         ),
     );
