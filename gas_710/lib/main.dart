@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:gas_710/AboutPage.dart';
 import 'package:gas_710/BillingPage.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/SettingsPage.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:gas_710/LinkPaymentPage.dart';
+import 'package:gas_710/ContactsPage.dart';
+import 'package:gas_710/auth.dart';
 
 void main() => runApp(MyApp());
 
@@ -28,6 +29,13 @@ class GasApp extends StatelessWidget {
           title: Text('7 ! 0'),
           backgroundColor: Colors.purple,
       ),
+       body: new Container(
+        child: new Center(
+          child: new Text("This is the main page",
+          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
+          )
+        )
+      )
     );
   }
 }
@@ -42,20 +50,35 @@ class DrawerCodeOnly extends StatelessWidget {
         (
           children: <Widget>
           [
-            new UserAccountsDrawerHeader(
-                accountName: new Text("User Name"),
-                accountEmail: new Text("username@gmail.com"),
+            signedIn ? new UserAccountsDrawerHeader( // IF signed in, nav header is filled with Login Details from auth.dart
+                accountName: new Text(name,
+                style: TextStyle(color: Colors.black),),
+                accountEmail: new Text(email,
+                style: TextStyle(color: Colors.black),),
                 currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Text('UN'),
-                ),
-              ),
+                  backgroundImage: NetworkImage(
+                    imageUrl,
+                  ),
+                ), 
+                decoration: BoxDecoration(color: Colors.amber), // IF not signed in, message displayed to sign in through settings page
+              ) : new DrawerHeader(
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    "Please sign in, check Settings!", // message to sign in
+                    style: TextStyle(fontSize: 17)
+                  ),
+                ),  
+                decoration: BoxDecoration(
+                  color: Colors.amber),
+              ),    
+              // Buttons in nav drawer
               new ListTile(
                 leading: Icon(Icons.navigation),
                 title: Text("Start trip"),
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new NavigationPage()));
+                  Navigator.pop(context); // Navigator.pop(context) will close the navigation drawer
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new NavigationPage())); // Navigator.push(context) will send you the page you choose
                 },
               ),
               new ListTile(
@@ -98,6 +121,7 @@ class DrawerCodeOnly extends StatelessWidget {
                 title: Text("Open contacts"),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new ContactsPage()));
                 },
               ),
               new ListTile(
@@ -105,6 +129,7 @@ class DrawerCodeOnly extends StatelessWidget {
                 title: Text("Link to payment services"),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new LinkPaymentPage()));
                 }
               ),
               Divider(
@@ -113,123 +138,31 @@ class DrawerCodeOnly extends StatelessWidget {
               new ListTile(
                 leading: Icon(Icons.bug_report),
                 title: Text("Report an issue"),
+                onTap: () { 
+                  Navigator.pop(context);
+                  // SnackBar at the bottom, displays that the feature is planned, but not implemented yet
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Feature not implemented yet"))); 
+                }
+              ),
+              Divider(
+                color: Colors.grey[400],
+              ),
+              new ListTile(
+                leading: Icon(Icons.exit_to_app),
+                title: Text("Log Out"),
                 onTap: () {
                   Navigator.pop(context);
+                  // IF signed in, display SnackBar that user has signed out
+                  // ELSE, display SnackBar that user is not signed in to be able to sign out
+                  signedIn ? Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Signed out"))) : Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Not signed in")));
+                  signOutGoogle(); // call signout method from auth.dart
                 }
-              )
+              ),
           ],
         ),
     );
   }
 }
-     
-
-// class MyApp extends StatefulWidget {
-//   @override
-//   _MyAppState createState() => _MyAppState();
-// }
-
-// class _MyAppState extends State<MyApp> {
-//   GoogleMapController mapController;
-
-//   final LatLng _center = const LatLng(45.521563, -122.677433);
-
-//   void _onMapCreated(GoogleMapController controller) {
-//     mapController = controller;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: Text('7 ! 0'),
-//           backgroundColor: Colors.purple,
-//         ),
-//         drawer: Drawer(
-//           child: new ListView(
-//             children: <Widget>[
-//               new UserAccountsDrawerHeader(
-//                 accountName: new Text("User Name"),
-//                 accountEmail: new Text("username@gmail.com"),
-//                 currentAccountPicture: CircleAvatar(
-//                   backgroundColor: Colors.white,
-//                   child: Text('UN'),
-//                 ),
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.navigation),
-//                 title: Text("Start trip"),
-//                 onTap: () {
-//                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new NavigationPage()));
-//                 },
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.attach_money),
-//                 title: Text("Billing"),
-//                 onTap: () {
-//                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new BillingPage()));
-//                 },
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.settings),
-//                 title: Text("Settings"),
-//                 onTap: () {
-//                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new SettingsPage()));
-//                 }
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.info),
-//                 title: Text("Info"),
-//                 onTap: () {
-//                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new InfoPage()));
-//                 }
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.people),
-//                 title: Text("About"),
-//                 onTap: () {
-//                   Navigator.push(context, new MaterialPageRoute(builder: (context) => new AboutPage()));
-//                 }
-//               ),
-//               Divider(
-//                 color: Colors.grey[400]
-//                 ),
-//               ListTile(
-//                 leading: Icon(Icons.contacts),
-//                 title: Text("Open contacts"),
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                 },
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.compare_arrows),
-//                 title: Text("Link to payment services"),
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                 }
-//               ),
-//               Divider(
-//                 color: Colors.grey[400],
-//               ),
-//               ListTile(
-//                 leading: Icon(Icons.bug_report),
-//                 title: Text("Report an issue"),
-//                 onTap: () {
-//                   Navigator.pop(context);
-//                 }
-//               )
-//              ],
-//             ),
-//           ),
-//         body: GoogleMap(
-//           onMapCreated: _onMapCreated,
-//           initialCameraPosition: CameraPosition(
-//             target: _center,
-//             zoom: 11.0,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

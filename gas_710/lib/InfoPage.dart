@@ -6,12 +6,18 @@ class InfoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold
     (
-      drawer: new DrawerCodeOnly(),
+      drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Info Page"),
         backgroundColor: Colors.purple,
       ),
-      body: new Text("This is the info page"),
+       body: new Container(
+        child: new Center(
+          child: new Text("This is the info page",
+          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
+          )
+        )
+      )
     );
   }
 }

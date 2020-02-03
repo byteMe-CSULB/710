@@ -6,12 +6,18 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold
     (
-      drawer: new DrawerCodeOnly(),
+      drawer: new DrawerCodeOnly(), // provides the nav drawer
       appBar: new AppBar(
         title: new Text("About Page"),
         backgroundColor: Colors.purple,
       ),
-      body: new Text("This is the about page"),
+       body: new Container(
+        child: new Center(
+          child: new Text("This is the about page",
+          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
+          )
+        )
+      )
     );
   }
 }
