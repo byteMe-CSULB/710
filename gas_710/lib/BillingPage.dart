@@ -11,7 +11,13 @@ class BillingPage extends StatelessWidget {
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,
       ),
-      body: new Text("This is the billing page"),
+      body: new Container(
+        child: new Center(
+          child: new Text("This is the billing page",
+          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
+          )
+        )
+      )
     );
   }
 }

@@ -4,6 +4,9 @@ import 'package:gas_710/BillingPage.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/SettingsPage.dart';
+import 'package:gas_710/LinkPaymentPage.dart';
+import 'package:gas_710/ContactsPage.dart';
+import 'package:gas_710/auth.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,6 +29,13 @@ class GasApp extends StatelessWidget {
           title: Text('7 ! 0'),
           backgroundColor: Colors.purple,
       ),
+       body: new Container(
+        child: new Center(
+          child: new Text("This is the main page",
+          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
+          )
+        )
+      )
     );
   }
 }
@@ -40,21 +50,35 @@ class DrawerCodeOnly extends StatelessWidget {
         (
           children: <Widget>
           [
-            new UserAccountsDrawerHeader( // drawer header in navigation bar
-                accountName: new Text("User Name"),
-                accountEmail: new Text("username@gmail.com"),
+            signedIn ? new UserAccountsDrawerHeader( // IF signed in, nav header is filled with Login Details from auth.dart
+                accountName: new Text(name,
+                style: TextStyle(color: Colors.black),),
+                accountEmail: new Text(email,
+                style: TextStyle(color: Colors.black),),
                 currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Text('UN'),
-                ),
-              ),
+                  backgroundImage: NetworkImage(
+                    imageUrl,
+                  ),
+                ), 
+                decoration: BoxDecoration(color: Colors.amber), // IF not signed in, message displayed to sign in through settings page
+              ) : new DrawerHeader(
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    "Please sign in, check Settings!", // message to sign in
+                    style: TextStyle(fontSize: 17)
+                  ),
+                ),  
+                decoration: BoxDecoration(
+                  color: Colors.amber),
+              ),    
               // Buttons in nav drawer
               new ListTile(
                 leading: Icon(Icons.navigation),
                 title: Text("Start trip"),
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new NavigationPage()));
+                  Navigator.pop(context); // Navigator.pop(context) will close the navigation drawer
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new NavigationPage())); // Navigator.push(context) will send you the page you choose
                 },
               ),
               new ListTile(
@@ -92,12 +116,12 @@ class DrawerCodeOnly extends StatelessWidget {
               Divider(
                 color: Colors.grey[400]
                 ),
-              // buttons below do not go anywhere at the moment 
               new ListTile(
                 leading: Icon(Icons.contacts),
                 title: Text("Open contacts"),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new ContactsPage()));
                 },
               ),
               new ListTile(
@@ -105,6 +129,7 @@ class DrawerCodeOnly extends StatelessWidget {
                 title: Text("Link to payment services"),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new LinkPaymentPage()));
                 }
               ),
               Divider(
@@ -113,8 +138,11 @@ class DrawerCodeOnly extends StatelessWidget {
               new ListTile(
                 leading: Icon(Icons.bug_report),
                 title: Text("Report an issue"),
-                onTap: () {
+                onTap: () { 
                   Navigator.pop(context);
+                  // SnackBar at the bottom, displays that the feature is planned, but not implemented yet
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Feature not implemented yet"))); 
                 }
               ),
               Divider(
@@ -125,6 +153,12 @@ class DrawerCodeOnly extends StatelessWidget {
                 title: Text("Log Out"),
                 onTap: () {
                   Navigator.pop(context);
+                  // IF signed in, display SnackBar that user has signed out
+                  // ELSE, display SnackBar that user is not signed in to be able to sign out
+                  signedIn ? Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Signed out"))) : Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Not signed in")));
+                  signOutGoogle(); // call signout method from auth.dart
                 }
               ),
           ],

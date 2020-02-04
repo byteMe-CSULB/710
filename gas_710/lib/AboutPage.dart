@@ -11,7 +11,13 @@ class AboutPage extends StatelessWidget {
         title: new Text("About Page"),
         backgroundColor: Colors.purple,
       ),
-      body: new Text("This is the about page"),
+       body: new Container(
+        child: new Center(
+          child: new Text("This is the about page",
+          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
+          )
+        )
+      )
     );
   }
 }

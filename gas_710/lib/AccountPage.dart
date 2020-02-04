@@ -9,7 +9,7 @@ class AccountPage extends StatelessWidget {
     return Scaffold(
        drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
-        title: new Text("Settings Page"),
+        title: new Text("Account Page"),
         backgroundColor: Colors.purple,
       ),
       body: Container(
@@ -17,7 +17,6 @@ class AccountPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
-
             children: <Widget>[
               CircleAvatar(
                 backgroundImage: NetworkImage(
@@ -62,12 +61,12 @@ class AccountPage extends StatelessWidget {
                   signOutGoogle();
                   Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return SettingsPage();}), ModalRoute.withName('/'));
                 },
-                color: Colors.yellow[700],
+                color: Colors.amber,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Sign Out',
-                    style: TextStyle(fontSize: 25, color: Colors.white),
+                    style: TextStyle(fontSize: 25, color: Colors.black),
                   ),
                 ),
                 elevation: 5,
