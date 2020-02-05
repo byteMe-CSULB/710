@@ -9,6 +9,11 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="gas_710.v2"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- Add the following entry, with your API key -->
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB_ydG69Smnh96yJpKSBdrhE5kcouztAOk"/>
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -16,6 +21,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
