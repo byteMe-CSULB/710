@@ -8,6 +8,7 @@ import 'package:gas_710/LinkPaymentPage.dart';
 import 'package:gas_710/ContactsPage.dart';
 import 'package:gas_710/auth.dart';
 
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -18,6 +19,9 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+
 
 class GasApp extends StatelessWidget {
   @override
@@ -160,6 +164,13 @@ class DrawerCodeOnly extends StatelessWidget {
                     content: Text("Not signed in")));
                   signOutGoogle(); // call signout method from auth.dart
                 }
+              ),
+              new ListTile(
+                leading: Icon(Icons.attach_money),
+                title: Text("Taylor test map"),
+                onTap: () {
+
+                },
               ),
           ],
         ),
