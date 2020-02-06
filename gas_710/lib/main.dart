@@ -7,6 +7,7 @@ import 'package:gas_710/SettingsPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
 import 'package:gas_710/ContactsPage.dart';
 import 'package:gas_710/auth.dart';
+import 'package:gas_710/MapTest.dart';
 
 
 void main() => runApp(MyApp());
@@ -168,9 +169,10 @@ class DrawerCodeOnly extends StatelessWidget {
               new ListTile(
                 leading: Icon(Icons.attach_money),
                 title: Text("Taylor test map"),
-                onTap: () {
-
-                },
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, new MaterialPageRoute(builder: (context) => new MapTest()));
+                  }
               ),
           ],
         ),
