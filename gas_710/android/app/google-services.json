@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "310606083871-3an57ura09d0frlqjjcs300gg7vg43n9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.byteMe.gas_710",
+            "certificate_hash": "e5f7d44806d15f8557d9265f7c5331ad18c5347a"
+          }
+        },
+        {
+          "client_id": "310606083871-2k1m29jdrdtnepld740tccc9r1794fja.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.byteMe.gas_710",
+            "certificate_hash": "e1985e9f37ffdc87aab5ebd982b35f1317e3c59f"
+          }
+        },
+        {
           "client_id": "310606083871-ocogieq0ci7ecc8suo6libl7920q7oin.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

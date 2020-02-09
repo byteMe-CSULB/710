@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/AboutPage.dart';
 import 'package:gas_710/BillingPage.dart';
+import 'package:gas_710/FirestoreTest.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/SettingsPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
 import 'package:gas_710/ContactsPage.dart';
 import 'package:gas_710/auth.dart';
-import 'package:gas_710/MapTest.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -16,13 +15,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      home: GasApp(),
+      home: NavigationPage(),
     );
   }
 }
-
-
-
 
 class GasApp extends StatelessWidget {
   @override
@@ -78,6 +74,19 @@ class DrawerCodeOnly extends StatelessWidget {
                   color: Colors.amber),
               ),    
               // Buttons in nav drawer
+
+            ///////////////////// FIREBASE TEST ////////////////////////
+            new ListTile(
+              leading: Icon(Icons.navigation),
+              title: Text("Firestore Test"),
+              onTap: () {
+                Navigator.pop(context); // Navigator.pop(context) will close the navigation drawer
+                Navigator.push(context, new MaterialPageRoute(builder: (context) => new FirestoreTest())); // Navigator.push(context) will send you the page you choose
+              },
+            ),
+
+              ////////////////// FIREBASE TEST ///////////////////////
+
               new ListTile(
                 leading: Icon(Icons.navigation),
                 title: Text("Start trip"),
@@ -165,14 +174,6 @@ class DrawerCodeOnly extends StatelessWidget {
                     content: Text("Not signed in")));
                   signOutGoogle(); // call signout method from auth.dart
                 }
-              ),
-              new ListTile(
-                leading: Icon(Icons.attach_money),
-                title: Text("Taylor test map"),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context, new MaterialPageRoute(builder: (context) => new MapTest()));
-                  }
               ),
           ],
         ),
