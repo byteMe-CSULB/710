@@ -15,6 +15,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "310606083871-2k1m29jdrdtnepld740tccc9r1794fja.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.byteMe.gas_710",
+            "certificate_hash": "e1985e9f37ffdc87aab5ebd982b35f1317e3c59f"
+          }
+        },
+        {
+          "client_id": "310606083871-ocogieq0ci7ecc8suo6libl7920q7oin.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.byteMe.gas_710",
+            "certificate_hash": "5fd36a70f777cde18951513ba0f8d179a9a6ac64"
+          }
+        },
+        {
+          "client_id": "310606083871-rtc8mg727n9i8obg5i5u2upcr7t887er.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.byteMe.gas_710",
+            "certificate_hash": "1abc99e5d3b2eac43159bb0014ee83e4aa3438e7"
+          }
+        },
+        {
           "client_id": "310606083871-0lom52u4kla8do0m65tjsdv1dob90i6q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -22,42 +46,6 @@
             "certificate_hash": "243550c11afcb5e1cb179d920774c685f9a934b7"
           }
         },
-        {
-          "client_id": "310606083871-h0geh6kk7kj66epdh3iur39gj9ug5vfb.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyA5SF72MYOw0CaRqDCk5qI6zxmMFEKS6cg"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "310606083871-h0geh6kk7kj66epdh3iur39gj9ug5vfb.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "310606083871-dqemhlc019qhg0oduhk0hf536acuvogs.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.byteMe.calc710"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:310606083871:android:836d9fc98de64145ffe22a",
-        "android_client_info": {
-          "package_name": "com.byteMe.gas_calctest"
-        }
-      },
-      "oauth_client": [
         {
           "client_id": "310606083871-h0geh6kk7kj66epdh3iur39gj9ug5vfb.apps.googleusercontent.com",
           "client_type": 3
