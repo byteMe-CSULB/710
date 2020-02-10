@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
 const double CAMERA_ZOOM = 13;
@@ -37,6 +38,9 @@ class _NavigationPageState extends State<NavigationPage> {
   BitmapDescriptor sourceIcon;
   BitmapDescriptor destinationIcon;
 
+  // search address
+  String searchAddr;
+
   @override
   void initState() {
     super.initState();
@@ -53,8 +57,38 @@ class _NavigationPageState extends State<NavigationPage> {
 
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
-    setMapPins();
-    setPolylines();
+    // setMapPins();
+    // setPolylines();
+  }
+
+  void _getLocation() async {
+    var currentLocation = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    print('got current location as ${currentLocation.latitude}, ${currentLocation.longitude}');    
+    var currentAddress = await _getAddress(currentLocation);    
+    await _moveToPosition(currentLocation);
+
+    setState(() {
+      // _markers.clear();
+      // final marker = Marker(
+      //     markerId: MarkerId("curr_loc"),
+      //     position: LatLng(currentLocation.latitude, currentLocation.longitude),
+      //     infoWindow: InfoWindow(title: currentAddress),
+      // );
+      // _markers.add("Current Location") = marker;
+      // // source pin
+      //   _markers.add(Marker(
+      //       markerId: MarkerId('sourcePin'),
+      //       position: SOURCE_LOCATION,
+      //       icon: sourceIcon)); 
+      final marker = Marker(
+        markerId: MarkerId("curr_loc"),
+        position: LatLng(currentLocation.latitude, currentLocation.longitude),
+        infoWindow:  InfoWindow(title: currentAddress),
+        icon: sourceIcon,
+      );
+      _markers.add(marker);
+    }); 
   }
 
   @override
@@ -72,62 +106,139 @@ class _NavigationPageState extends State<NavigationPage> {
         title: new Text("Navigation Page"),
         backgroundColor: Colors.purple,
       ),
-      body: GoogleMap(
-          myLocationEnabled: true,
-          compassEnabled: true,
-          tiltGesturesEnabled: false,
-          markers: _markers,
-          polylines: _polylines,
-          mapType: MapType.normal,
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: initialLocation,
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _getLocation,
+        backgroundColor: Colors.amber,
+        child: Icon(Icons.location_on),
+      ),
+      body: Stack(
+        children: <Widget>[
+          GoogleMap(
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            tiltGesturesEnabled: false,
+            markers: _markers,
+            polylines: _polylines,
+            mapType: MapType.normal,
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: initialLocation,
+          ),
+          Positioned(
+            top: 20.0,
+            right: 15.0,
+            left: 15.0,
+            child: Container(
+              height: 50.0,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.white,
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Enter Address..',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.search), 
+                    iconSize: 30.0,
+                    onPressed: searchandNavigate,
+                  ),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    searchAddr = val;
+                  });
+                },
+              ),
+            ),
+          )
+        ]
+      ),
     );
   }
 
-  void setMapPins() {
+  Future<void> animateTo(double lat, double long) async {
+    final c = await _controller.future;
+    final p = CameraPosition(target: LatLng(lat, long), zoom: 15.0);
+    c.animateCamera(CameraUpdate.newCameraPosition(p));
+  }
+
+  searchandNavigate() {
+    Geolocator().placemarkFromAddress(searchAddr).then((result) async { // result is your destination that searched from searchAddr
+      animateTo(result[0].position.latitude, result[0].position.longitude); // takes us to the location
+      var currentLocation = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best); // pings YOUR location
+      double distanceInMeter = await Geolocator().distanceBetween(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
+      print("Distance to $searchAddr is $distanceInMeter meters from your location");
+      setMapPins(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
+      setPolylines(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
+    });
+  }
+
+  Future<String> _getAddress(Position pos) async {
+    List<Placemark> placemarks = await Geolocator()
+        .placemarkFromCoordinates(pos.latitude, pos.longitude);
+    if (placemarks != null && placemarks.isNotEmpty) {
+      final Placemark pos = placemarks[0];
+      print(pos.thoroughfare + ', ' + pos.locality);
+      return pos.thoroughfare + ', ' + pos.locality;
+    }
+    return "";
+  }
+
+  Future<void> _moveToPosition(Position pos) async {
+    if(_controller == null) return;
+    print('moving to position ${pos.latitude}, ${pos.longitude}');
+    animateTo(pos.latitude, pos.longitude);
+  }
+
+  void setMapPins(double sourceLat, double sourceLong, double destLat, double destLong) async {
+      double distanceInMeter = await Geolocator().distanceBetween(sourceLat, sourceLong, destLat, destLong);
       setState(() {
         // source pin
         _markers.add(Marker(
             markerId: MarkerId('sourcePin'),
-            position: SOURCE_LOCATION,
+            position: LatLng(sourceLat, sourceLong),
             icon: sourceIcon));
         // destination pin
         _markers.add(Marker(
             markerId: MarkerId('destPin'),
-            position: DEST_LOCATION,
-            icon: destinationIcon));
+            position: LatLng(destLat, destLong),
+            icon: destinationIcon,
+            infoWindow: InfoWindow(
+              title: "$distanceInMeter meters away",
+            )));
       });
     }
 
-    setPolylines() async {
-
-        List<PointLatLng> result = await polylinePoints?.getRouteBetweenCoordinates(
-            googleAPIKey,
-            SOURCE_LOCATION.latitude,
-            SOURCE_LOCATION.longitude,
-            DEST_LOCATION.latitude,
-            DEST_LOCATION.longitude);
-        if (result.isNotEmpty) {
-          // loop through all PointLatLng points and convert them
-          // to a list of LatLng, required by the Polyline
-          result.forEach((PointLatLng point) {
-            polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-          });
-        }
-
-      setState(() {
-          // create a Polyline instance
-          // with an id, an RGB color and the list of LatLng pairs
-          Polyline polyline = Polyline(
-              polylineId: PolylineId("poly"),
-              color: Color.fromARGB(255, 40, 122, 198),
-              points: polylineCoordinates);
-
-          // add the constructed polyline as a set of points
-          // to the polyline set, which will eventually
-          // end up showing up on the map
-          _polylines.add(polyline);
+  setPolylines(double sourceLat, double sourceLong, double destLat, double destLong) async {
+    List<PointLatLng> result = await polylinePoints?.getRouteBetweenCoordinates(
+        googleAPIKey,
+        sourceLat,
+        sourceLong,
+        destLat,
+        destLong);
+    if (result.isNotEmpty) {
+      // loop through all PointLatLng points and convert them
+      // to a list of LatLng, required by the Polyline
+      result.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       });
+    }
+
+    setState(() {
+        // create a Polyline instance
+        // with an id, an RGB color and the list of LatLng pairs
+        Polyline polyline = Polyline(
+            polylineId: PolylineId("poly"),
+            color: Color.fromARGB(255, 40, 122, 198),
+            points: polylineCoordinates);
+
+        // add the constructed polyline as a set of points
+        // to the polyline set, which will eventually
+        // end up showing up on the map
+        _polylines.add(polyline);
+    });
   }
 }
