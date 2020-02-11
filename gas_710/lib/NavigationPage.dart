@@ -117,6 +117,7 @@ class _NavigationPageState extends State<NavigationPage> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             tiltGesturesEnabled: false,
+            compassEnabled: false,
             markers: _markers,
             polylines: _polylines,
             mapType: MapType.normal,
