@@ -36,13 +36,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.2"
-  cloud_firestore:
-    dependency: "direct main"
-    description:
-      name: cloud_firestore
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.12.11"
   collection:
     dependency: transitive
     description:
@@ -78,26 +71,29 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.2.1"
-<<<<<<< HEAD
-  firebase_auth:
-=======
-  firebase_analytics:
->>>>>>> master
-    dependency: "direct main"
-    description:
-      name: firebase_analytics
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "5.0.11"
   firebase_auth:
     dependency: "direct main"
     description:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0+9"
+    version: "0.15.4"
+  firebase_auth_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_auth_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.5"
+  firebase_auth_web:
+    dependency: transitive
+    description:
+      name: firebase_auth_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   firebase_core:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
@@ -122,7 +118,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
   flutter_google_places:
     dependency: "direct main"
     description:
@@ -130,8 +125,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
-=======
->>>>>>> master
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -139,7 +132,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
-<<<<<<< HEAD
   flutter_polyline_points:
     dependency: "direct main"
     description:
@@ -147,8 +139,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.0"
-=======
->>>>>>> master
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -159,7 +149,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
   geocoder:
     dependency: "direct main"
     description:
@@ -167,8 +156,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.1"
-=======
->>>>>>> master
   geolocator:
     dependency: "direct main"
     description:
@@ -189,7 +176,6 @@ packages:
       name: google_maps_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "0.5.22+3"
   google_maps_webservice:
     dependency: "direct main"
@@ -198,9 +184,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.16"
-=======
-    version: "0.5.22"
->>>>>>> master
   google_sign_in:
     dependency: "direct main"
     description:
