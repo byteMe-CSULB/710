@@ -302,7 +302,8 @@ class _NavigationPageState extends State<NavigationPage> {
       var currentLocation = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best); // pings YOUR location
       double distanceInMeter = await Geolocator().distanceBetween(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
-      miles = convertMetersToMiles(distanceInMeter);
+      // Changes distance to #.## format in MILES, not meters
+      miles = double.parse((convertMetersToMiles(distanceInMeter)).toStringAsFixed(2));
       print("Distance to $searchAddr is $miles miles from your location");
       setMapPins(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
       setPolylines(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
