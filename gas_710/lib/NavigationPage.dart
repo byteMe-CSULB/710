@@ -53,7 +53,7 @@ class _NavigationPageState extends State<NavigationPage> {
   var selected = [];
 
   // distance
-  var miles = 0.0;
+  double miles = 0.0;
 
   @override
   void initState() {
@@ -302,8 +302,8 @@ class _NavigationPageState extends State<NavigationPage> {
       var currentLocation = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best); // pings YOUR location
       double distanceInMeter = await Geolocator().distanceBetween(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
-      miles = distanceInMeter;
-      print("Distance to $searchAddr is $distanceInMeter meters from your location");
+      miles = convertMetersToMiles(distanceInMeter);
+      print("Distance to $searchAddr is $miles miles from your location");
       setMapPins(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
       setPolylines(currentLocation.latitude, currentLocation.longitude, result[0].position.latitude, result[0].position.longitude);
     });
@@ -374,4 +374,10 @@ class _NavigationPageState extends State<NavigationPage> {
         _polylines.add(polyline);
     });
   }
+
+  double convertMetersToMiles(double m)
+  {
+    return m*0.00062137;
+  }
+
 }
