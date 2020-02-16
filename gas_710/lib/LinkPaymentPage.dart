@@ -6,6 +6,15 @@ import 'package:android_intent/android_intent.dart';
 
 class LinkPaymentPage extends StatelessWidget {
 
+  List<Application> apps;
+
+  // Get all installed apps
+  getApps() async {
+    this.apps = await DeviceApps.getInstalledApplications();
+    apps.forEach((element) => print(element.appName));
+  }
+
+  // Launches webpage
   _launchURL() async {
     const url = 'https://www.paypal.com/us/home';
     if (await canLaunch(url)) {
@@ -17,6 +26,10 @@ class LinkPaymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    getApps();
+
+
     return new Scaffold(
       body: new Center(
         child: new RaisedButton(
