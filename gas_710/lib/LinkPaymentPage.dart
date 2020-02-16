@@ -7,7 +7,7 @@ import 'package:android_intent/android_intent.dart';
 class LinkPaymentPage extends StatelessWidget {
 
   _launchURL() async {
-    const url = 'https://flutter.io';
+    const url = 'https://www.paypal.com/us/home';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -15,43 +15,15 @@ class LinkPaymentPage extends StatelessWidget {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       body: new Center(
         child: new RaisedButton(
           onPressed: _launchURL,
-          child: new Text('Show Flutterr homepage'),
+          child: new Text('PayPal'),
         ),
       ),
     );
   }
 }
-
-
-/*
-
-_openJioSavaan (data) async
-{String dt = data['JioSavaan'] as String;
-  bool isInstalled = await DeviceApps.isAppInstalled('com.jio.media.jiobeats');
-if (isInstalled != false)
- {
-    AndroidIntent intent = AndroidIntent(
-      action: 'action_view',
-      data: dt
-  );
-  await intent.launch();
- }
-else
-  {
-  String url = dt;
-  if (await canLaunch(url))
-    await launch(url);
-   else
-    throw 'Could not launch $url';
-}
-}
-
- */
