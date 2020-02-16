@@ -11,7 +11,9 @@ class LinkPaymentPage extends StatelessWidget {
   // Get all installed apps
   getApps() async {
     this.apps = await DeviceApps.getInstalledApplications();
-    apps.forEach((element) => print(element.appName));
+    apps.forEach((element) => print(element.packageName));
+    bool isInstalled = await DeviceApps.isAppInstalled('com.paypal.android.p2pmobile');
+    print("True?:------ " + isInstalled.toString() + "\n");
   }
 
   // Launches webpage
