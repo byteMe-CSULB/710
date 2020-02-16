@@ -7,13 +7,14 @@ import 'package:android_intent/android_intent.dart';
 class LinkPaymentPage extends StatelessWidget {
 
   List<Application> apps;
+  bool PayPalInstalled;
 
   // Get all installed apps
   getApps() async {
     this.apps = await DeviceApps.getInstalledApplications();
     apps.forEach((element) => print(element.packageName));
-    bool isInstalled = await DeviceApps.isAppInstalled('com.paypal.android.p2pmobile');
-    print("True?:------ " + isInstalled.toString() + "\n");
+    this.PayPalInstalled = await DeviceApps.isAppInstalled('com.paypal.android.p2pmobile');
+    print("True?:------ " + PayPalInstalled.toString() + "\n");
   }
 
   // Launches webpage
@@ -26,6 +27,19 @@ class LinkPaymentPage extends StatelessWidget {
     }
   }
 
+  launchPayPal()
+  {
+    print("Inside launchPayPal: " + this.PayPalInstalled.toString());
+    if (this.PayPalInstalled)
+      {
+        DeviceApps.openApp('com.paypal.android.p2pmobile');
+      }
+    else
+      {
+        _launchURL();
+      }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -35,7 +49,7 @@ class LinkPaymentPage extends StatelessWidget {
     return new Scaffold(
       body: new Center(
         child: new RaisedButton(
-          onPressed: _launchURL,
+          onPressed: launchPayPal,
           child: new Text('PayPal'),
         ),
       ),
