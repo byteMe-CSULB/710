@@ -412,7 +412,7 @@ class _NavigationPageState extends State<NavigationPage> {
           currentLocation.longitude,
           result[0].position.latitude,
           result[0].position.longitude);
-      miles = distanceInMeter;
+      miles = convertMetersToMiles(distanceInMeter);
       _locationSearched = true;
       _milesGot = true;
       print(
