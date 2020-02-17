@@ -72,7 +72,7 @@ class _NavigationPageState extends State<NavigationPage> {
   bool _milesGot = false;
 
   // distance
-  var miles = 0.0;
+  double miles = 0.0;
 
 
   @override
@@ -489,6 +489,11 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
+  double convertMetersToMiles(double m)
+  {
+    return m*0.00062137;
+  }
+  
   //prints the autocomplete address
   //Can be scraped later if of no use
   Future<Null> displayPrediction(Prediction p) async {
