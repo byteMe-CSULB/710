@@ -142,7 +142,9 @@ class DrawerCodeOnly extends StatelessWidget {
                   Navigator.pop(context);
                   // SnackBar at the bottom, displays that the feature is planned, but not implemented yet
                   Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text("Feature not implemented yet"))); 
+                    content: Text("Feature not implemented yet"),
+                    )
+                  ); 
                 }
               ),
               Divider(
@@ -155,9 +157,18 @@ class DrawerCodeOnly extends StatelessWidget {
                   Navigator.pop(context);
                   // IF signed in, display SnackBar that user has signed out
                   // ELSE, display SnackBar that user is not signed in to be able to sign out
-                  signedIn ? Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text("Signed out"))) : Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text("Not signed in")));
+                  signedIn ? Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Signed out"))) : 
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                        content: Text("Not signed in"),
+                        action: SnackBarAction(
+                          textColor: Colors.amber,
+                          label: 'Sign In', onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(context, new MaterialPageRoute(builder: (context) => new SettingsPage()));
+                      })));
                   signOutGoogle(); // call signout method from auth.dart
                 }
               ),

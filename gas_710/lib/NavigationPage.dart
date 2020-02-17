@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:gas_710/main.dart';
+import 'package:gas_710/TripSummaryPage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +9,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:async';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 const double CAMERA_ZOOM = 13;
 const double CAMERA_TILT = 0;
@@ -64,9 +66,14 @@ class _NavigationPageState extends State<NavigationPage> {
     'Bart Simpson'
   ];
   var selected = [];
+  var selectedContacts = new List<String>();
+  bool _contactSelected = false;
+  bool _locationSearched = false;
+  bool _milesGot = false;
 
   // distance
   var miles = 0.0;
+
 
   @override
   void initState() {
@@ -125,14 +132,16 @@ class _NavigationPageState extends State<NavigationPage> {
         title: new Text("Navigation Page"),
         backgroundColor: Colors.purple,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _getLocation,
-        backgroundColor: Colors.amber,
-        child: Icon(Icons.location_on),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 525.0),
+        child: FloatingActionButton(
+          onPressed: _getLocation,
+          backgroundColor: Colors.amber,
+          child: Icon(Icons.location_on),
+        ),
       ),
       body: SlidingUpPanel(
         borderRadius: radius,
-        backdropEnabled: true,
         panel: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -157,29 +166,51 @@ class _NavigationPageState extends State<NavigationPage> {
                           ),
                           Expanded(
                             child: Container(
-                                child: ListView.builder(
+                              child: ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) =>
-                                  FilterChip(
+                                FilterChip(
                                 // dynamically add contacts to trip
+                                avatar: CircleAvatar(
+                                  backgroundColor: Colors.grey[400],
+                                  child: Text(
+                                    contacts[index][0],
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
                                 label: Text(contacts[index],
-                                    style: TextStyle(color: Colors.black)),
+                                  style: TextStyle(
+                                    color: Colors.black
+                                    )
+                                  ),
+                                showCheckmark: false,
                                 onSelected: (bool value) {
                                   if (selected.contains(index)) {
                                     selected.remove(index);
+                                    print('Removed ' + contacts[index]);
+                                    selectedContacts.remove(contacts[index]);
                                     passengers -= 1;
                                   } else {
                                     selected.add(index);
+                                    print('Added ' + contacts[index]);
+                                    selectedContacts.add(contacts[index]);
                                     passengers += 1;
                                   }
-                                  setState(() {});
+                                  setState(() {
+                                    if(selected.isNotEmpty) {
+                                      _contactSelected = true;
+                                    } else {
+                                      _contactSelected = false;
+                                    }
+                                  });
                                 },
                                 selected: selected.contains(index),
                                 selectedColor: Colors.amber,
                                 labelStyle: TextStyle(
                                   color: Colors.white,
                                 ),
-                                showCheckmark: true,
                                 backgroundColor: Colors.purple[300],
                               ),
                               scrollDirection: Axis.vertical,
@@ -232,16 +263,60 @@ class _NavigationPageState extends State<NavigationPage> {
                 ),
               ),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.centerRight,
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: RaisedButton(
-                      color: Colors.amber,
-                      shape: StadiumBorder(),
-                      child: Text("Confirm Passengers"),
-                      onPressed: () {
-                        // do something
-                      }),
+                    color: _contactSelected ? Colors.amber : Colors.grey[400],
+                    child: Text(
+                      "Confirm Passengers",
+                      style: TextStyle(
+                        color: _contactSelected ? Colors.black : Colors.blueGrey
+                      ),
+                    ),
+                    onPressed: () {
+                      if(_contactSelected && _milesGot && _locationSearched) {
+                        Navigator.pop(context);
+                        print('Passing in $miles $searchAddr');
+                        print('Contacts');
+                        print(selectedContacts);
+                        Navigator.push(context, new MaterialPageRoute(
+                          builder: (context) => new TripSummaryPage(
+                            selected: selectedContacts,
+                             location: searchAddr,
+                              miles: miles
+                            )
+                          )
+                        );
+                      } else {
+                        if(!_contactSelected && !_milesGot && !_locationSearched) {
+                          Fluttertoast.showToast(
+                            msg: 'No passengers or destination set',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIos: 1,
+                            fontSize: 16.0,
+                          );
+                        }
+                        else if(!_contactSelected) {
+                          Fluttertoast.showToast(
+                            msg: 'No passengers selected',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIos: 1,
+                            fontSize: 16.0,
+                          );
+                        } else if(!_milesGot || !_locationSearched) {
+                          Fluttertoast.showToast(
+                            msg: 'Destination not set',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIos: 1,
+                            fontSize: 16.0,
+                          );
+                        }
+                      }
+                    }),
                 ),
               )
             ],
@@ -338,6 +413,8 @@ class _NavigationPageState extends State<NavigationPage> {
           result[0].position.latitude,
           result[0].position.longitude);
       miles = distanceInMeter;
+      _locationSearched = true;
+      _milesGot = true;
       print(
           "Distance to $searchAddr is $distanceInMeter meters from your location");
       setMapPins(currentLocation.latitude, currentLocation.longitude,
