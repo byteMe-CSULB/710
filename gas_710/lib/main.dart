@@ -176,13 +176,7 @@ class DrawerCodeOnly extends StatelessWidget {
                       content: Text("Signed out"))) : 
                       Scaffold.of(context).showSnackBar(
                         SnackBar(
-                        content: Text("Not signed in"),
-                        action: SnackBarAction(
-                          textColor: Colors.amber,
-                          label: 'Sign In', onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.push(context, new MaterialPageRoute(builder: (context) => new SettingsPage()));
-                      })));
+                        content: Text("Not signed in")));
                   signOutGoogle(); // call signout method from auth.dart
                 }
               ),
