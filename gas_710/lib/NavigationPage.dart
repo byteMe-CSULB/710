@@ -74,6 +74,8 @@ class _NavigationPageState extends State<NavigationPage> {
   // distance
   double miles = 0.0;
 
+  double latitude = 0.0;
+  double longitude = 0.0;
 
   @override
   void initState() {
@@ -283,8 +285,10 @@ class _NavigationPageState extends State<NavigationPage> {
                         Navigator.push(context, new MaterialPageRoute(
                           builder: (context) => new TripSummaryPage(
                             selected: selectedContacts,
-                             location: searchAddr,
-                              miles: miles
+                            location: searchAddr,
+                            miles: miles,
+                            lat: latitude,
+                            long: longitude
                             )
                           )
                         );
@@ -401,6 +405,9 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   searchandNavigate() {
+    _markers.clear(); // clears any previous search queries
+    _polylines.clear();
+    polylineCoordinates.clear();
     Geolocator().placemarkFromAddress(searchAddr).then((result) async {
       // result is your destination that searched from searchAddr
       animateTo(result[0].position.latitude,
@@ -415,6 +422,8 @@ class _NavigationPageState extends State<NavigationPage> {
       miles = convertMetersToMiles(distanceInMeter);
       _locationSearched = true;
       _milesGot = true;
+      latitude = result[0].position.latitude;
+      longitude = result[0].position.longitude;
       print(
           "Distance to $searchAddr is $distanceInMeter meters from your location");
       setMapPins(currentLocation.latitude, currentLocation.longitude,
@@ -491,7 +500,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   double convertMetersToMiles(double m)
   {
-    return m*0.00062137;
+    return double.parse((m*0.00062137).toStringAsFixed(2));
   }
   
   //prints the autocomplete address

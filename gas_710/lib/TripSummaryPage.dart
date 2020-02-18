@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/NavigationPage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TripSummaryPage extends StatelessWidget {
-  final selected, miles, location;
-  TripSummaryPage({Key key, @required this.selected, @required this.location, @required this.miles}) : super(key : key);
+  final selected, miles, location, lat, long;
+  TripSummaryPage({Key key, @required this.selected, @required this.location,
+   @required this.miles, @required this.lat, @required this.long}) : super(key : key);
+
+  static Future<void> openMap(double latitude, double longitude) async {
+    String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +79,7 @@ class TripSummaryPage extends StatelessWidget {
                     ),
                   ),
                   RaisedButton(
-                    onPressed: () {
-                      // open GoogleMaps
-                    },
+                    onPressed: () => openMap(lat, long),
                     child: Text(
                       'Open GoogleMaps'
                     ),
