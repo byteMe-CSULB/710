@@ -35,7 +35,7 @@ h3 = page_soup.findAll('h3')
 data = {}
 data['fuelCost'] = []
 
-# For every tag
+# For every h3 tag
 for i in h3:
     # Get location
     loc = i.text
@@ -56,11 +56,23 @@ with open('data.json', 'w') as outfile:
 # Pretty print data
 pprint(data)
 
-# Test write to Firebase
-#cred = credentials.Certificate("./ServiceAccountKey.json")
-#app = firebase_admin.initialize_app(cred)
+#-------------------------------------------
+# Write to Firebase
+#-------------------------------------------
 
-#store = firestore.client()
+# Credentials
+cred = credentials.Certificate("./ServiceAccountKey.json")
+app = firebase_admin.initialize_app(cred)
+store = firestore.client()
 
-#doc_ref = store.collection(u'test')
-#doc_ref.add({u'name': u'test', u'added': u'just now'})
+# For every h3 tag
+for i in h3:
+    # Get location
+    loc = i.text
+    # Get fuel cost
+    cost = i.attrs.get('data-cost')
+    #print(loc, cost, sep=' ')
+
+    # Write
+    doc_ref = store.collection(u'fuelCost')
+    doc_ref.add({u'location': loc, u'cost': cost})
