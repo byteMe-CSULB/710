@@ -7,6 +7,10 @@ import requests
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup as soup
 import json
+import firebase_admin
+import google.cloud
+from firebase_admin import credentials, firestore
+from pprint import pprint
 
 # AAA website to be scraped
 url = "https://gasprices.aaa.com/?state=CA"
@@ -48,3 +52,15 @@ for i in h3:
 # Write JSON to .txt file
 with open('data.json', 'w') as outfile:
     json.dump(data, outfile)
+
+# Pretty print data
+pprint(data)
+
+# Test write to Firebase
+#cred = credentials.Certificate("./ServiceAccountKey.json")
+#app = firebase_admin.initialize_app(cred)
+
+#store = firestore.client()
+
+#doc_ref = store.collection(u'test')
+#doc_ref.add({u'name': u'test', u'added': u'just now'})
