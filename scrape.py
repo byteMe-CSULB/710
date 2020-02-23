@@ -1,21 +1,28 @@
-'''
-Let's learn how to web scrape!
-'''
+# 710
+# Web-Scraping Fuel Cost Averages
+# Taylor Meyer 2/22/2020
 
 # Libraries
 import requests
 from urllib.request import Request, urlopen
 import time
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as soup
 
-print("Hello World!")
-
+# AAA website to be scraped
 url = "https://gasprices.aaa.com/?state=CA"
 
-req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+# Request page
+req = Request(url , headers={'User-Agent': 'Mozilla/5.0'})
 
+# Open it
 webpage = urlopen(req).read()
 
-#response = requests.get(url)
-#soup = BeautifulSoup(response.text, "html.parser")
-print(webpage)
+# Parse it
+page_soup = soup(webpage, "html.parser")
+
+# Put every line of html that contains an <h3> tag
+# into a list
+head3 = page_soup.findAll("h3")
+
+# Element 5 is "Los Angeles-Long Beach"
+print(head3[5])
