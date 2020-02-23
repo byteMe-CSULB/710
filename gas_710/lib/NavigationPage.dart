@@ -144,6 +144,7 @@ class _NavigationPageState extends State<NavigationPage> {
       ),
       body: SlidingUpPanel(
         borderRadius: radius,
+        minHeight: 60,
         panel: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -168,10 +169,10 @@ class _NavigationPageState extends State<NavigationPage> {
                           ),
                           Expanded(
                             child: Container(
-                              child: ListView.builder(
+                                child: ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) =>
-                                FilterChip(
+                                  FilterChip(
                                 // dynamically add contacts to trip
                                 avatar: CircleAvatar(
                                   backgroundColor: Colors.grey[400],
@@ -183,10 +184,7 @@ class _NavigationPageState extends State<NavigationPage> {
                                   ),
                                 ),
                                 label: Text(contacts[index],
-                                  style: TextStyle(
-                                    color: Colors.black
-                                    )
-                                  ),
+                                    style: TextStyle(color: Colors.black)),
                                 showCheckmark: false,
                                 onSelected: (bool value) {
                                   if (selected.contains(index)) {
@@ -201,7 +199,7 @@ class _NavigationPageState extends State<NavigationPage> {
                                     passengers += 1;
                                   }
                                   setState(() {
-                                    if(selected.isNotEmpty) {
+                                    if (selected.isNotEmpty) {
                                       _contactSelected = true;
                                     } else {
                                       _contactSelected = false;
@@ -269,58 +267,60 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: RaisedButton(
-                    color: _contactSelected ? Colors.amber : Colors.grey[400],
-                    child: Text(
-                      "Confirm Passengers",
-                      style: TextStyle(
-                        color: _contactSelected ? Colors.black : Colors.blueGrey
+                      color: _contactSelected ? Colors.amber : Colors.grey[400],
+                      child: Text(
+                        "Confirm Passengers",
+                        style: TextStyle(
+                            color: _contactSelected
+                                ? Colors.black
+                                : Colors.blueGrey),
                       ),
-                    ),
-                    onPressed: () {
-                      if(_contactSelected && _milesGot && _locationSearched) {
-                        Navigator.pop(context);
-                        print('Passing in $miles $searchAddr');
-                        print('Contacts');
-                        print(selectedContacts);
-                        Navigator.push(context, new MaterialPageRoute(
-                          builder: (context) => new TripSummaryPage(
-                            selected: selectedContacts,
-                            location: searchAddr,
-                            miles: miles,
-                            lat: latitude,
-                            long: longitude
-                            )
-                          )
-                        );
-                      } else {
-                        if(!_contactSelected && !_milesGot && !_locationSearched) {
-                          Fluttertoast.showToast(
-                            msg: 'No passengers or destination set',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0,
-                          );
+                      onPressed: () {
+                        if (_contactSelected &&
+                            _milesGot &&
+                            _locationSearched) {
+                          print('Passing in $miles $searchAddr');
+                          print('Contacts');
+                          print(selectedContacts);
+                          Navigator.push(
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => new TripSummaryPage(
+                                      selected: selectedContacts,
+                                      location: searchAddr,
+                                      miles: miles,
+                                      lat: latitude,
+                                      long: longitude)));
+                        } else {
+                          if (!_contactSelected &&
+                              !_milesGot &&
+                              !_locationSearched) {
+                            Fluttertoast.showToast(
+                              msg: 'No passengers or destination set',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIos: 1,
+                              fontSize: 16.0,
+                            );
+                          } else if (!_contactSelected) {
+                            Fluttertoast.showToast(
+                              msg: 'No passengers selected',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIos: 1,
+                              fontSize: 16.0,
+                            );
+                          } else if (!_milesGot || !_locationSearched) {
+                            Fluttertoast.showToast(
+                              msg: 'Destination not set',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIos: 1,
+                              fontSize: 16.0,
+                            );
+                          }
                         }
-                        else if(!_contactSelected) {
-                          Fluttertoast.showToast(
-                            msg: 'No passengers selected',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0,
-                          );
-                        } else if(!_milesGot || !_locationSearched) {
-                          Fluttertoast.showToast(
-                            msg: 'Destination not set',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0,
-                          );
-                        }
-                      }
-                    }),
+                      }),
                 ),
               )
             ],
@@ -498,11 +498,10 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
-  double convertMetersToMiles(double m)
-  {
-    return double.parse((m*0.00062137).toStringAsFixed(2));
+  double convertMetersToMiles(double m) {
+    return double.parse((m * 0.00062137).toStringAsFixed(2));
   }
-  
+
   //prints the autocomplete address
   //Can be scraped later if of no use
   Future<Null> displayPrediction(Prediction p) async {
