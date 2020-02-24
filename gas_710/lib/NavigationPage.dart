@@ -13,7 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 const double CAMERA_ZOOM = 13;
 const double CAMERA_TILT = 0;
-const double CAMERA_BEARING = 30;
+const double CAMERA_BEARING = 0;
 const LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
 const LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
 const googlePlacesAPIKey = "AIzaSyD71HMbuRIt7smNaNek_R0OXBRHJMtj_fo";
