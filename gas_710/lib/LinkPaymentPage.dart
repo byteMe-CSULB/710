@@ -19,6 +19,8 @@ class LinkPaymentPage extends StatelessWidget {
           children: <Widget>[
             RaisedButton(
               child: Text('Open Google Pay'),
+              shape: StadiumBorder(),
+              color: Colors.amber,
               onPressed: () {
                 print('Opening Google Pay');
                 Navigator.of(context).push(MaterialPageRoute(
@@ -30,6 +32,8 @@ class LinkPaymentPage extends StatelessWidget {
             ),
             RaisedButton(
               child: Text('Open PayPal'),
+              shape: StadiumBorder(),
+              color: Colors.amber,
               onPressed: () {
                 print('Opening PayPal');
                 Navigator.of(context).push(MaterialPageRoute(
