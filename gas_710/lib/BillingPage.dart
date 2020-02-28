@@ -28,6 +28,9 @@ class BillingPage extends StatelessWidget {
   }
 
   Widget _cardListView(BuildContext context) {
+    //ToDo: replace the hardcoded contacts with REAL contacts
+
+    // list of contacts to display in a ListView.builder
     var contacts = [
     'Tyler Okonoma',
     'Kevin Abstract',
@@ -54,7 +57,6 @@ class BillingPage extends StatelessWidget {
       itemCount: contacts.length,
       itemBuilder: (context, index) {
         return Card(
-          // margin: EdgeInsets.all(8.0),
           elevation: 5,
           child: ListTile(
             contentPadding: EdgeInsets.all(8.0),
@@ -75,7 +77,7 @@ class BillingPage extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              money[index].toString(),
+              money[index].toStringAsFixed(2),
               style: TextStyle(
                 color: (money[index] > 0) ? Colors.black : Colors.red,
                 fontSize: 15.0
