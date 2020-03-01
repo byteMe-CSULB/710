@@ -1,6 +1,6 @@
 # 710
 # Web-Scraping Fuel Cost Averages
-# Taylor Meyer 2/22/2020
+# Taylor Meyer 2/29/2020
 
 # Libraries
 import requests
@@ -12,11 +12,28 @@ import google.cloud
 from firebase_admin import credentials, firestore
 from pprint import pprint
 
-# AAA website to be scraped
-url = "https://gasprices.aaa.com/?state=CA"
+def getStateNames(page_soup):
+
+    # Get all href tag
+    lines = page_soup.findAll('a', href=True)
+
+    # Delete the ones that are not what we want
+    del lines[0:44]
+    del lines[51:53]
+
+    # Append names with stripped whitespace to list
+    list = []
+    for line in lines:
+        list.append(line.text.strip())
+    
+    # Return list
+    return list
+
+# URL
+url = "https://gasprices.aaa.com/state-gas-price-averages/"
 
 # Request page
-req = Request(url , headers={'User-Agent': 'Mozilla/5.0'})
+req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
 
 # Open it
 webpage = urlopen(req).read()
@@ -24,55 +41,8 @@ webpage = urlopen(req).read()
 # Parse it
 page_soup = soup(webpage, 'html.parser')
 
-# Put every line of html that contains an <h3> tag
-# into a list
-h3 = page_soup.findAll('h3')
+# Get state names
+names = getStateNames(page_soup)
 
-# Element 5 is "Los Angeles-Long Beach"
-#print(head3)
-
-# For JSON
-data = {}
-data['fuelCost'] = []
-
-# For every h3 tag
-for i in h3:
-    # Get location
-    loc = i.text
-    # Get fuel cost
-    cost = i.attrs.get('data-cost')
-    #print(loc, cost, sep=' ')
-
-    # Append to the JSON
-    data['fuelCost'].append({
-        'location': loc,
-        'cost': cost
-    })
-
-# Write JSON to .txt file
-with open('data.json', 'w') as outfile:
-    json.dump(data, outfile)
-
-# Pretty print data
-pprint(data)
-
-#-------------------------------------------
-# Write to Firebase
-#-------------------------------------------
-
-# Credentials
-cred = credentials.Certificate("./ServiceAccountKey.json")
-app = firebase_admin.initialize_app(cred)
-store = firestore.client()
-
-# For every h3 tag
-for i in h3:
-    # Get location
-    loc = i.text
-    # Get fuel cost
-    cost = i.attrs.get('data-cost')
-    #print(loc, cost, sep=' ')
-
-    # Write
-    doc_ref = store.collection(u'fuelCost')
-    doc_ref.add({u'location': loc, u'cost': cost})
+# Test print
+print(names)
