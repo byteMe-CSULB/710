@@ -12,6 +12,8 @@ import google.cloud
 from firebase_admin import credentials, firestore
 from pprint import pprint
 
+# Using BeautifulSoup soup as param
+# Parse state names into a list and return it
 def getStateNames(page_soup):
 
     # Get all href tag
@@ -29,6 +31,23 @@ def getStateNames(page_soup):
     # Return list
     return list
 
+# Using BeautifulSoup soup as param
+# Parse state prices into a list and return it
+def getStatePrices(page_soup):
+
+    # Get all <td> tags
+    prices = page_soup.findAll('td')
+
+    # Indexes for middle grades are 2, 7, 12, 17,...
+    index = 2
+
+    # Get price and append to list
+    list = []
+    for i in range(0,50):
+        list.append(prices[index].text.strip())
+        index = index + 5 # Next index
+    return list
+
 # URL
 url = "https://gasprices.aaa.com/state-gas-price-averages/"
 
@@ -44,8 +63,11 @@ page_soup = soup(webpage, 'html.parser')
 # Get state names
 names = getStateNames(page_soup)
 
-prices = page_soup.findAll('td')
-count = 0
-for i in prices:
-    print(count,":",i,sep="")
-    count = count + 1
+# Get prices per state
+prices = getStatePrices(page_soup)
+
+# Test print
+print()
+print(names)
+print()
+print(prices)
