@@ -44,5 +44,8 @@ page_soup = soup(webpage, 'html.parser')
 # Get state names
 names = getStateNames(page_soup)
 
-# Test print
-print(names)
+prices = page_soup.findAll('td')
+count = 0
+for i in prices:
+    print(count,":",i,sep="")
+    count = count + 1
