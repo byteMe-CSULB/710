@@ -1,6 +1,6 @@
 # 710
 # Web-Scraping Fuel Cost Averages
-# Taylor Meyer 2/29/2020
+# Taylor Meyer 3/1/2020
 
 # Libraries
 import requests
@@ -62,12 +62,28 @@ page_soup = soup(webpage, 'html.parser')
 
 # Get state names
 names = getStateNames(page_soup)
+names.pop(7) # Toss out D.C.
 
 # Get prices per state
 prices = getStatePrices(page_soup)
 
-# Test print
-print()
-print(names)
-print()
-print(prices)
+
+
+#-------------------------------------------
+# Write to Firebase
+#-------------------------------------------
+
+# Credentials
+cred = credentials.Certificate("./ServiceAccountKey.json")
+app = firebase_admin.initialize_app(cred)
+store = firestore.client()
+
+# Set table name
+doc_ref = store.collection(u'costPerSate')
+
+# For 50 states
+for i in range(0,50):
+    # Write
+    loc = names[i]
+    ppg = prices[i]
+    doc_ref.add({u'location': loc, u'ppg': ppg}) 
