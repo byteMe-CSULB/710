@@ -102,15 +102,14 @@ class TripSummaryPage extends StatelessWidget {
   }
 
   void addTrip() async { // this is different from addPassengers() bc this one stores all passengers in one
-    var now = DateTime.now();
-    print('DateTime.now() = $now');
     DocumentReference ref = await databaseReference.collection("trip")
       .add({
         'passengers' : selected,
         'miles' : miles,
         'location' : location,
-        'date' : now,
+        'date' : DateTime.now(),
         'price' : 200.00,
+        'route' : GeoPoint(lat, long)
       });
   }
 
