@@ -84,6 +84,7 @@ class TripSummaryPage extends StatelessWidget {
                   RaisedButton(
                     onPressed: () {
                       addTrip();
+                      addContact();
                       openMap(lat, long);
                     },
                     child: Text(
@@ -100,7 +101,7 @@ class TripSummaryPage extends StatelessWidget {
     );
   }
 
-  void addTrip() async {
+  void addTrip() async { // this is different from addPassengers() bc this one stores all passengers in one
     var now = DateTime.now();
     print('DateTime.now() = $now');
     DocumentReference ref = await databaseReference.collection("trip")
@@ -111,5 +112,13 @@ class TripSummaryPage extends StatelessWidget {
         'date' : now,
         'price' : 200.00,
       });
+  }
+
+  void addContact() async { // we add per individual, beware of duplicate names!!!
+    await databaseReference.collection("recentContacts")
+        .document("contactNames")
+        .updateData({
+          'name' : FieldValue.arrayUnion(selected),
+        });
   }
 }
