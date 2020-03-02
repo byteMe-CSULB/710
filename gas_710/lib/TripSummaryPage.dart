@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TripSummaryPage extends StatelessWidget {
   final selected, miles, location, lat, long;
   TripSummaryPage({Key key, @required this.selected, @required this.location,
    @required this.miles, @required this.lat, @required this.long}) : super(key : key);
+
+  final databaseReference = Firestore.instance;
 
   static Future<void> openMap(double latitude, double longitude) async {
     String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
@@ -79,7 +82,10 @@ class TripSummaryPage extends StatelessWidget {
                     ),
                   ),
                   RaisedButton(
-                    onPressed: () => openMap(lat, long),
+                    onPressed: () {
+                      addTrip();
+                      openMap(lat, long);
+                    },
                     child: Text(
                       'Open GoogleMaps'
                     ),
@@ -92,5 +98,18 @@ class TripSummaryPage extends StatelessWidget {
         )
       )
     );
+  }
+
+  void addTrip() async {
+    var now = DateTime.now();
+    print('DateTime.now() = $now');
+    DocumentReference ref = await databaseReference.collection("trip")
+      .add({
+        'passengers' : selected,
+        'miles' : miles,
+        'location' : location,
+        'date' : now,
+        'price' : 200.00,
+      });
   }
 }
