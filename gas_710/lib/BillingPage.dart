@@ -4,8 +4,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
 import 'package:gas_710/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BillingPage extends StatelessWidget {
+  final databaseReference = Firestore.instance;
+  var firebaseContacts = [];
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold
@@ -52,6 +56,8 @@ class BillingPage extends StatelessWidget {
       2.00,
       -7.93
     ];
+
+    getPassengers();
 
     return ListView.builder(
       itemCount: contacts.length,
@@ -146,5 +152,16 @@ class BillingPage extends StatelessWidget {
         Navigator.push(context, MaterialPageRoute(builder: (context) => LinkPaymentPage()));
       },
     );
+  }
+
+  void getPassengers() { // might remove this later, but keep it for now, helpful for debugging
+    databaseReference
+      .collection("recentContacts")
+      .getDocuments()
+      .then((QuerySnapshot snapshot) {
+        snapshot.documents.forEach((element) {
+          print(element['name']);
+         });
+      });
   }
 }
