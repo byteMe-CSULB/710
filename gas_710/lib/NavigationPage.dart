@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:gas_710/AddPassengersPage.dart';
+import 'package:gas_710/ContactsPage.dart';
+import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/TripSummaryPage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,6 +13,7 @@ import 'dart:async';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 const double CAMERA_ZOOM = 13;
 const double CAMERA_TILT = 0;
@@ -55,16 +59,7 @@ class _NavigationPageState extends State<NavigationPage> {
   int passengers = 0;
 
   // mock contact list
-  var contacts = [
-    'Tyler Okonoma',
-    'Kevin Abstract',
-    'Hideo Kojima',
-    'Norman Reedus',
-    'Peter Parker',
-    'Kobe Bryant',
-    'Gianna Bryant',
-    'Bart Simpson'
-  ];
+  List<Contact> contacts = new List<Contact>();
   var selected = [];
   var selectedContacts = new List<String>();
   bool _contactSelected = false;
@@ -167,6 +162,21 @@ class _NavigationPageState extends State<NavigationPage> {
                               ),
                             ),
                           ),
+                          Align(
+                              alignment: Alignment.topCenter,
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: RaisedButton(
+                                  color: Colors.white,
+                                  child: Text(
+                                    "Add Passengers",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    _getPassengers(context);
+                                  },
+                                ),
+                              )),
                           Expanded(
                             child: Container(
                                 child: ListView.builder(
@@ -177,25 +187,28 @@ class _NavigationPageState extends State<NavigationPage> {
                                 avatar: CircleAvatar(
                                   backgroundColor: Colors.grey[400],
                                   child: Text(
-                                    contacts[index][0],
+                                    contacts[index].displayName[0],
                                     style: TextStyle(
                                       color: Colors.black,
                                     ),
                                   ),
                                 ),
-                                label: Text(contacts[index],
+                                label: Text(contacts[index].displayName,
                                     style: TextStyle(color: Colors.black)),
                                 showCheckmark: false,
                                 onSelected: (bool value) {
                                   if (selected.contains(index)) {
                                     selected.remove(index);
-                                    print('Removed ' + contacts[index]);
+                                    print('Removed ' +
+                                        contacts[index].displayName);
                                     selectedContacts.remove(contacts[index]);
                                     passengers -= 1;
                                   } else {
                                     selected.add(index);
-                                    print('Added ' + contacts[index]);
-                                    selectedContacts.add(contacts[index]);
+                                    print(
+                                        'Added ' + contacts[index].displayName);
+                                    selectedContacts
+                                        .add(contacts[index].displayName);
                                     passengers += 1;
                                   }
                                   setState(() {
@@ -522,5 +535,16 @@ class _NavigationPageState extends State<NavigationPage> {
   void dispose() {
     _textController.dispose();
     super.dispose();
+  }
+
+  //Return passengers data and set it to contacts variable
+  _getPassengers(BuildContext context) async {
+    List<Contact> passengerResult = new List<Contact>();
+
+    passengerResult = await Navigator.push(context,
+        new MaterialPageRoute(builder: (context) => AddPassengersPage()));
+    if (passengerResult != null) {
+      this.contacts = passengerResult;
+    }
   }
 }
