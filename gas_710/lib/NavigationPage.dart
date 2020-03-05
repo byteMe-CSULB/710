@@ -60,9 +60,6 @@ class _NavigationPageState extends State<NavigationPage> {
 
   // mock contact list
   List<Contact> contacts = new List<Contact>();
-  var selected = [];
-  var selectedContacts = new List<String>();
-  bool _contactSelected = false;
   bool _locationSearched = false;
   bool _milesGot = false;
 
@@ -167,7 +164,7 @@ class _NavigationPageState extends State<NavigationPage> {
                               child: Padding(
                                 padding: EdgeInsets.all(16.0),
                                 child: RaisedButton(
-                                  color: Colors.white,
+                                  color: Colors.amber,
                                   child: Text(
                                     "Add Passengers",
                                     style: TextStyle(color: Colors.black),
@@ -184,47 +181,19 @@ class _NavigationPageState extends State<NavigationPage> {
                               itemBuilder: (BuildContext context, int index) =>
                                   FilterChip(
                                 // dynamically add contacts to trip
-                                avatar: CircleAvatar(
-                                  backgroundColor: Colors.grey[400],
-                                  child: Text(
-                                    contacts[index].displayName[0],
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
+                                avatar: (contacts[index].avatar != null &&
+                                        contacts[index].avatar.length > 0)
+                                    ? CircleAvatar(
+                                        backgroundImage:
+                                            MemoryImage(contacts[index].avatar))
+                                    : CircleAvatar(
+                                        child: Text(contacts[index].initials()),
+                                      ),
                                 label: Text(contacts[index].displayName,
                                     style: TextStyle(color: Colors.black)),
                                 showCheckmark: false,
-                                onSelected: (bool value) {
-                                  if (selected.contains(index)) {
-                                    selected.remove(index);
-                                    print('Removed ' +
-                                        contacts[index].displayName);
-                                    selectedContacts.remove(contacts[index]);
-                                    passengers -= 1;
-                                  } else {
-                                    selected.add(index);
-                                    print(
-                                        'Added ' + contacts[index].displayName);
-                                    selectedContacts
-                                        .add(contacts[index].displayName);
-                                    passengers += 1;
-                                  }
-                                  setState(() {
-                                    if (selected.isNotEmpty) {
-                                      _contactSelected = true;
-                                    } else {
-                                      _contactSelected = false;
-                                    }
-                                  });
-                                },
-                                selected: selected.contains(index),
-                                selectedColor: Colors.amber,
-                                labelStyle: TextStyle(
-                                  color: Colors.white,
-                                ),
-                                backgroundColor: Colors.purple[300],
+                                onSelected: (bool value) {},
+                                backgroundColor: Colors.blue[100],
                               ),
                               scrollDirection: Axis.vertical,
                             )),
@@ -280,60 +249,13 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: RaisedButton(
-                      color: _contactSelected ? Colors.amber : Colors.grey[400],
-                      child: Text(
-                        "Confirm Passengers",
-                        style: TextStyle(
-                            color: _contactSelected
-                                ? Colors.black
-                                : Colors.blueGrey),
-                      ),
-                      onPressed: () {
-                        if (_contactSelected &&
-                            _milesGot &&
-                            _locationSearched) {
-                          print('Passing in $miles $searchAddr');
-                          print('Contacts');
-                          print(selectedContacts);
-                          Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => new TripSummaryPage(
-                                      selected: selectedContacts,
-                                      location: searchAddr,
-                                      miles: miles,
-                                      lat: latitude,
-                                      long: longitude)));
-                        } else {
-                          if (!_contactSelected &&
-                              !_milesGot &&
-                              !_locationSearched) {
-                            Fluttertoast.showToast(
-                              msg: 'No passengers or destination set',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIos: 1,
-                              fontSize: 16.0,
-                            );
-                          } else if (!_contactSelected) {
-                            Fluttertoast.showToast(
-                              msg: 'No passengers selected',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIos: 1,
-                              fontSize: 16.0,
-                            );
-                          } else if (!_milesGot || !_locationSearched) {
-                            Fluttertoast.showToast(
-                              msg: 'Destination not set',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIos: 1,
-                              fontSize: 16.0,
-                            );
-                          }
-                        }
-                      }),
+                    color: passengers > 0 ? Colors.amber : Colors.grey[400],
+                    child: Text(
+                      "Confirm Passengers",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    onPressed: confirmPassengerButtonPress,
+                  ),
                 ),
               )
             ],
@@ -383,6 +305,8 @@ class _NavigationPageState extends State<NavigationPage> {
                     );
                     searchandNavigate();
                   }
+                  //closes keyboard
+                  FocusScope.of(context).requestFocus(new FocusNode());
                 },
                 //When user presses 'ok' on keyboard.
                 onSubmitted: (String value) async {
@@ -544,7 +468,49 @@ class _NavigationPageState extends State<NavigationPage> {
     passengerResult = await Navigator.push(context,
         new MaterialPageRoute(builder: (context) => AddPassengersPage()));
     if (passengerResult != null) {
-      this.contacts = passengerResult;
+      contacts = passengerResult;
+      passengers = passengerResult.length;
+    }
+  }
+
+  //when Confirm Passengers button gets pressed
+  confirmPassengerButtonPress() {
+    if (contacts.length > 0 && _milesGot && _locationSearched) {
+      Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (context) => new TripSummaryPage(
+                  selected: contacts,
+                  location: searchAddr,
+                  miles: miles,
+                  lat: latitude,
+                  long: longitude)));
+    } else {
+      if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
+        Fluttertoast.showToast(
+          msg: 'No passengers or destination set',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      } else if (contacts.length <= 0) {
+        Fluttertoast.showToast(
+          msg: 'No passengers selected',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      } else if (!_milesGot || !_locationSearched) {
+        Fluttertoast.showToast(
+          msg: 'Destination not set',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      }
     }
   }
 }

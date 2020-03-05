@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 class TripSummaryPage extends StatelessWidget {
-  final selected, miles, location, lat, long;
+  final List<Contact> selected;
+  final miles, location, lat, long;
   TripSummaryPage(
       {Key key,
       @required this.selected,
@@ -14,9 +16,10 @@ class TripSummaryPage extends StatelessWidget {
       @required this.long})
       : super(key: key);
 
-  static Future<void> openMap(double latitude, double longitude) async {
+  static Future<void> openMap(
+      double latitude, double longitude, String location) async {
     String googleUrl =
-        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+        'https://www.google.com/maps/search/?api=1&query=$location';
     if (await canLaunch(googleUrl)) {
       await launch(googleUrl);
     } else {
@@ -62,7 +65,7 @@ class TripSummaryPage extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: selected.length,
                 itemBuilder: (BuildContext context, int index) => Chip(
-                  label: Text(selected[index],
+                  label: Text(selected[index].displayName,
                       style: TextStyle(color: Colors.black)),
                 ),
               ),
@@ -76,7 +79,7 @@ class TripSummaryPage extends StatelessWidget {
                   child: Text('Cancel'),
                 ),
                 RaisedButton(
-                    onPressed: () => openMap(lat, long),
+                    onPressed: () => openMap(lat, long, location),
                     child: Text('Open GoogleMaps'),
                     color: Colors.amber),
               ],
