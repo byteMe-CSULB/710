@@ -8,7 +8,8 @@ class BillContactPage extends StatelessWidget {
   BillContactPage({Key key, @required this.name, @required this.money})
       : super(key: key); // eventually we should add more keys
 
-  Firestore _firestore = Firestore.instance;
+  final Firestore _firestore = Firestore.instance;
+  bool sortDesc = true;
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +19,7 @@ class BillContactPage extends StatelessWidget {
         title: new Text(name),
         backgroundColor: Colors.purple,
       ),
-      body: StreamBuilder(
-        stream: _firestore.collection('trip').where('passengers', arrayContains: name).snapshots(),
-        builder: (context, snapshot) {
-          if(!snapshot.hasData) return CircularProgressIndicator();
-          return Padding(
+      body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -71,7 +68,7 @@ class BillContactPage extends StatelessWidget {
               ),
               Align(
                 alignment: Alignment.centerLeft,
-                            child: Text(
+                child: Text(
                   'Contact Information',
                   style: TextStyle(
                     fontSize: 18,
@@ -109,54 +106,62 @@ class BillContactPage extends StatelessWidget {
                     ),
                   ),
                   Spacer(),
-                  Icon( // this does nothing rn
-                    Icons.filter_list,
+                  IconButton( // it's a useless button for now
+                    icon: Icon(Icons.filter_list),
                     color: Colors.grey,
+                    onPressed: () {
+                      sortDesc = !sortDesc;
+                    },
                   ),
                 ]
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Expanded(child: _cardListView(context, snapshot)),
+              StreamBuilder(
+              stream: _firestore.collection('trip').where('passengers', arrayContains: name).orderBy('date').snapshots(),
+              builder: (context, snapshot) {
+                if(!snapshot.hasData) return CircularProgressIndicator();
+                return Expanded(child: _cardListView(context, snapshot));
+              }),
             ]
           ),
-        );
-        }
-      ),
-    );
+        )
+      );
   }
 
   Widget _cardListView(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) { // card list view builder widget
     var snapshotLength = snapshot.data.documents.length;
     var trips = [];
     var dates = [];
+
     for(int i = 0; i < snapshotLength; i++) {
       trips.add(snapshot.data.documents[i]['location']);
       DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
       dates.add(DateFormat.yMMMMd().format(myDateTime).toString());
     }
+
     return ListView.builder(
-      itemCount: trips.length,
-      itemBuilder: (context, index) {
-        return Card(
-          elevation: 2,
-          child: ListTile(
-            leading: Text(
-              (index + 1).toString(), // for quick ordering, essentially should be in chronological order
-            ),
-            title: Text(
-              trips[index],
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+        itemCount: trips.length,
+        itemBuilder: (context, index) {
+          return Card(
+            elevation: 2,
+            child: ListTile(
+              leading: Text(
+                (index + 1).toString(), // for quick ordering, essentially should be in chronological order
               ),
+              title: Text(
+                trips[index],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                dates[index]
+              ),
+              onTap: () {
+                
+              },
             ),
-            subtitle: Text(
-              dates[index]
-            ),
-          ),
-        );
-      }
+          );
+        }
     );
   }
 }
