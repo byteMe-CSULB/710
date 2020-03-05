@@ -3,12 +3,13 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
+import 'package:gas_710/TestPage.dart';
 import 'package:gas_710/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
 
 class BillingPage extends StatelessWidget {
   final databaseReference = Firestore.instance;
-  var firebaseContacts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -18,46 +19,39 @@ class BillingPage extends StatelessWidget {
       appBar: new AppBar(
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(Icons.exit_to_app),
+        //     onPressed: () {                  
+        //       Navigator.push(context, MaterialPageRoute(builder: (context) => TestPage()));
+        //     } 
+        //   ),
+        // ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(child: _cardListView(context)),
-          ],
-        ),
+      body: StreamBuilder(
+        stream: databaseReference.collection('recentContacts').snapshots(),
+        builder: (context, snapshot) {
+          if(!snapshot.hasData) return CircularProgressIndicator();
+          var contacts = snapshot.data.documents[0]['name'];
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Expanded(child: _cardListView(context, contacts)),
+              ],
+            ),
+          );
+        }
       ),
     );
   }
 
-  Widget _cardListView(BuildContext context) {
-    //ToDo: replace the hardcoded contacts with REAL contacts
-
-    // list of contacts to display in a ListView.builder
-    var contacts = [
-    'Tyler Okonoma',
-    'Kevin Abstract',
-    'Hideo Kojima',
-    'Norman Reedus',
-    'Peter Parker',
-    'Kobe Bryant',
-    'Gianna Bryant',
-    'Bart Simpson'
-    ];
-
-    var money = [
-      5.23,
-      -3.24,
-      32.62,
-      -13.79,
-      0.01,
-      24.00,
-      2.00,
-      -7.93
-    ];
-
-    getPassengers();
+  Widget _cardListView(BuildContext context, List<dynamic> contacts) {
+    var money = [];
+    for(int i = 0; i < contacts.length; i++) {
+      money.add(randomMoney());
+    }
 
     return ListView.builder(
       itemCount: contacts.length,
@@ -94,9 +88,9 @@ class BillingPage extends StatelessWidget {
               String contactName = contacts[index].toString();
               String dollars;
               if (money[index] > 0) {
-                dollars = money[index].toString();
+                dollars = money[index].toStringAsFixed(2);
               } else {
-                dollars = (-1 * money[index]).toString();
+                dollars = (-1 * money[index]).toStringAsFixed(2);
               }
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) => BillContactPage(
@@ -109,10 +103,10 @@ class BillingPage extends StatelessWidget {
               String dollars;
               if (money[index] > 0) {
                 youOwe = false;
-                dollars = money[index].toString();
+                dollars = money[index].toStringAsFixed(2);
               } else {
                 youOwe = true;
-                dollars = (-1 * money[index]).toString();
+                dollars = (-1 * money[index]).toStringAsFixed(2);
               }
               Fluttertoast.showToast(
                 msg: youOwe ? 'You owe $contactName \$$dollars' : '$contactName owes you \$$dollars',
@@ -154,14 +148,13 @@ class BillingPage extends StatelessWidget {
     );
   }
 
-  void getPassengers() { // might remove this later, but keep it for now, helpful for debugging
-    databaseReference
-      .collection("recentContacts")
-      .getDocuments()
-      .then((QuerySnapshot snapshot) {
-        snapshot.documents.forEach((element) {
-          print(element['name']);
-         });
-      });
+  double randomMoney() { // this is just for money placeholders, definitely remove later
+    Random random = Random();
+    double rngDecimal = random.nextInt(20).toDouble();
+    rngDecimal += random.nextDouble();
+    var oweOrOwed = random.nextInt(2);
+    if(oweOrOwed == 0) {
+      return rngDecimal;
+    } else return rngDecimal * -1;
   }
 }
