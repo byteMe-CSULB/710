@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 const double CAMERA_ZOOM = 13;
 const double CAMERA_TILT = 0;
@@ -63,7 +64,15 @@ class _NavigationPageState extends State<NavigationPage> {
     'Peter Parker',
     'Kobe Bryant',
     'Gianna Bryant',
-    'Bart Simpson'
+    'Bart Simpson',
+    'Jerry Seinfeld',
+    'Terry Crews',
+    'Alexander The Great',
+    'Nathan Drake',
+    'Big Smoke',
+    'Carl Wheezer',
+    'Baby Yoda',
+    'Hank Hill',
   ];
   var selected = [];
   var selectedContacts = new List<String>();
@@ -77,10 +86,15 @@ class _NavigationPageState extends State<NavigationPage> {
   double latitude = 0.0;
   double longitude = 0.0;
 
+  double cost = 0.0;
+  double gas = 0.0;
+  var state = "";
+
   @override
   void initState() {
     super.initState();
     setSourceAndDestinationIcons();
+    // getStateLocation();
   }
 
   void setSourceAndDestinationIcons() async {
@@ -90,10 +104,15 @@ class _NavigationPageState extends State<NavigationPage> {
         ImageConfiguration(devicePixelRatio: 2.5), 'assets/location_pin.png');
   }
 
+  void getStateLocation() async {
+    var currentLocation = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    var currentState = await _getState(currentLocation);
+    state = currentState.toString(); // sets state to current state 
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
-    // setMapPins();
-    // setPolylines();
   }
 
   void _getLocation() async {
@@ -241,8 +260,15 @@ class _NavigationPageState extends State<NavigationPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              // !!! change to miles !!!
-                              'Total Miles: $miles', // right now this is in meters OOPS
+                              'Total Miles: $miles',
+                              style: TextStyle(
+                                  fontSize: 20.0, color: Colors.grey[700]),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'Price Per Gallon in $state: 0.0',
                               style: TextStyle(
                                   fontSize: 20.0, color: Colors.grey[700]),
                             ),
@@ -444,6 +470,17 @@ class _NavigationPageState extends State<NavigationPage> {
     return "";
   }
 
+  Future<String> _getState(Position pos) async {
+    List<Placemark> placemarks = await Geolocator()
+        .placemarkFromCoordinates(pos.latitude, pos.longitude);
+    if (placemarks != null && placemarks.isNotEmpty) {
+      final Placemark pos = placemarks[0];
+      print(pos.administrativeArea);
+      return pos.administrativeArea;
+    }
+    return "";
+  }
+
   Future<void> _moveToPosition(Position pos) async {
     if (_controller == null) return;
     print('moving to position ${pos.latitude}, ${pos.longitude}');
@@ -498,8 +535,7 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
-  double convertMetersToMiles(double m)
-  {
+  double convertMetersToMiles(double m) {
     return double.parse((m*0.00062137).toStringAsFixed(2));
   }
   
