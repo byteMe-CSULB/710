@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gas_710/main.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
-import 'package:gas_710/NavigationPage.dart';
 
 class AddPassengersPage extends StatefulWidget {
   @override
@@ -66,6 +64,7 @@ class _MyHomePageState extends State<AddPassengersPage> {
         child: new Scaffold(
           appBar: new AppBar(
             title: new Text('Passengers'),
+            backgroundColor: Colors.purple,
           ),
           body: !_isLoading
               ? Container(
