@@ -124,42 +124,42 @@ class TripSummaryPage extends StatelessWidget {
 
   void addContact() async { // we add per individual, beware of duplicate names!!!
     for(int i = 0; i < selected.length; i++) {
-      var emails = selected[i].emails;
-      var phoneNumbers = selected[i].phones;
-      print('addContacts: Sending ${selected[i].displayName} - ${emails.elementAt(0).value.toString()} - ${phoneNumbers.elementAt(0).value.toString()}');
-      if(emails.isEmpty) {
-        await databaseReference.collection("contacts")
-        .add({
-          'displayName' : selected[i].displayName,
-          'emailAddress' : noEmailError,
-          'phoneNumber' : phoneNumbers.elementAt(0).value.toString(),
-        });
-      } else if(phoneNumbers.isEmpty) {
-        await databaseReference.collection("contacts")
-        .add({
-          'displayName' : selected[i].displayName,
-          'emailAddress' : emails.elementAt(0).value.toString(),
-          'phoneNumber' : noPhoneError,
-        });
-      } else if(emails.isEmpty && phoneNumbers.isEmpty) {
-        await databaseReference.collection("contacts")
-        .add({
-          'displayName' : selected[i].displayName,
-          'emailAddress' : noEmailError,
-          'phoneNumber' : noPhoneError,
-        });
-      } else {
-        await databaseReference.collection("contacts")
-        .add({
-          'displayName' : selected[i].displayName,
-          'emailAddress' : emails.elementAt(0).value.toString(),
-          'phoneNumber' : phoneNumbers.elementAt(0).value.toString(),
-        });
+      var query = 
+        await databaseReference.collection('contacts').where('displayName', isEqualTo: selected[i].displayName).getDocuments();
+      if(query.documents.length == 0) {
+        var emails = selected[i].emails;
+        var phoneNumbers = selected[i].phones;
+        print('addContacts: Sending ${selected[i].displayName} - ${emails.elementAt(0).value.toString()} - ${phoneNumbers.elementAt(0).value.toString()}');
+        if(emails.isEmpty) {
+          await databaseReference.collection("contacts")
+          .add({
+            'displayName' : selected[i].displayName,
+            'emailAddress' : noEmailError,
+            'phoneNumber' : phoneNumbers.elementAt(0).value.toString(),
+          });
+        } else if(phoneNumbers.isEmpty) {
+          await databaseReference.collection("contacts")
+          .add({
+            'displayName' : selected[i].displayName,
+            'emailAddress' : emails.elementAt(0).value.toString(),
+            'phoneNumber' : noPhoneError,
+          });
+        } else if(emails.isEmpty && phoneNumbers.isEmpty) {
+          await databaseReference.collection("contacts")
+          .add({
+            'displayName' : selected[i].displayName,
+            'emailAddress' : noEmailError,
+            'phoneNumber' : noPhoneError,
+          });
+        } else {
+          await databaseReference.collection("contacts")
+          .add({
+            'displayName' : selected[i].displayName,
+            'emailAddress' : emails.elementAt(0).value.toString(),
+            'phoneNumber' : phoneNumbers.elementAt(0).value.toString(),
+          });
+        }
       }
     }
-        // .document("contactNames")
-        // .updateData({
-        //   'name' : FieldValue.arrayUnion(selected),
-        // });
   }
 }
