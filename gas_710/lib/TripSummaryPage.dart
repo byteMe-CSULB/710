@@ -80,8 +80,7 @@ class TripSummaryPage extends StatelessWidget {
                 children: <Widget>[
                   FlatButton(
                     onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(context, new MaterialPageRoute(builder: (context) => new NavigationPage()));
+                      Navigator.pop(context); 
                     },
                     child: Text(
                       'Cancel'
@@ -122,7 +121,7 @@ class TripSummaryPage extends StatelessWidget {
       });
   }
 
-  void addContact() async { // we add per individual, beware of duplicate names!!!
+  void addContact() async { // we add per individual
     for(int i = 0; i < selected.length; i++) {
       var query = 
         await databaseReference.collection('contacts').where('displayName', isEqualTo: selected[i].displayName).getDocuments();
