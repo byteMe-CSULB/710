@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:gas_710/AddPassengersPage.dart';
+import 'package:gas_710/ContactsPage.dart';
+import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/TripSummaryPage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,10 +13,12 @@ import 'dart:async';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 const double CAMERA_ZOOM = 13;
 const double CAMERA_TILT = 0;
-const double CAMERA_BEARING = 30;
+const double CAMERA_BEARING = 0;
 const LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
 const LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
 const googlePlacesAPIKey = "AIzaSyD71HMbuRIt7smNaNek_R0OXBRHJMtj_fo";
@@ -55,19 +60,7 @@ class _NavigationPageState extends State<NavigationPage> {
   int passengers = 0;
 
   // mock contact list
-  var contacts = [
-    'Tyler Okonoma',
-    'Kevin Abstract',
-    'Hideo Kojima',
-    'Norman Reedus',
-    'Peter Parker',
-    'Kobe Bryant',
-    'Gianna Bryant',
-    'Bart Simpson'
-  ];
-  var selected = [];
-  var selectedContacts = new List<String>();
-  bool _contactSelected = false;
+  List<Contact> contacts = new List<Contact>();
   bool _locationSearched = false;
   bool _milesGot = false;
 
@@ -77,10 +70,15 @@ class _NavigationPageState extends State<NavigationPage> {
   double latitude = 0.0;
   double longitude = 0.0;
 
+  double cost = 0.0;
+  double gas = 0.0;
+  var state = "";
+
   @override
   void initState() {
     super.initState();
     setSourceAndDestinationIcons();
+    // getStateLocation();
   }
 
   void setSourceAndDestinationIcons() async {
@@ -90,10 +88,15 @@ class _NavigationPageState extends State<NavigationPage> {
         ImageConfiguration(devicePixelRatio: 2.5), 'assets/location_pin.png');
   }
 
+  void getStateLocation() async {
+    var currentLocation = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    var currentState = await _getState(currentLocation);
+    state = currentState.toString(); // sets state to current state 
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
-    // setMapPins();
-    // setPolylines();
   }
 
   void _getLocation() async {
@@ -144,6 +147,7 @@ class _NavigationPageState extends State<NavigationPage> {
       ),
       body: SlidingUpPanel(
         borderRadius: radius,
+        minHeight: 60,
         panel: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -166,54 +170,39 @@ class _NavigationPageState extends State<NavigationPage> {
                               ),
                             ),
                           ),
+                          Align(
+                              alignment: Alignment.topCenter,
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: RaisedButton(
+                                  color: Colors.amber,
+                                  child: Text(
+                                    "Add Passengers",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    _getPassengers(context);
+                                  },
+                                ),
+                              )),
                           Expanded(
                             child: Container(
                               child: ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) =>
-                                FilterChip(
+                                  Chip(
                                 // dynamically add contacts to trip
-                                avatar: CircleAvatar(
-                                  backgroundColor: Colors.grey[400],
-                                  child: Text(
-                                    contacts[index][0],
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                                label: Text(contacts[index],
-                                  style: TextStyle(
-                                    color: Colors.black
-                                    )
-                                  ),
-                                showCheckmark: false,
-                                onSelected: (bool value) {
-                                  if (selected.contains(index)) {
-                                    selected.remove(index);
-                                    print('Removed ' + contacts[index]);
-                                    selectedContacts.remove(contacts[index]);
-                                    passengers -= 1;
-                                  } else {
-                                    selected.add(index);
-                                    print('Added ' + contacts[index]);
-                                    selectedContacts.add(contacts[index]);
-                                    passengers += 1;
-                                  }
-                                  setState(() {
-                                    if(selected.isNotEmpty) {
-                                      _contactSelected = true;
-                                    } else {
-                                      _contactSelected = false;
-                                    }
-                                  });
-                                },
-                                selected: selected.contains(index),
-                                selectedColor: Colors.amber,
-                                labelStyle: TextStyle(
-                                  color: Colors.white,
-                                ),
-                                backgroundColor: Colors.purple[300],
+                                avatar: (contacts[index].avatar != null &&
+                                        contacts[index].avatar.length > 0)
+                                    ? CircleAvatar(
+                                        backgroundImage:
+                                            MemoryImage(contacts[index].avatar))
+                                    : CircleAvatar(
+                                        child: Text(contacts[index].initials()),
+                                      ),
+                                label: Text(contacts[index].displayName,
+                                    style: TextStyle(color: Colors.black)),
+                                backgroundColor: Colors.blue[100],
                               ),
                               scrollDirection: Axis.vertical,
                             )),
@@ -241,8 +230,15 @@ class _NavigationPageState extends State<NavigationPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              // !!! change to miles !!!
-                              'Total Miles: $miles', // right now this is in meters OOPS
+                              'Total Miles: $miles',
+                              style: TextStyle(
+                                  fontSize: 20.0, color: Colors.grey[700]),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'Price Per Gallon in $state: 0.0',
                               style: TextStyle(
                                   fontSize: 20.0, color: Colors.grey[700]),
                             ),
@@ -269,58 +265,13 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: RaisedButton(
-                    color: _contactSelected ? Colors.amber : Colors.grey[400],
+                    color: passengers > 0 ? Colors.amber : Colors.grey[400],
                     child: Text(
                       "Confirm Passengers",
-                      style: TextStyle(
-                        color: _contactSelected ? Colors.black : Colors.blueGrey
-                      ),
+                      style: TextStyle(color: Colors.black),
                     ),
-                    onPressed: () {
-                      if(_contactSelected && _milesGot && _locationSearched) {
-                        Navigator.pop(context);
-                        print('Passing in $miles $searchAddr');
-                        print('Contacts');
-                        print(selectedContacts);
-                        Navigator.push(context, new MaterialPageRoute(
-                          builder: (context) => new TripSummaryPage(
-                            selected: selectedContacts,
-                            location: searchAddr,
-                            miles: miles,
-                            lat: latitude,
-                            long: longitude
-                            )
-                          )
-                        );
-                      } else {
-                        if(!_contactSelected && !_milesGot && !_locationSearched) {
-                          Fluttertoast.showToast(
-                            msg: 'No passengers or destination set',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0,
-                          );
-                        }
-                        else if(!_contactSelected) {
-                          Fluttertoast.showToast(
-                            msg: 'No passengers selected',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0,
-                          );
-                        } else if(!_milesGot || !_locationSearched) {
-                          Fluttertoast.showToast(
-                            msg: 'Destination not set',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIos: 1,
-                            fontSize: 16.0,
-                          );
-                        }
-                      }
-                    }),
+                    onPressed: confirmPassengerButtonPress,
+                  ),
                 ),
               )
             ],
@@ -370,6 +321,8 @@ class _NavigationPageState extends State<NavigationPage> {
                     );
                     searchandNavigate();
                   }
+                  //closes keyboard
+                  FocusScope.of(context).requestFocus(new FocusNode());
                 },
                 //When user presses 'ok' on keyboard.
                 onSubmitted: (String value) async {
@@ -444,6 +397,17 @@ class _NavigationPageState extends State<NavigationPage> {
     return "";
   }
 
+  Future<String> _getState(Position pos) async {
+    List<Placemark> placemarks = await Geolocator()
+        .placemarkFromCoordinates(pos.latitude, pos.longitude);
+    if (placemarks != null && placemarks.isNotEmpty) {
+      final Placemark pos = placemarks[0];
+      print(pos.administrativeArea);
+      return pos.administrativeArea;
+    }
+    return "";
+  }
+
   Future<void> _moveToPosition(Position pos) async {
     if (_controller == null) return;
     print('moving to position ${pos.latitude}, ${pos.longitude}');
@@ -498,11 +462,10 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
-  double convertMetersToMiles(double m)
-  {
-    return double.parse((m*0.00062137).toStringAsFixed(2));
+  double convertMetersToMiles(double m) {
+    return double.parse((m * 0.00062137).toStringAsFixed(2));
   }
-  
+
   //prints the autocomplete address
   //Can be scraped later if of no use
   Future<Null> displayPrediction(Prediction p) async {
@@ -523,5 +486,58 @@ class _NavigationPageState extends State<NavigationPage> {
   void dispose() {
     _textController.dispose();
     super.dispose();
+  }
+
+  //Return passengers data and set it to contacts variable
+  _getPassengers(BuildContext context) async {
+    List<Contact> passengerResult = new List<Contact>();
+
+    passengerResult = await Navigator.push(context,
+        new MaterialPageRoute(builder: (context) => AddPassengersPage()));
+    if (passengerResult != null) {
+      contacts = passengerResult;
+      passengers = passengerResult.length;
+    }
+  }
+
+  //when Confirm Passengers button gets pressed
+  confirmPassengerButtonPress() {
+    if (contacts.length > 0 && _milesGot && _locationSearched) {
+      Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (context) => new TripSummaryPage(
+                  selected: contacts,
+                  location: searchAddr,
+                  miles: miles,
+                  lat: latitude,
+                  long: longitude)));
+    } else {
+      if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
+        Fluttertoast.showToast(
+          msg: 'No passengers or destination set',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      } else if (contacts.length <= 0) {
+        Fluttertoast.showToast(
+          msg: 'No passengers selected',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      } else if (!_milesGot || !_locationSearched) {
+        Fluttertoast.showToast(
+          msg: 'Destination not set',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      }
+    }
   }
 }
