@@ -79,7 +79,7 @@ app = firebase_admin.initialize_app(cred)
 store = firestore.client()
 
 # Set table name
-doc_ref = store.collection(u'costPerSate')
+doc_ref = store.collection(u'costPerState')
 
 # For 50 states
 for i in range(0,50):
