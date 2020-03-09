@@ -187,10 +187,10 @@ class _NavigationPageState extends State<NavigationPage> {
                               )),
                           Expanded(
                             child: Container(
-                                child: ListView.builder(
+                              child: ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) =>
-                                  FilterChip(
+                                  Chip(
                                 // dynamically add contacts to trip
                                 avatar: (contacts[index].avatar != null &&
                                         contacts[index].avatar.length > 0)
@@ -202,8 +202,6 @@ class _NavigationPageState extends State<NavigationPage> {
                                       ),
                                 label: Text(contacts[index].displayName,
                                     style: TextStyle(color: Colors.black)),
-                                showCheckmark: false,
-                                onSelected: (bool value) {},
                                 backgroundColor: Colors.blue[100],
                               ),
                               scrollDirection: Axis.vertical,
