@@ -19,31 +19,107 @@ class BillingPage extends StatelessWidget {
       appBar: new AppBar(
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(Icons.exit_to_app),
-        //     onPressed: () {                  
-        //       Navigator.push(context, MaterialPageRoute(builder: (context) => TestPage()));
-        //     } 
-        //   ),
-        // ],
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: () {                  
+              Navigator.push(context, MaterialPageRoute(builder: (context) => TestPage()));
+            } 
+          ),
+        ],
       ),
       body: StreamBuilder(
-        stream: databaseReference.collection('recentContacts').snapshots(),
+        stream: databaseReference.collection('contacts').snapshots(),
         builder: (context, snapshot) {
           if(!snapshot.hasData) return CircularProgressIndicator();
-          var contacts = snapshot.data.documents[0]['name'];
+          // return ListView(children:_listView(snapshot));
+          // var contacts = snapshot.data.documents[0]['name'];
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Expanded(child: _cardListView(context, contacts)),
+                Expanded(child: _listView(snapshot)),
               ],
             ),
           );
         }
       ),
+    );
+  }
+
+  _listView(AsyncSnapshot<QuerySnapshot> snapshot) { 
+    var money = [];
+    for(int i = 0; i < snapshot.data.documents.length; i++) {
+      money.add(randomMoney());
+    }
+
+    return ListView.builder(
+      itemCount: snapshot.data.documents.length,
+      itemBuilder: (context, index) {
+        return Card(
+          elevation: 5,
+          child: ListTile(
+            contentPadding: EdgeInsets.all(8.0),
+            leading: CircleAvatar(
+              backgroundColor: Colors.purple,
+              child: Text(
+                snapshot.data.documents[index]['displayName'][0],
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24.0
+                ),
+              ),
+            ),
+            title: Text(
+              snapshot.data.documents[index]['displayName'],
+              style: TextStyle(
+                fontSize: 18.0
+              ),
+            ),
+            subtitle: Text(
+              money[index].toStringAsFixed(2),
+              style: TextStyle(
+                color: (money[index] > 0) ? Colors.black : Colors.red,
+                fontSize: 15.0
+              ),
+            ),
+            trailing: (money[index] > 0) ? _requestButton(context) :  _payButton(context),
+            onTap: () {
+              String contactName = snapshot.data.documents[index]['displayName'];
+              String dollars;
+              if (money[index] > 0) {
+                dollars = money[index].toStringAsFixed(2);
+              } else {
+                dollars = (-1 * money[index]).toStringAsFixed(2);
+              }
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) => BillContactPage(
+                  name: contactName,
+                  money: dollars)));
+            },
+            onLongPress: () {
+              String contactName = snapshot.data.documents[index]['displayName'].toString();
+              bool youOwe;
+              String dollars;
+              if (money[index] > 0) {
+                youOwe = false;
+                dollars = money[index].toStringAsFixed(2);
+              } else {
+                youOwe = true;
+                dollars = (-1 * money[index]).toStringAsFixed(2);
+              }
+              Fluttertoast.showToast(
+                msg: youOwe ? 'You owe $contactName \$$dollars' : '$contactName owes you \$$dollars',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIos: 1,
+                fontSize: 16.0,
+              );
+            }
+          ),
+        );
+      }
     );
   }
 

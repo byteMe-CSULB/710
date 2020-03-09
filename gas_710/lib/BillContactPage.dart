@@ -76,22 +76,28 @@ class BillContactPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                height: 150,
-                child: Column(
-                  children:<Widget> [
-                    ListTile(
-                      leading: Icon(Icons.phone),
-                      title: Text('Phone Number'),
-                      subtitle: Text('(123) 456-7890'),
+              StreamBuilder(
+                stream: _firestore.collection('contacts').where('displayName', isEqualTo: name).snapshots(),
+                builder: (context, snapshot) {
+                  if(!snapshot.hasData) return CircularProgressIndicator();
+                  return Container(
+                    height: 150,
+                    child: Column(
+                      children:<Widget> [
+                        ListTile(
+                          leading: Icon(Icons.phone),
+                          title: Text('Phone Number'),
+                          subtitle: Text(snapshot.data.documents[0]['phoneNumber']),
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.email),
+                          title: Text('Email Address'),
+                          subtitle: Text(snapshot.data.documents[0]['emailAddress']),
+                        ),
+                      ]
                     ),
-                    ListTile(
-                      leading: Icon(Icons.email),
-                      title: Text('Email Address'),
-                      subtitle: Text('${name.toLowerCase().replaceAll(new RegExp(r"\s+\b|\b\s"), "")}@email.com'), // the fancy regex will be removed later on
-                    ),
-                  ]
-                ),
+                  );
+                }
               ),
               Divider(
                 thickness: 0.8,
@@ -116,7 +122,7 @@ class BillContactPage extends StatelessWidget {
                 ]
               ),
               StreamBuilder(
-              stream: _firestore.collection('trip').where('passengers', arrayContains: name).orderBy('date').snapshots(),
+              stream: _firestore.collection('trip.v2').where('passengers', arrayContains: name).orderBy('date').snapshots(),
               builder: (context, snapshot) {
                 if(!snapshot.hasData) return CircularProgressIndicator();
                 return Expanded(child: _cardListView(context, snapshot));
