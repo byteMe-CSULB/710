@@ -32,8 +32,6 @@ class BillingPage extends StatelessWidget {
         stream: databaseReference.collection('contacts').snapshots(),
         builder: (context, snapshot) {
           if(!snapshot.hasData) return CircularProgressIndicator();
-          // return ListView(children:_listView(snapshot));
-          // var contacts = snapshot.data.documents[0]['name'];
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
