@@ -24,6 +24,8 @@ class ContactListPage extends StatefulWidget {
 
 class _ContactListPageState extends State<ContactListPage> {
   List<Contact> _contacts;
+  var selected = [];
+  var selectedContacts = new List<String>();
 
   @override
   initState() {
@@ -94,6 +96,7 @@ class _ContactListPageState extends State<ContactListPage> {
     }
   }
 
+  // -----------------------Main Contacts Page------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,10 +157,7 @@ class ContactDetailsPage extends StatelessWidget {
         title: Text(_contact.displayName ?? ""),
         backgroundColor: Colors.purple,
         actions: <Widget>[
-//          IconButton(
-//            icon: Icon(Icons.share),
-//            onPressed: () => shareVCFCard(context, contact: _contact),
-//          ),
+          //make sure to return to contacts page after delete
           IconButton(
             icon: Icon(Icons.delete),
             onPressed: () => ContactsService.deleteContact(_contact),
@@ -311,6 +311,7 @@ class _AddContactPageState extends State<AddContactPage> {
   PostalAddress address = PostalAddress(label: "Home");
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  //-------------------Add a contact page-----------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -419,6 +420,7 @@ class _UpdateContactsPageState extends State<UpdateContactsPage> {
     contact = widget.contact;
   }
 
+  //---------------Editing and updating contact page---------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
