@@ -19,14 +19,14 @@ class BillingPage extends StatelessWidget {
       appBar: new AppBar(
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () {                  
-              Navigator.push(context, MaterialPageRoute(builder: (context) => TestPage()));
-            } 
-          ),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(Icons.exit_to_app),
+        //     onPressed: () {                  
+        //       Navigator.push(context, MaterialPageRoute(builder: (context) => TestPage()));
+        //     } 
+        //   ),
+        // ],
       ),
       body: StreamBuilder(
         stream: databaseReference.collection('contacts').snapshots(),

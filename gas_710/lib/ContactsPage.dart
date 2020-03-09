@@ -316,6 +316,7 @@ class _AddContactPageState extends State<AddContactPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.purple,
         title: Text("Add a contact"),
         actions: <Widget>[
           FlatButton(

@@ -18,7 +18,7 @@ class _MyHomePageState extends State<AddPassengersPage> {
 
   //Add Passenger screen variables
   String floatingButtonLabel = 'Add Passengers';
-  Color floatingButtonColor = Colors.blue;
+  Color floatingButtonColor = Colors.amber;
   IconData icon = Icons.add;
   //Confirm Passenger screen variables
   String floatingButtonLabel2 = 'Confirm Passengers';
@@ -123,14 +123,18 @@ class _MyHomePageState extends State<AddPassengersPage> {
       leading: (c.contact.avatar != null && c.contact.avatar.length > 0)
           ? CircleAvatar(backgroundImage: MemoryImage(c.contact.avatar))
           : CircleAvatar(
-              child: Text(c.contact.initials()),
+              backgroundColor: Colors.purple,
+              child: Text(
+                c.contact.initials(),
+                style: TextStyle(color: Colors.white),
+              ),
             ),
       title: Text(c.contact.displayName ?? ""),
       subtitle: list.length >= 1 && list[0]?.value != null
           ? Text(list[0].value)
           : Text(''),
       trailing: Checkbox(
-          activeColor: Colors.green,
+          activeColor: Colors.amber,
           value: c.isChecked,
           onChanged: (bool value) {
             setState(() {
