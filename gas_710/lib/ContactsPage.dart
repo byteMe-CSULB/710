@@ -6,21 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ContactsPage extends StatelessWidget {
-//  @override
-//  Widget build(BuildContext context) {
-//    return new Scaffold(
-//        drawer: new DrawerCodeOnly(), // provides the nav drawer
-//        appBar: new AppBar(
-//          title: new Text("Contacts Page"),
-//          backgroundColor: Colors.purple,
-//        ),
-//        body: new Container(
-//            child: new Center(
-//                child: new Text(
-//          "This is the contacts page",
-//          style: TextStyle(fontStyle: FontStyle.italic, fontSize: 25),
-//        ))));
-//  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,6 +24,8 @@ class ContactListPage extends StatefulWidget {
 
 class _ContactListPageState extends State<ContactListPage> {
   List<Contact> _contacts;
+  var selected = [];
+  var selectedContacts = new List<String>();
 
   @override
   initState() {
@@ -109,6 +96,7 @@ class _ContactListPageState extends State<ContactListPage> {
     }
   }
 
+  // -----------------------Main Contacts Page------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,6 +107,7 @@ class _ContactListPageState extends State<ContactListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
+        backgroundColor: Colors.amber,
         onPressed: () {
           Navigator.of(context).pushNamed("/add").then((_) {
             refreshContacts();
@@ -139,7 +128,12 @@ class _ContactListPageState extends State<ContactListPage> {
                     },
                     leading: (c.avatar != null && c.avatar.length > 0)
                         ? CircleAvatar(backgroundImage: MemoryImage(c.avatar))
-                        : CircleAvatar(child: Text(c.initials())),
+                        : CircleAvatar(child: 
+                        Text(
+                          c.initials(),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.purple),
                     title: Text(c.displayName ?? ""),
                   );
                 },
@@ -161,11 +155,9 @@ class ContactDetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(_contact.displayName ?? ""),
+        backgroundColor: Colors.purple,
         actions: <Widget>[
-//          IconButton(
-//            icon: Icon(Icons.share),
-//            onPressed: () => shareVCFCard(context, contact: _contact),
-//          ),
+          //make sure to return to contacts page after delete
           IconButton(
             icon: Icon(Icons.delete),
             onPressed: () => ContactsService.deleteContact(_contact),
@@ -319,10 +311,12 @@ class _AddContactPageState extends State<AddContactPage> {
   PostalAddress address = PostalAddress(label: "Home");
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  //-------------------Add a contact page-----------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.purple,
         title: Text("Add a contact"),
         actions: <Widget>[
           FlatButton(
@@ -427,6 +421,7 @@ class _UpdateContactsPageState extends State<UpdateContactsPage> {
     contact = widget.contact;
   }
 
+  //---------------Editing and updating contact page---------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
