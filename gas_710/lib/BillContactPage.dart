@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/auth.dart';
 import 'package:intl/intl.dart';
+import 'package:gas_710/createTXT.dart';
 
 class BillContactPage extends StatelessWidget {
   final name, money, avatar; // required keys from BillingPage.dart
@@ -172,9 +173,10 @@ class BillContactPage extends StatelessWidget {
               subtitle: Text(
                 dates[index]
               ),
-              onTap: () {
-                
-              },
+              onLongPress: () {
+                print('Writing Txt');
+                write(name, double.parse(money), trips[index], dates[index]);
+              }
             ),
           );
         }
