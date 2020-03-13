@@ -71,7 +71,16 @@ class TripSummaryPage extends StatelessWidget {
                   ),
                   scrollDirection: Axis.horizontal,
                   itemCount: selected.length,
-                  itemBuilder: (BuildContext context, int index) => Chip(
+                  itemBuilder: (BuildContext context, int index) => 
+                  Chip(
+                    avatar: (selected[index].avatar != null &&
+                            selected[index].avatar.length > 0)
+                        ? CircleAvatar(
+                            backgroundImage:
+                                MemoryImage(selected[index].avatar))
+                        : CircleAvatar(
+                            child: Text(selected[index].initials()),
+                          ),
                     label: Text(selected[index].displayName,
                         style: TextStyle(color: Colors.black)),
                   ),
