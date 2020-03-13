@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
 class BillingPage extends StatelessWidget {
-  final databaseReference = Firestore.instance.collection('userData').document(firebaseUser.email);
+  final databaseReference = signedIn ? Firestore.instance.collection('userData').document(firebaseUser.email) : null;
 
   @override
   Widget build(BuildContext context) {
