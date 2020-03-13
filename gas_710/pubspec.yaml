@@ -49,6 +49,12 @@ dependencies:
   # Database Packages
   sqflite: any                # https://pub.dev/packages/sqflite
 
+  # Creating PDF
+  pdf: ^1.5.0                 # https://pub.dev/packages/pdf
+
+  # Creating txt
+  path_provider: ^1.6.5       # https://pub.dev/packages/path_provider
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
