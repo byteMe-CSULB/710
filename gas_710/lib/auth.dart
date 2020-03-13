@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = GoogleSignIn();
+FirebaseUser firebaseUser;
 
 String name;
 String email;
@@ -42,7 +44,19 @@ Future<String> signInWithGoogle() async {
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
   signedIn = true;
+  firebaseUser = currentUser;
+  addToDatabase(currentUser);
   return 'signInWithGoogle succeeded: $user';
+}
+
+void addToDatabase(FirebaseUser currentUser) async {
+  var query = 
+    await Firestore.instance.collection('userData').where('uuid', isEqualTo: currentUser.uid).getDocuments();
+  if(query.documents.length == 0) {        
+    await Firestore.instance.collection('userData').document(currentUser.email).setData({
+      'uuid' : currentUser.uid
+    });
+  }
 }
 
 void signOutGoogle() async {

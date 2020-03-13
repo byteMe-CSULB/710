@@ -3,18 +3,18 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
-import 'package:gas_710/TestPage.dart';
+// import 'package:gas_710/TestPage.dart';
 import 'package:gas_710/main.dart';
+import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
 class BillingPage extends StatelessWidget {
-  final databaseReference = Firestore.instance;
+  final databaseReference = Firestore.instance.collection('userData').document(firebaseUser.email);
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold
-    (
+    return new Scaffold(
       drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Billing Page"),
@@ -28,7 +28,7 @@ class BillingPage extends StatelessWidget {
         //   ),
         // ],
       ),
-      body: StreamBuilder(
+      body: signedIn ? StreamBuilder(
         stream: databaseReference.collection('contacts').snapshots(),
         builder: (context, snapshot) {
           if(!snapshot.hasData) return CircularProgressIndicator();
@@ -42,7 +42,7 @@ class BillingPage extends StatelessWidget {
             ),
           );
         }
-      ),
+      ) : _signedOut(context)
     );
   }
 
@@ -51,7 +51,6 @@ class BillingPage extends StatelessWidget {
     for(int i = 0; i < snapshot.data.documents.length; i++) {
       money.add(randomMoney());
     }
-
     return ListView.builder(
       itemCount: snapshot.data.documents.length,
       itemBuilder: (context, index) {
@@ -144,6 +143,24 @@ class BillingPage extends StatelessWidget {
       onPressed: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => LinkPaymentPage()));
       },
+    );
+  }
+
+  Widget _signedOut(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'That can\'t be right..?\nSign in to see your bills!',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 24.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:gas_710/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gas_710/auth.dart';
 import 'package:intl/intl.dart';
 
 class BillContactPage extends StatelessWidget {
@@ -8,7 +9,7 @@ class BillContactPage extends StatelessWidget {
   BillContactPage({Key key, @required this.name, @required this.money})
       : super(key: key); // eventually we should add more keys
 
-  final Firestore _firestore = Firestore.instance;
+  final databaseReference = Firestore.instance.collection('userData').document(firebaseUser.email);
   bool sortDesc = true;
 
   @override
@@ -77,7 +78,7 @@ class BillContactPage extends StatelessWidget {
                 ),
               ),
               StreamBuilder(
-                stream: _firestore.collection('contacts').where('displayName', isEqualTo: name).snapshots(),
+                stream: databaseReference.collection('contacts').where('displayName', isEqualTo: name).snapshots(),
                 builder: (context, snapshot) {
                   if(!snapshot.hasData) return CircularProgressIndicator();
                   return Container(
@@ -122,7 +123,7 @@ class BillContactPage extends StatelessWidget {
                 ]
               ),
               StreamBuilder(
-              stream: _firestore.collection('trip.v2').where('passengers', arrayContains: name).orderBy('date').snapshots(),
+              stream: databaseReference.collection('trips').where('passengers', arrayContains: name).orderBy('date').snapshots(),
               builder: (context, snapshot) {
                 if(!snapshot.hasData) return CircularProgressIndicator();
                 return Expanded(child: _cardListView(context, snapshot));
