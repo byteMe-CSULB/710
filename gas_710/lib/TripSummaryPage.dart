@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/NavigationPage.dart';
@@ -165,7 +167,8 @@ class TripSummaryPage extends StatelessWidget {
       userReference.collection('contacts').document('init').setData({
         'displayName' : 'init',
         'emailAddress' : 'int',
-        'phoneNumber' : 'int'
+        'phoneNumber' : 'int',
+        'avatar' : 'init'
       });
     }
     for(int i = 0; i < selected.length; i++) {
@@ -183,12 +186,21 @@ class TripSummaryPage extends StatelessWidget {
         } else {
           phoneNumbers = noPhoneError;
         }
+        
+        var avatar;
+        if(selected[i].avatar != null && selected[i].avatar.length > 0) {
+          avatar = String.fromCharCodes(selected[i].avatar);
+        } else {
+          avatar = 'none';
+        }
+
         print('addContacts: Sending ${selected[i].displayName} - $emails - $phoneNumbers');
         await userReference.collection("contacts")
           .add({
             'displayName' : selected[i].displayName,
             'emailAddress' : emails,
             'phoneNumber' : phoneNumbers,
+            'avatar' : avatar
         });
         userReference.collection('contacts').document('init').delete();
       }

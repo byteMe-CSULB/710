@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -58,16 +60,18 @@ class BillingPage extends StatelessWidget {
           elevation: 5,
           child: ListTile(
             contentPadding: EdgeInsets.all(8.0),
-            leading: CircleAvatar(
-              backgroundColor: Colors.purple,
-              child: Text(
-                snapshot.data.documents[index]['displayName'][0],
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24.0
-                ),
-              ),
-            ),
+            leading: (Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits) != null && 
+            Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits).length > 0)
+                        ? CircleAvatar(backgroundImage: MemoryImage(Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits)))
+                        : CircleAvatar(child: 
+                        Text(
+                          snapshot.data.documents[index]['displayName'][0],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24.0
+                          ),
+                        ),
+                        backgroundColor: Colors.purple),
             title: Text(
               snapshot.data.documents[index]['displayName'],
               style: TextStyle(
@@ -90,10 +94,12 @@ class BillingPage extends StatelessWidget {
               } else {
                 dollars = (-1 * money[index]).toStringAsFixed(2);
               }
+              Uint8List avatar = Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits);
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) => BillContactPage(
                   name: contactName,
-                  money: dollars)));
+                  money: dollars,
+                  avatar: avatar)));
             },
             onLongPress: () {
               String contactName = snapshot.data.documents[index]['displayName'].toString();

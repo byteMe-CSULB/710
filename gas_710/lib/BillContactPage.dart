@@ -5,8 +5,8 @@ import 'package:gas_710/auth.dart';
 import 'package:intl/intl.dart';
 
 class BillContactPage extends StatelessWidget {
-  final name, money; // required keys from BillingPage.dart
-  BillContactPage({Key key, @required this.name, @required this.money})
+  final name, money, avatar; // required keys from BillingPage.dart
+  BillContactPage({Key key, @required this.name, @required this.money, @required this.avatar})
       : super(key: key); // eventually we should add more keys
 
   final databaseReference = Firestore.instance.collection('userData').document(firebaseUser.email);
@@ -26,16 +26,25 @@ class BillContactPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Center(
-                  child: CircleAvatar( //ToDo: add contact image, for now, first letter of name
-                      backgroundColor: Colors.purple,
+                  child: 
+                    (avatar != null && avatar.length > 0)
+                      ? 
+                    CircleAvatar(
+                      backgroundImage: MemoryImage(avatar),
+                      radius: 48.0,
+                    )
+                      : 
+                    CircleAvatar(
                       child: Text(
                         name[0],
                         style: TextStyle(
-                          fontSize: 48,
                           color: Colors.white,
+                          fontSize: 48.0
                         ),
                       ),
-                      radius: 48),
+                      radius: 48.0,
+                      backgroundColor: Colors.purple
+                    ),
                 ),
                 SizedBox(
                   height: 20,
