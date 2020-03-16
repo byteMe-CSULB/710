@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/auth.dart';
 import 'package:intl/intl.dart';
-import 'package:gas_710/createTXT.dart';
+import 'dart:io';
+import 'package:pdf/widgets.dart' as pdfLib;
+import 'package:path_provider/path_provider.dart';
+import 'package:gas_710/PdfViewPage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class BillContactPage extends StatelessWidget {
   final name, money, avatar; // required keys from BillingPage.dart
@@ -20,6 +24,30 @@ class BillContactPage extends StatelessWidget {
       appBar: new AppBar(
         title: new Text(name),
         backgroundColor: Colors.purple,
+        actions: <Widget>[
+          StreamBuilder(
+            stream: databaseReference.collection('trips').where('passengers', arrayContains: name).snapshots(),
+            builder: (context, snapshot) {
+              if(!snapshot.hasData) {
+                return IconButton(
+                  icon: Icon(Icons.picture_as_pdf),
+                  onPressed: () {
+                    print('Cannot make PDF');
+                  },
+                  tooltip: 'Save all of $name\'s trips as a PDF',
+                ); 
+              }
+              return IconButton(
+                icon: Icon(Icons.picture_as_pdf),
+                onPressed: () {
+                  print('Creating PDF');
+                  _generatePdf(context, snapshot);
+                },
+                tooltip: 'Save all of $name\'s trips as a PDF',
+              );
+            }
+          )
+        ],
       ),
       body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -133,11 +161,12 @@ class BillContactPage extends StatelessWidget {
                 ]
               ),
               StreamBuilder(
-              stream: databaseReference.collection('trips').where('passengers', arrayContains: name).orderBy('date').snapshots(),
-              builder: (context, snapshot) {
-                if(!snapshot.hasData) return CircularProgressIndicator();
-                return Expanded(child: _cardListView(context, snapshot));
-              }),
+                stream: databaseReference.collection('trips').where('passengers', arrayContains: name).orderBy('date').snapshots(),
+                builder: (context, snapshot) {
+                  if(!snapshot.hasData) return CircularProgressIndicator();
+                  return Expanded(child: _cardListView(context, snapshot));
+                }
+              ),
             ]
           ),
         )
@@ -173,13 +202,93 @@ class BillContactPage extends StatelessWidget {
               subtitle: Text(
                 dates[index]
               ),
-              onLongPress: () {
-                print('Writing Txt');
-                write(name, double.parse(money), trips[index], dates[index]);
-              }
             ),
           );
         }
     );
+  }
+
+  _generatePdf(context, AsyncSnapshot<QuerySnapshot> snapshot) async {
+    var snapshotLength = snapshot.data.documents.length;
+    List<Trip> trips = [];
+    for(int i = 0; i < snapshotLength; i++) {
+      DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
+      String dateTime = DateFormat.yMMMMd().format(myDateTime).toString();
+      String location = snapshot.data.documents[i]['location'];
+      String price = snapshot.data.documents[i]['price'].toString();
+      String mile = snapshot.data.documents[i]['miles'].toString();
+      Trip individualTrip = Trip(dateTime, location, mile, price);
+      trips.add(individualTrip);
+    }
+
+    final pdfLib.Document pdf = pdfLib.Document(deflate: zlib.encode);
+    List<List<String>> data = [
+      <String>['Date', 'Location', 'Miles', 'Price']
+    ];
+    trips.forEach((element) {
+      data.add(element.getTripList());
+    });
+    pdf.addPage(
+      pdfLib.MultiPage(
+        build: (context) => [
+          pdfLib.Text('Contact Name - $name'),
+          pdfLib.Table.fromTextArray(context: context, data: data)
+        ]
+      )
+    );
+
+    final Directory dir = await getExternalStorageDirectory();
+    final String path = '${dir.path}/$name.pdf';
+    final File file = File(path);
+    await file.writeAsBytes(pdf.save());
+    Fluttertoast.showToast(
+      msg: 'PDF File Path: $path',
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIos: 1,
+      fontSize: 16.0,
+    );
+    print('PDF File path: $path');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PdfViewPage(path: path),
+      ),
+    );
+  }
+}
+
+class Trip {
+  String _date;
+  String _location;
+  String _miles;
+  String _price;
+  List<String> _trip = [];
+  
+  Trip(date, location, miles, price) {
+    this._date = date;
+    this._location = location;
+    this._miles = miles;
+    this._price = price;
+    this._trip = [_date, _location, _miles, _price];
+  }
+
+  String getDate() {
+    return _date;
+  }
+
+  String getLocation() {
+    return _location;
+  }
+
+  String getMiles() {
+    return _miles;
+  }
+
+  String getPrice() {
+    return _price;
+  }
+
+  List<String> getTripList() {
+    return _trip;
   }
 }
