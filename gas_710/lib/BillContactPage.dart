@@ -60,7 +60,7 @@ class BillContactPage extends StatelessWidget {
               children: <Widget>[
                 Center(
                   child: 
-                    (avatar != null && avatar.length > 0)
+                    (avatar.toString() != 'none' && (avatar != null && avatar.length > 0))
                       ? 
                     CircleAvatar(
                       backgroundImage: MemoryImage(avatar),
@@ -82,7 +82,7 @@ class BillContactPage extends StatelessWidget {
                 SizedBox(
                   height: 20,
                 ),
-                Row(
+                Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                   Center(
@@ -95,9 +95,10 @@ class BillContactPage extends StatelessWidget {
                   ),
                   Center(
                     child: Text(
-                      ' - \$' + money.toString(),
+                      '\$' + money.toString(),
                       style: TextStyle(
                         fontSize: 32,
+                        color: Colors.green
                       ),
                     ),
                   ),
@@ -242,7 +243,7 @@ class BillContactPage extends StatelessWidget {
     );
 
     final Directory dir = await getExternalStorageDirectory();
-    final String path = '${dir.path}/$name.pdf';
+    final String path = '${dir.path}/' + DateTime.now().millisecondsSinceEpoch.toString() + '.pdf';
     final File file = File(path);
     await file.writeAsBytes(pdf.save());
     Fluttertoast.showToast(
