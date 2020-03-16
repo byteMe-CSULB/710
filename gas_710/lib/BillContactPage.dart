@@ -8,6 +8,7 @@ import 'package:pdf/widgets.dart' as pdfLib;
 import 'package:path_provider/path_provider.dart';
 import 'package:gas_710/PdfViewPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BillContactPage extends StatelessWidget {
   final name, money, avatar; // required keys from BillingPage.dart
@@ -39,9 +40,12 @@ class BillContactPage extends StatelessWidget {
               }
               return IconButton(
                 icon: Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  print('Creating PDF');
-                  _generatePdf(context, snapshot);
+                onPressed: () async {
+                  PermissionStatus permissionStatus = await _getContactPermission();
+                  if (permissionStatus == PermissionStatus.granted) {
+                    print('Creating PDF');
+                    _generatePdf(context, snapshot);
+                  }
                 },
                 tooltip: 'Save all of $name\'s trips as a PDF',
               );
@@ -254,6 +258,21 @@ class BillContactPage extends StatelessWidget {
         builder: (_) => PdfViewPage(path: path),
       ),
     );
+  }
+
+  Future<PermissionStatus> _getContactPermission() async {
+    PermissionStatus permission = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.storage);
+    if (permission != PermissionStatus.granted &&
+        permission != PermissionStatus.disabled) {
+      Map<PermissionGroup, PermissionStatus> permissionStatus =
+          await PermissionHandler()
+              .requestPermissions([PermissionGroup.storage]);
+      return permissionStatus[PermissionGroup.storage] ??
+          PermissionStatus.unknown;
+    } else {
+      return permission;
+    }
   }
 }
 
