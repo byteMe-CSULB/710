@@ -515,7 +515,9 @@ class _NavigationPageState extends State<NavigationPage> {
                   location: searchAddr,
                   miles: miles,
                   lat: latitude,
-                  long: longitude)));
+                  long: longitude,
+                  costPerPassenger: (cost/passengers),
+                  totalCost: cost)));
     } else {
       if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
         Fluttertoast.showToast(
