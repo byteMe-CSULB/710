@@ -51,9 +51,8 @@ dependencies:
 
   # Creating PDF
   pdf: ^1.5.0                 # https://pub.dev/packages/pdf
-
-  # Creating txt
   path_provider: ^1.6.5       # https://pub.dev/packages/path_provider
+  flutter_full_pdf_viewer: ^1.0.6 # https://pub.dev/packages/flutter_full_pdf_viewer
 
 dev_dependencies:
   flutter_test:
