@@ -1,24 +1,22 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
-import 'package:gas_710/NavigationPage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:gas_710/auth.dart';
 
-
 class TripSummaryPage extends StatelessWidget {
   final List<Contact> selected;
-  final miles, location, lat, long;
+  final miles, location, lat, long, costPerPassenger, totalCost;
   TripSummaryPage(
       {Key key,
       @required this.selected,
       @required this.location,
       @required this.miles,
       @required this.lat,
-      @required this.long})
+      @required this.long,
+      @required this.costPerPassenger,
+      @required this.totalCost})
       : super(key: key);
 
   final databaseReference = Firestore.instance;
@@ -155,11 +153,12 @@ class TripSummaryPage extends StatelessWidget {
         'miles' : miles,
         'location' : location,
         'date' : DateTime.now(),
-        'price' : 200.00,
+        'price' : totalCost,
         'route' : GeoPoint(lat, long)
       });
   }
 
+  // ToDo: include individual cost per passenger
   void addContact() async { // we add per individual
     var userReference = databaseReference.collection('userData').document(firebaseUser.email);
     var test = await userReference.collection('userData').document(firebaseUser.email).collection('contacts').getDocuments();
@@ -168,7 +167,7 @@ class TripSummaryPage extends StatelessWidget {
         'displayName' : 'init',
         'emailAddress' : 'int',
         'phoneNumber' : 'int',
-        'avatar' : 'init'
+        'avatar' : 'init',
       });
     }
     for(int i = 0; i < selected.length; i++) {
