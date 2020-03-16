@@ -40,10 +40,6 @@ class BillingPage extends StatelessWidget {
   }
 
   _listView(AsyncSnapshot<QuerySnapshot> snapshot) { 
-    var money = [];
-    for(int i = 0; i < snapshot.data.documents.length; i++) {
-      money.add(randomMoney());
-    }
     return ListView.builder(
       itemCount: snapshot.data.documents.length,
       itemBuilder: (context, index) {
@@ -71,20 +67,20 @@ class BillingPage extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              money[index].toStringAsFixed(2),
+              snapshot.data.documents[index]['bill'].toStringAsFixed(2),
               style: TextStyle(
-                color: (money[index] > 0) ? Colors.black : Colors.red,
+                color: Colors.black,
                 fontSize: 15.0
               ),
             ),
-            trailing: (money[index] > 0) ? _requestButton(context) :  _payButton(context),
+            trailing: (snapshot.data.documents[index]['bill'] > 0) ? _requestButton(context) :  _payButton(context),
             onTap: () {
               String contactName = snapshot.data.documents[index]['displayName'];
               String dollars;
-              if (money[index] > 0) {
-                dollars = money[index].toStringAsFixed(2);
+              if (snapshot.data.documents[index]['bill'] > 0) {
+                dollars = snapshot.data.documents[index]['bill'].toStringAsFixed(2);
               } else {
-                dollars = (-1 * money[index]).toStringAsFixed(2);
+                dollars = (-1 * snapshot.data.documents[index]['bill']).toStringAsFixed(2);
               }
               var avatar;
               if(snapshot.data.documents[index]['avatar'] != 'none') {
@@ -102,12 +98,12 @@ class BillingPage extends StatelessWidget {
               String contactName = snapshot.data.documents[index]['displayName'].toString();
               bool youOwe;
               String dollars;
-              if (money[index] > 0) {
+              if (snapshot.data.documents[index]['bill'] > 0) {
                 youOwe = false;
-                dollars = money[index].toStringAsFixed(2);
+                dollars = snapshot.data.documents[index]['bill'].toStringAsFixed(2);
               } else {
                 youOwe = true;
-                dollars = (-1 * money[index]).toStringAsFixed(2);
+                dollars = (-1 * snapshot.data.documents[index]['bill']).toStringAsFixed(2);
               }
               Fluttertoast.showToast(
                 msg: youOwe ? 'You owe $contactName \$$dollars' : '$contactName owes you \$$dollars',
@@ -165,15 +161,5 @@ class BillingPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  double randomMoney() { // this is just for money placeholders, definitely remove later
-    Random random = Random();
-    double rngDecimal = random.nextInt(20).toDouble();
-    rngDecimal += random.nextDouble();
-    var oweOrOwed = random.nextInt(2);
-    if(oweOrOwed == 0) {
-      return rngDecimal;
-    } else return rngDecimal * -1;
   }
 }
