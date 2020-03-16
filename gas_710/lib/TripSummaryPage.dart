@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/main.dart';
-import 'package:gas_710/NavigationPage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:gas_710/auth.dart';
 
 class TripSummaryPage extends StatelessWidget {
   final List<Contact> selected;
-  final miles, location, lat, long;
+  final miles, location, lat, long, costPerPassenger, totalCost;
   TripSummaryPage(
       {Key key,
       @required this.selected,
       @required this.location,
       @required this.miles,
       @required this.lat,
-      @required this.long})
+      @required this.long,
+      @required this.costPerPassenger,
+      @required this.totalCost})
       : super(key: key);
 
   final databaseReference = Firestore.instance;
@@ -22,8 +24,7 @@ class TripSummaryPage extends StatelessWidget {
   final noPhoneError = "NO PHONE NUMBER PROVIDED";
   final noEmailError = "NO EMAIL PROVIDED";
   
-  static Future<void> openMap(
-      double latitude, double longitude, String location) async {
+  static Future<void> openMap(String location) async {
     String googleUrl =
         'https://www.google.com/maps/search/?api=1&query=$location';
     if (await canLaunch(googleUrl)) {
@@ -70,7 +71,16 @@ class TripSummaryPage extends StatelessWidget {
                   ),
                   scrollDirection: Axis.horizontal,
                   itemCount: selected.length,
-                  itemBuilder: (BuildContext context, int index) => Chip(
+                  itemBuilder: (BuildContext context, int index) => 
+                  Chip(
+                    avatar: (selected[index].avatar != null &&
+                            selected[index].avatar.length > 0)
+                        ? CircleAvatar(
+                            backgroundImage:
+                                MemoryImage(selected[index].avatar))
+                        : CircleAvatar(
+                            child: Text(selected[index].initials()),
+                          ),
                     label: Text(selected[index].displayName,
                         style: TextStyle(color: Colors.black)),
                   ),
@@ -83,14 +93,18 @@ class TripSummaryPage extends StatelessWidget {
                       Navigator.pop(context); 
                     },
                     child: Text(
-                      'Cancel'
+                      'Go Back'
                     ),
                   ),
                   RaisedButton(
                     onPressed: () {
-                      addTrip();
-                      addContact();
-                      openMap(lat, long, location);
+                      if(signedIn) {
+                        addTrip();
+                        addContact();
+                        openMap(location);
+                      } else {
+                        showAlertDialog(context);
+                      }
                     },
                     child: Text(
                       'Open GoogleMaps'
@@ -103,62 +117,100 @@ class TripSummaryPage extends StatelessWidget {
         ))));
   }
 
+  showAlertDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: Text('Warning'),
+      content: Text('Your Trips Will Not Be Saved Unless You Are Signed In. \n\nPlease Check Settings.'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Open GoogleMaps'),
+          onPressed: () {
+            openMap(location);
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      }
+    );
+  }
+
   void addTrip() async { // this is different from addPassengers() bc this one stores all passengers in one
+    var userReference = databaseReference.collection('userData').document(firebaseUser.email);
     print('addTrip: selected.length = ${selected.length}');
     var passengers = [];
     for(int i = 0; i < selected.length; i++) {
       passengers.add(selected[i].displayName);
     }
     print('addTrip: Sending $passengers to Firebase');
-    await databaseReference.collection("trip.v2")
+    await userReference.collection("trips")
       .add({
         'passengers' : passengers,
         'miles' : miles,
         'location' : location,
         'date' : DateTime.now(),
-        'price' : 200.00,
+        'price' : totalCost,
         'route' : GeoPoint(lat, long)
       });
   }
 
+  // ToDo: include individual cost per passenger
   void addContact() async { // we add per individual
+    var userReference = databaseReference.collection('userData').document(firebaseUser.email);
+    var test = await userReference.collection('userData').document(firebaseUser.email).collection('contacts').getDocuments();
+    if(test.documents.length == 0) { // no collection created.
+      userReference.collection('contacts').document('init').setData({
+        'displayName' : 'init',
+        'emailAddress' : 'int',
+        'phoneNumber' : 'int',
+        'avatar' : 'init',
+        'bill' : 0.0,
+      });
+    }
     for(int i = 0; i < selected.length; i++) {
       var query = 
-        await databaseReference.collection('contacts').where('displayName', isEqualTo: selected[i].displayName).getDocuments();
+        await userReference.collection('contacts').where('displayName', isEqualTo: selected[i].displayName).getDocuments();
       if(query.documents.length == 0) {
-        var emails = selected[i].emails;
-        var phoneNumbers = selected[i].phones;
-        print('addContacts: Sending ${selected[i].displayName} - ${emails.elementAt(0).value.toString()} - ${phoneNumbers.elementAt(0).value.toString()}');
-        if(emails.isEmpty) {
-          await databaseReference.collection("contacts")
-          .add({
-            'displayName' : selected[i].displayName,
-            'emailAddress' : noEmailError,
-            'phoneNumber' : phoneNumbers.elementAt(0).value.toString(),
-          });
-        } else if(phoneNumbers.isEmpty) {
-          await databaseReference.collection("contacts")
-          .add({
-            'displayName' : selected[i].displayName,
-            'emailAddress' : emails.elementAt(0).value.toString(),
-            'phoneNumber' : noPhoneError,
-          });
-        } else if(emails.isEmpty && phoneNumbers.isEmpty) {
-          await databaseReference.collection("contacts")
-          .add({
-            'displayName' : selected[i].displayName,
-            'emailAddress' : noEmailError,
-            'phoneNumber' : noPhoneError,
-          });
+        String emails, phoneNumbers = '';
+        if(selected[i].emails.isNotEmpty) {
+          emails = selected[i].emails.first.value.toString();
         } else {
-          await databaseReference.collection("contacts")
+          emails = noEmailError;
+        }
+        if(selected[i].phones.isNotEmpty) {
+          phoneNumbers = selected[i].phones.first.value.toString();
+        } else {
+          phoneNumbers = noPhoneError;
+        }
+        
+        var avatar;
+        if(selected[i].avatar != null && selected[i].avatar.length > 0) {
+          avatar = String.fromCharCodes(selected[i].avatar);
+        } else {
+          avatar = 'none';
+        }
+
+        print('addContacts: Sending ${selected[i].displayName} - $emails - $phoneNumbers');
+        await userReference.collection("contacts")
           .add({
             'displayName' : selected[i].displayName,
-            'emailAddress' : emails.elementAt(0).value.toString(),
-            'phoneNumber' : phoneNumbers.elementAt(0).value.toString(),
-          });
-        }
+            'emailAddress' : emails,
+            'phoneNumber' : phoneNumbers,
+            'avatar' : avatar,
+            'bill' : costPerPassenger
+        });
+      } else if(query.documents.length == 1) { // contact exists within Firebase
+        var docId = query.documents[0].documentID;
+        var updatedBill = query.documents[0]['bill'] + costPerPassenger;
+        await userReference.collection('contacts').document(docId).updateData({
+          'bill' : updatedBill
+        });
       }
     }
+    userReference.collection('contacts').document('init').delete();
   }
 }

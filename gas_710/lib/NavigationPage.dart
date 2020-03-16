@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:gas_710/AddPassengersPage.dart';
-import 'package:gas_710/ContactsPage.dart';
-import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/TripSummaryPage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -72,13 +70,13 @@ class _NavigationPageState extends State<NavigationPage> {
 
   double cost = 0.0;
   double gas = 0.0;
-  var state = "";
+  String state = "";
 
   @override
   void initState() {
     super.initState();
     setSourceAndDestinationIcons();
-    // getStateLocation();
+    getStateLocation();
   }
 
   void setSourceAndDestinationIcons() async {
@@ -235,21 +233,25 @@ class _NavigationPageState extends State<NavigationPage> {
                                   fontSize: 20.0, color: Colors.grey[700]),
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'Price Per Gallon in $state: 0.0',
-                              style: TextStyle(
-                                  fontSize: 20.0, color: Colors.grey[700]),
-                            ),
-                          ),
                           Divider(
                             thickness: 0.8,
                           ),
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              'Total Cost: \$200', // hard coded price, figure this later
+                              (passengers == 0) ?
+                              'Cost Per Passenger: 0.0'
+                              : 'Cost Per Passenger: ${(cost / passengers).toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.grey[700],
+                              ),
+                            )
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'Total Cost: $cost',
                               style: TextStyle(
                                 fontSize: 20.0,
                                 color: Colors.grey[700],
@@ -463,6 +465,7 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   double convertMetersToMiles(double m) {
+    setGas();
     return double.parse((m * 0.00062137).toStringAsFixed(2));
   }
 
@@ -497,6 +500,7 @@ class _NavigationPageState extends State<NavigationPage> {
     if (passengerResult != null) {
       contacts = passengerResult;
       passengers = passengerResult.length;
+      setCost();
     }
   }
 
@@ -511,7 +515,9 @@ class _NavigationPageState extends State<NavigationPage> {
                   location: searchAddr,
                   miles: miles,
                   lat: latitude,
-                  long: longitude)));
+                  long: longitude,
+                  costPerPassenger: (cost/passengers),
+                  totalCost: cost)));
     } else {
       if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
         Fluttertoast.showToast(
@@ -539,5 +545,19 @@ class _NavigationPageState extends State<NavigationPage> {
         );
       }
     }
+  }
+
+  setGas() {
+    // TODO: change collection to 'costPerState' when updated in Firebase
+    var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: state).getDocuments();
+    query.then((value) =>
+      gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
+  }
+
+  setCost() {
+    int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
+    double tempCost= ((miles * gas) / fuelEfficiency);
+    cost = double.parse(tempCost.toStringAsFixed(2));
+    print('Cost: $cost');
   }
 }
