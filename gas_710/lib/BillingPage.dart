@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
-// import 'package:gas_710/TestPage.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,14 +20,6 @@ class BillingPage extends StatelessWidget {
       appBar: new AppBar(
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(Icons.exit_to_app),
-        //     onPressed: () {                  
-        //       Navigator.push(context, MaterialPageRoute(builder: (context) => TestPage()));
-        //     } 
-        //   ),
-        // ],
       ),
       body: signedIn ? StreamBuilder(
         stream: databaseReference.collection('contacts').snapshots(),
