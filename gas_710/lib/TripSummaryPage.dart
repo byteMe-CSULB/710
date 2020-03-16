@@ -93,7 +93,7 @@ class TripSummaryPage extends StatelessWidget {
                       Navigator.pop(context); 
                     },
                     child: Text(
-                      'Cancel'
+                      'Go Back'
                     ),
                   ),
                   RaisedButton(
@@ -168,6 +168,7 @@ class TripSummaryPage extends StatelessWidget {
         'emailAddress' : 'int',
         'phoneNumber' : 'int',
         'avatar' : 'init',
+        'bill' : 0.0,
       });
     }
     for(int i = 0; i < selected.length; i++) {
@@ -199,10 +200,17 @@ class TripSummaryPage extends StatelessWidget {
             'displayName' : selected[i].displayName,
             'emailAddress' : emails,
             'phoneNumber' : phoneNumbers,
-            'avatar' : avatar
+            'avatar' : avatar,
+            'bill' : costPerPassenger
         });
-        userReference.collection('contacts').document('init').delete();
+      } else if(query.documents.length == 1) { // contact exists within Firebase
+        var docId = query.documents[0].documentID;
+        var updatedBill = query.documents[0]['bill'] + costPerPassenger;
+        await userReference.collection('contacts').document(docId).updateData({
+          'bill' : updatedBill
+        });
       }
     }
+    userReference.collection('contacts').document('init').delete();
   }
 }
