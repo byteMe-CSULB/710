@@ -51,8 +51,9 @@ class BillingPage extends StatelessWidget {
           elevation: 5,
           child: ListTile(
             contentPadding: EdgeInsets.all(8.0),
-            leading: (Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits) != null && 
-            Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits).length > 0)
+            leading: (snapshot.data.documents[index]['avatar'].toString() != 'none' 
+            && (Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits) != null && 
+            Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits).length > 0))
                         ? CircleAvatar(backgroundImage: MemoryImage(Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits)))
                         : CircleAvatar(child: 
                         Text(
@@ -85,7 +86,12 @@ class BillingPage extends StatelessWidget {
               } else {
                 dollars = (-1 * money[index]).toStringAsFixed(2);
               }
-              Uint8List avatar = Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits);
+              var avatar;
+              if(snapshot.data.documents[index]['avatar'] != 'none') {
+                avatar = Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits);
+              } else {
+                avatar = 'none';
+              }
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) => BillContactPage(
                   name: contactName,
