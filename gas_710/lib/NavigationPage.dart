@@ -116,8 +116,6 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
-  PanelController _pc = new PanelController();
-
   @override
   Widget build(BuildContext context) {
     CameraPosition initialLocation = CameraPosition(
@@ -146,7 +144,6 @@ class _NavigationPageState extends State<NavigationPage> {
         ),
       ),
       body: SlidingUpPanel(
-        controller: _pc,
         borderRadius: radius,
         minHeight: 60,
         panel: Center(
