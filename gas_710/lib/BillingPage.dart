@@ -24,7 +24,7 @@ class BillingPage extends StatelessWidget {
       body: signedIn ? StreamBuilder(
         stream: databaseReference.collection('contacts').snapshots(),
         builder: (context, snapshot) {
-          if(!snapshot.hasData) return CircularProgressIndicator();
+          if(!snapshot.hasData) return CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

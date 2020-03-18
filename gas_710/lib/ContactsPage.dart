@@ -139,7 +139,9 @@ class _ContactListPageState extends State<ContactListPage> {
                 },
               )
             : Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.amber)
+                ),
               ),
       ),
     );

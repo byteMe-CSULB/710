@@ -123,7 +123,7 @@ class BillContactPage extends StatelessWidget {
               StreamBuilder(
                 stream: databaseReference.collection('contacts').where('displayName', isEqualTo: name).snapshots(),
                 builder: (context, snapshot) {
-                  if(!snapshot.hasData) return CircularProgressIndicator();
+                  if(!snapshot.hasData) return CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
                   return Container(
                     height: 150,
                     child: Column(
@@ -168,7 +168,7 @@ class BillContactPage extends StatelessWidget {
               StreamBuilder(
                 stream: databaseReference.collection('trips').where('passengers', arrayContains: name).orderBy('date').snapshots(),
                 builder: (context, snapshot) {
-                  if(!snapshot.hasData) return CircularProgressIndicator();
+                  if(!snapshot.hasData) return CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
                   return Expanded(child: _cardListView(context, snapshot));
                 }
               ),
