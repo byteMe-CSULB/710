@@ -135,17 +135,9 @@ class _NavigationPageState extends State<NavigationPage> {
         title: new Text("Navigation Page"),
         backgroundColor: Colors.purple,
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 525.0),
-        child: FloatingActionButton(
-          onPressed: _getLocation,
-          backgroundColor: Colors.amber,
-          child: Icon(Icons.location_on),
-        ),
-      ),
       body: SlidingUpPanel(
         borderRadius: radius,
-        minHeight: 60,
+        minHeight: 70,
         panel: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -171,14 +163,38 @@ class _NavigationPageState extends State<NavigationPage> {
                                 ),
                               ),
                               Spacer(),
-                              IconButton(
-                                icon: Icon(Icons.group_add),
-                                onPressed: () {
-                                  _getPassengers(context);
-                                },
-                                tooltip: "Add Passengers to a Trip",
-                                iconSize: 36,
-                                color: Colors.grey,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.purple,
+                                  shape: BoxShape.circle
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.location_on),
+                                  onPressed: () {
+                                    _getLocation();
+                                  },
+                                  tooltip: "Get Your Current Location",
+                                  iconSize: 36,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10.0,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.purple,
+                                  shape: BoxShape.circle
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.group_add),
+                                  onPressed: () {
+                                    _getPassengers(context);
+                                  },
+                                  tooltip: "Add Passengers to a Trip",
+                                  iconSize: 36,
+                                  color: Colors.white,
+                                ),
                               ),
                             ],
                             ),
