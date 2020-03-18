@@ -116,6 +116,8 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
+  PanelController _pc = new PanelController();
+
   @override
   Widget build(BuildContext context) {
     CameraPosition initialLocation = CameraPosition(
@@ -144,6 +146,7 @@ class _NavigationPageState extends State<NavigationPage> {
         ),
       ),
       body: SlidingUpPanel(
+        controller: _pc,
         borderRadius: radius,
         minHeight: 60,
         panel: Center(
@@ -161,47 +164,58 @@ class _NavigationPageState extends State<NavigationPage> {
                         children: <Widget>[
                           Padding(
                             padding: EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
-                            child: Text(
-                              'Add Passengers',
-                              style: TextStyle(
-                                fontSize: 23.0,
+                            child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                'Add Passengers',
+                                style: TextStyle(
+                                  fontSize: 23.0,
+                                ),
                               ),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.group_add),
+                                onPressed: () {
+                                  _getPassengers(context);
+                                },
+                                tooltip: "Add Passengers to a Trip",
+                                iconSize: 36,
+                                color: Colors.grey,
+                              ),
+                            ],
                             ),
                           ),
-                          Align(
-                              alignment: Alignment.topCenter,
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: RaisedButton(
-                                  color: Colors.amber,
-                                  child: Text(
-                                    "Add Passengers",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  onPressed: () {
-                                    _getPassengers(context);
-                                  },
-                                ),
-                              )),
                           Expanded(
                             child: Container(
                               child: ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) =>
-                                  Chip(
-                                // dynamically add contacts to trip
-                                avatar: (contacts[index].avatar != null &&
-                                        contacts[index].avatar.length > 0)
-                                    ? CircleAvatar(
-                                        backgroundImage:
-                                            MemoryImage(contacts[index].avatar))
-                                    : CircleAvatar(
-                                        child: Text(contacts[index].initials()),
+                                Card(
+                                  elevation: 4.0,
+                                  child: ListTile(
+                                    leading: (contacts[index].avatar != null &&
+                                          contacts[index].avatar.length > 0)
+                                      ? CircleAvatar(
+                                          backgroundImage:
+                                              MemoryImage(contacts[index].avatar))
+                                      : CircleAvatar(
+                                          child: Text(contacts[index].initials(),
+                                          style: TextStyle(color: Colors.white)),
+                                          backgroundColor: Colors.purple,
+                                        ),
+                                      title: Text(
+                                        contacts[index].displayName,
+                                        style: TextStyle(
+                                          color: Colors.black
+                                        ),
                                       ),
-                                label: Text(contacts[index].displayName,
-                                    style: TextStyle(color: Colors.black)),
-                                backgroundColor: Colors.blue[100],
-                              ),
+                                      subtitle: Text(
+                                        contacts[index].phones.first.value.toString()
+                                      ),
+                                      trailing: Text((index + 1).toString()),
+                                  ),
+                                ),
                               scrollDirection: Axis.vertical,
                             )),
                           ),
