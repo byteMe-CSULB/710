@@ -155,7 +155,7 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: Container(
                   alignment: Alignment.topLeft,
                   child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
