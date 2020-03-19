@@ -116,6 +116,8 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
+  PanelController _pc = new PanelController();
+
   @override
   Widget build(BuildContext context) {
     CameraPosition initialLocation = CameraPosition(
@@ -136,8 +138,13 @@ class _NavigationPageState extends State<NavigationPage> {
         backgroundColor: Colors.purple,
       ),
       body: SlidingUpPanel(
+        controller: _pc,
         borderRadius: radius,
         minHeight: 70,
+        backdropTapClosesPanel: true,
+        backdropEnabled: true,
+        backdropOpacity: 0.3,
+        parallaxEnabled: true,
         panel: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -166,12 +173,17 @@ class _NavigationPageState extends State<NavigationPage> {
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.purple,
-                                  shape: BoxShape.circle
+                                  shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
                                   icon: Icon(Icons.location_on),
                                   onPressed: () {
-                                    _getLocation();
+                                    if(_pc.isAttached) {
+                                      if(_pc.isPanelOpen) {
+                                        _pc.close();
+                                        _getLocation();
+                                      }
+                                    }
                                   },
                                   tooltip: "Get Your Current Location",
                                   iconSize: 36,
@@ -189,7 +201,12 @@ class _NavigationPageState extends State<NavigationPage> {
                                 child: IconButton(
                                   icon: Icon(Icons.group_add),
                                   onPressed: () {
-                                    _getPassengers(context);
+                                    if(_pc.isAttached) {
+                                      if(_pc.isPanelClosed) {
+                                        _pc.open();
+                                        _getPassengers(context);
+                                      }
+                                    }
                                   },
                                   tooltip: "Add Passengers to a Trip",
                                   iconSize: 36,
@@ -211,16 +228,24 @@ class _NavigationPageState extends State<NavigationPage> {
                                           contacts[index].avatar.length > 0)
                                       ? CircleAvatar(
                                           backgroundImage:
-                                              MemoryImage(contacts[index].avatar))
+                                              MemoryImage(contacts[index].avatar),
+                                          maxRadius: 30,)
                                       : CircleAvatar(
                                           child: Text(contacts[index].initials(),
-                                          style: TextStyle(color: Colors.white)),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 36,
+                                            )
+                                          ),
                                           backgroundColor: Colors.purple,
+                                          maxRadius: 30,
                                         ),
                                       title: Text(
                                         contacts[index].displayName,
                                         style: TextStyle(
-                                          color: Colors.black
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold
                                         ),
                                       ),
                                       subtitle: Text(
@@ -240,7 +265,7 @@ class _NavigationPageState extends State<NavigationPage> {
                 alignment: Alignment.centerRight,
                 child: Container(
                   child: Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 16.0),
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
@@ -319,7 +344,7 @@ class _NavigationPageState extends State<NavigationPage> {
             initialCameraPosition: initialLocation,
           ),
           Positioned(
-            top: 20.0,
+            top: 30.0,
             right: 15.0,
             left: 15.0,
             child: Container(
@@ -337,7 +362,8 @@ class _NavigationPageState extends State<NavigationPage> {
                   Prediction p = await PlacesAutocomplete.show(
                       context: context,
                       mode: Mode.overlay,
-                      apiKey: googlePlacesAPIKey);
+                      apiKey: googlePlacesAPIKey,
+                  );
                   //if user picks an address, send it to the search bar
                   if (p != null) {
                     displayPrediction(p);
@@ -402,6 +428,10 @@ class _NavigationPageState extends State<NavigationPage> {
           result[0].position.latitude,
           result[0].position.longitude);
       miles = convertMetersToMiles(distanceInMeter);
+      setState(() {
+        setGas();
+        setCost();
+      });
       _locationSearched = true;
       _milesGot = true;
       latitude = result[0].position.latitude;
@@ -492,7 +522,6 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   double convertMetersToMiles(double m) {
-    setGas();
     return double.parse((m * 0.00062137).toStringAsFixed(2));
   }
 
@@ -524,11 +553,16 @@ class _NavigationPageState extends State<NavigationPage> {
 
     passengerResult = await Navigator.push(context,
         new MaterialPageRoute(builder: (context) => AddPassengersPage()));
-    if (passengerResult != null) {
-      contacts = passengerResult;
-      passengers = passengerResult.length;
-      setCost();
-    }
+    setState((){
+      if (passengerResult != null) {
+        contacts = passengerResult;
+        passengers = passengerResult.length;
+        if(miles > 0) {
+          setGas();
+          setCost();
+        }
+      }
+    });
   }
 
   //when Confirm Passengers button gets pressed
@@ -574,17 +608,24 @@ class _NavigationPageState extends State<NavigationPage> {
     }
   }
 
-  setGas() {
+  setGas() async {
     // TODO: change collection to 'costPerState' when updated in Firebase
-    var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: state).getDocuments();
-    query.then((value) =>
-      gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
+    print('setGAs() $state');
+    var query = await Firestore.instance.collection('costPerSate').where('location', isEqualTo: state).getDocuments();
+    print('Length: ${query.documents.length}');
+    var gasQuery = double.parse(query.documents[0]['ppg'].toString().substring(1));
+    print('setGas() $gasQuery');
+    gas = gasQuery;
+    // query.then((value) => gas = double.parse(value.documents.first['ppg'].toString().substring(1)));
   }
 
   setCost() {
-    int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
-    double tempCost= ((miles * gas) / fuelEfficiency);
-    cost = double.parse(tempCost.toStringAsFixed(2));
-    print('Cost: $cost');
+    setState(() {
+      int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
+      print('Gas: $gas Miles: $miles');
+      double tempCost= ((miles * gas) / fuelEfficiency);
+      cost = double.parse(tempCost.toStringAsFixed(2));
+      print('Cost: $cost');
+    });
   }
 }
