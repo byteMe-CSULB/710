@@ -204,7 +204,6 @@ class _BillContactPageState extends State<BillContactPage> {
         itemCount: trips.length,
         itemBuilder: (context, index) {
           return ExpansionTileCard(
-            expandedColor: Colors.purple,
             leading: Text(
               (index + 1).toString(), // for quick ordering, essentially should be in chronological order
             ),
