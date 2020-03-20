@@ -41,7 +41,7 @@ class _BillContactPageState extends State<BillContactPage> {
                   onPressed: () {
                     print('Cannot make PDF');
                   },
-                  tooltip: 'Save all of $name\'s trips as a PDF',
+                  tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
                 ); 
               }
               return IconButton(
@@ -53,7 +53,7 @@ class _BillContactPageState extends State<BillContactPage> {
                     _generatePdf(context, snapshot);
                   }
                 },
-                tooltip: 'Save all of $name\'s trips as a PDF',
+                tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
               );
             }
           )
@@ -75,7 +75,7 @@ class _BillContactPageState extends State<BillContactPage> {
                       : 
                     CircleAvatar(
                       child: Text(
-                        name[0],
+                        widget.name[0],
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 48.0
@@ -316,7 +316,7 @@ class _BillContactPageState extends State<BillContactPage> {
     pdf.addPage(
       pdfLib.MultiPage(
         build: (context) => [
-          pdfLib.Text('Contact Name - $name'),
+          pdfLib.Text('Contact Name - ${widget.name}'),
           pdfLib.Table.fromTextArray(context: context, data: data)
         ]
       )
