@@ -14,11 +14,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 
-const double CAMERA_ZOOM = 13;
-const double CAMERA_TILT = 0;
-const double CAMERA_BEARING = 0;
-const LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
-const LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
+double CAMERA_ZOOM = 13;
+double CAMERA_TILT = 0;
+double CAMERA_BEARING = 0;
+LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
 const googlePlacesAPIKey = "AIzaSyD71HMbuRIt7smNaNek_R0OXBRHJMtj_fo";
 
 GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: googlePlacesAPIKey);
@@ -61,6 +60,7 @@ class _NavigationPageState extends State<NavigationPage> {
   List<Contact> contacts = new List<Contact>();
   bool _locationSearched = false;
   bool _milesGot = false;
+  bool calculationMade = false;
 
   // distance
   double miles = 0.0;
@@ -69,6 +69,7 @@ class _NavigationPageState extends State<NavigationPage> {
   double longitude = 0.0;
 
   double cost = 0.0;
+  double costPerPassenger = 0.0;
   double gas = 0.0;
   String state = "";
 
@@ -77,6 +78,8 @@ class _NavigationPageState extends State<NavigationPage> {
     super.initState();
     setSourceAndDestinationIcons();
     getStateLocation();
+    _getInitLocation();
+    setGas();
   }
 
   void setSourceAndDestinationIcons() async {
@@ -114,6 +117,12 @@ class _NavigationPageState extends State<NavigationPage> {
       );
       _markers.add(marker);
     });
+  }
+
+  _getInitLocation() async {
+    var currentLocation = await Geolocator()
+      .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    await _moveToPosition(currentLocation);
   }
 
   PanelController _pc = new PanelController();
@@ -182,6 +191,8 @@ class _NavigationPageState extends State<NavigationPage> {
                                       if(_pc.isPanelOpen) {
                                         _pc.close();
                                         _getLocation();
+                                      } else {
+                                        _getLocation();
                                       }
                                     }
                                   },
@@ -204,6 +215,8 @@ class _NavigationPageState extends State<NavigationPage> {
                                     if(_pc.isAttached) {
                                       if(_pc.isPanelClosed) {
                                         _pc.open();
+                                        _getPassengers(context);
+                                      } else {
                                         _getPassengers(context);
                                       }
                                     }
@@ -291,9 +304,7 @@ class _NavigationPageState extends State<NavigationPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              (passengers == 0) ?
-                              'Cost Per Passenger: 0.0'
-                              : 'Cost Per Passenger: ${(cost / passengers).toStringAsFixed(2)}',
+                              'Cost Per Passenger: $costPerPassenger',
                               style: TextStyle(
                                 fontSize: 20.0,
                                 color: Colors.grey[700],
@@ -428,10 +439,10 @@ class _NavigationPageState extends State<NavigationPage> {
           result[0].position.latitude,
           result[0].position.longitude);
       miles = convertMetersToMiles(distanceInMeter);
-      setState(() {
-        setGas();
+      if(miles > 0) {
         setCost();
-      });
+        setCostPP();
+      }
       _locationSearched = true;
       _milesGot = true;
       latitude = result[0].position.latitude;
@@ -558,8 +569,8 @@ class _NavigationPageState extends State<NavigationPage> {
         contacts = passengerResult;
         passengers = passengerResult.length;
         if(miles > 0) {
-          setGas();
           setCost();
+          setCostPP();
         }
       }
     });
@@ -610,13 +621,8 @@ class _NavigationPageState extends State<NavigationPage> {
 
   setGas() async {
     // TODO: change collection to 'costPerState' when updated in Firebase
-    print('setGAs() $state');
-    var query = await Firestore.instance.collection('costPerSate').where('location', isEqualTo: state).getDocuments();
-    print('Length: ${query.documents.length}');
-    var gasQuery = double.parse(query.documents[0]['ppg'].toString().substring(1));
-    print('setGas() $gasQuery');
-    gas = gasQuery;
-    // query.then((value) => gas = double.parse(value.documents.first['ppg'].toString().substring(1)));
+    var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: 'California').getDocuments();
+    query.then((value) => gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
   }
 
   setCost() {
@@ -626,6 +632,14 @@ class _NavigationPageState extends State<NavigationPage> {
       double tempCost= ((miles * gas) / fuelEfficiency);
       cost = double.parse(tempCost.toStringAsFixed(2));
       print('Cost: $cost');
+      calculationMade = true;
+    });
+  }
+
+  setCostPP() {
+    String temp = (cost / passengers).toStringAsFixed(2);
+    setState(() {
+      costPerPassenger = double.parse(temp);
     });
   }
 }
