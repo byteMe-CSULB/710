@@ -33,7 +33,7 @@ class _BillContactPageState extends State<BillContactPage> {
         backgroundColor: Colors.purple,
         actions: <Widget>[
           StreamBuilder(
-            stream: databaseReference.collection('trips').where('passengers', arrayContains: name).snapshots(),
+            stream: databaseReference.collection('trips').where('passengers', arrayContains: widget.name).snapshots(),
             builder: (context, snapshot) {
               if(!snapshot.hasData) {
                 return IconButton(
