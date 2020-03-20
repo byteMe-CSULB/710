@@ -29,7 +29,7 @@ class _BillContactPageState extends State<BillContactPage> {
     return new Scaffold(
       drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
-        title: new Text(name),
+        title: new Text(widget.name),
         backgroundColor: Colors.purple,
         actions: <Widget>[
           StreamBuilder(
@@ -162,7 +162,7 @@ class _BillContactPageState extends State<BillContactPage> {
                     ),
                   ),
                   Spacer(),
-                  IconButton( // it's a useless button for now
+                  IconButton(
                     icon: Icon(Icons.filter_list),
                     color: Colors.grey,
                     onPressed: () {
@@ -170,6 +170,7 @@ class _BillContactPageState extends State<BillContactPage> {
                           sortDesc = !sortDesc;
                       });
                     },
+                    tooltip: 'Sort by date',
                   ),
                 ]
               ),
