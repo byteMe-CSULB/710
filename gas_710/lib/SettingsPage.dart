@@ -4,6 +4,9 @@ import 'package:gas_710/main.dart';
 import 'package:gas_710/auth.dart';
 import 'package:gas_710/AccountPage.dart';
 
+enum PaymentServices {paypal, gpay, cashapp, venmo, zelle}
+PaymentServices prefService = PaymentServices.paypal;
+
 class SettingsPage extends StatefulWidget {
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -19,14 +22,102 @@ class _SettingsPageState extends State<SettingsPage> {
         title: new Text("Settings Page"),
         backgroundColor: Colors.purple,
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Preferred Payment Services',
+                style: TextStyle(
+                  fontSize: 24
+                )
+              ),
+            ),
+            ListTile(
+              title: const Text('PayPal'),
+              leading: Radio(
+                value: PaymentServices.paypal,
+                groupValue: prefService,
+                onChanged: (PaymentServices value) {
+                  setState(() {
+                    prefService = value;
+                  });
+                }
+              )
+            ),
+            ListTile(
+              title: const Text('Google Pay'),
+              leading: Radio(
+                value: PaymentServices.gpay,
+                groupValue: prefService,
+                onChanged: (PaymentServices value) {
+                  setState(() {
+                    prefService = value;
+                  });
+                }
+              )
+            ),
+            ListTile(
+              title: const Text('Cash App'),
+              leading: Radio(
+                value: PaymentServices.cashapp,
+                groupValue: prefService,
+                onChanged: (PaymentServices value) {
+                  setState(() {
+                    prefService = value;
+                  });
+                }
+              )
+            ),
+            ListTile(
+              title: const Text('Venmo'),
+              leading: Radio(
+                value: PaymentServices.venmo,
+                groupValue: prefService,
+                onChanged: (PaymentServices value) {
+                  setState(() {
+                    prefService = value;
+                  });
+                }
+              )
+            ),
+            ListTile(
+              title: const Text('Zelle'),
+              leading: Radio(
+                value: PaymentServices.zelle,
+                groupValue: prefService,
+                onChanged: (PaymentServices value) {
+                  setState(() {
+                    prefService = value;
+                  });
+                }
+              )
+            ),
+            Divider(),
+            SizedBox(
+              width: double.infinity,
+              height: 20.0,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Sign in Here!',
+                style: TextStyle(
+                  fontSize: 24
+                )
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: 10.0,
+            ),
             _signInButton(), // log in with Google Button
           ],
         ),
-      )
+      ),
     );
   }
 
