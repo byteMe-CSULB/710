@@ -237,7 +237,10 @@ class _NavigationPageState extends State<NavigationPage> {
                           ),
                           Expanded(
                             child: Container(
-                              color: Colors.grey[100],
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.grey[100],
+                              ),
                               child: passengers > 0 ? ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) {
@@ -296,7 +299,7 @@ class _NavigationPageState extends State<NavigationPage> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 18.0,
-                                  color: Colors.grey
+                                  color: Colors.grey[400]
                                 ),
                               ),
                             )),
