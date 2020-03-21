@@ -260,7 +260,24 @@ class _BillContactPageState extends State<BillContactPage> {
                   FlatButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4.0)),
-                    onPressed: () {},
+                    onPressed: () {}, // this should keep the bill in firebase
+                                      // but just say it's paid and still show it to users
+                                      // might need to add another field to trip collection
+                                      // for firebase
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.check),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical:2.0)
+                        ),
+                        Text('Paid')
+                      ],
+                    )
+                  ),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0)),
+                    onPressed: () {}, // this should share this individual trip with the contact
                     child: Column(
                       children: <Widget>[
                         Icon(Icons.share),
@@ -274,7 +291,9 @@ class _BillContactPageState extends State<BillContactPage> {
                   FlatButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4.0)),
-                    onPressed: () {},
+                    onPressed: () {}, // this should delete any record of this trip for everyone involved
+                                      // maybe do like a alert dialog that lets them know that it deletes it
+                                      // for EVERYONE
                     child: Column(
                       children: <Widget>[
                         Icon(Icons.delete),
