@@ -99,7 +99,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Divider(),
             SizedBox(
               width: double.infinity,
-              height: 20.0,
+              height: 10.0,
             ),
             Align(
               alignment: Alignment.centerLeft,
