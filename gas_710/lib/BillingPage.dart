@@ -1,14 +1,13 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
-import 'package:gas_710/LinkPaymentPage.dart';
+import 'package:gas_710/WebViewPage.dart';
 import 'package:gas_710/main.dart';
 import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math';
+import 'package:gas_710/SettingsPage.dart';
 
 class BillingPage extends StatelessWidget {
   final databaseReference = signedIn ? Firestore.instance.collection('userData').document(firebaseUser.email) : null;
@@ -127,7 +126,37 @@ class BillingPage extends StatelessWidget {
       shape: StadiumBorder(),
       color: Colors.amber,
       onPressed: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => LinkPaymentPage()));
+        if(prefService == PaymentServices.gpay) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "Google Pay",
+            selectedUrl: "https://pay.google.com",
+          )));
+        } else if(prefService == PaymentServices.paypal) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "PayPal",
+            selectedUrl: "https://www.paypal.com/us/home",
+          )));
+        } else if(prefService == PaymentServices.cashapp) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "CashApp",
+            selectedUrl: "https://cash.app/",
+          )));
+        } else if(prefService == PaymentServices.venmo) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "Venmo",
+            selectedUrl: "https://venmo.com/",
+          )));
+        } else if(prefService == PaymentServices.zelle) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "Zelle",
+            selectedUrl: "https://www.zellepay.com/",
+          )));
+        }
       },
     );
   }
@@ -140,7 +169,37 @@ class BillingPage extends StatelessWidget {
       shape: StadiumBorder(),
       color: Colors.amber,
       onPressed: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => LinkPaymentPage()));
+        if(prefService == PaymentServices.gpay) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "Google Pay",
+            selectedUrl: "https://pay.google.com",
+          )));
+        } else if(prefService == PaymentServices.paypal) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "PayPal",
+            selectedUrl: "https://www.paypal.com/us/home",
+          )));
+        } else if(prefService == PaymentServices.cashapp) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "CashApp",
+            selectedUrl: "https://cash.app/",
+          )));
+        } else if(prefService == PaymentServices.venmo) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "Venmo",
+            selectedUrl: "https://venmo.com/",
+          )));
+        } else if(prefService == PaymentServices.zelle) {
+          Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) => WebViewPage(
+            title: "Zelle",
+            selectedUrl: "https://www.zellepay.com/",
+          )));
+        }      
       },
     );
   }
