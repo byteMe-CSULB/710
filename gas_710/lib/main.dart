@@ -4,8 +4,8 @@ import 'package:gas_710/BillingPage.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/SettingsPage.dart';
-import 'package:gas_710/LinkPaymentPage.dart';
 import 'package:gas_710/ContactsPage.dart';
+import 'package:gas_710/WebViewPage.dart';
 import 'package:gas_710/auth.dart';
 
 void main() => runApp(MyApp());
@@ -144,10 +144,37 @@ class DrawerCodeOnly extends StatelessWidget {
               title: Text("Link to payment services"),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                        builder: (context) => new LinkPaymentPage()));
+                if(prefService == PaymentServices.gpay) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => WebViewPage(
+                    title: "Google Pay",
+                    selectedUrl: "https://pay.google.com",
+                  )));
+                } else if(prefService == PaymentServices.paypal) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => WebViewPage(
+                    title: "PayPal",
+                    selectedUrl: "https://www.paypal.com/us/home",
+                  )));
+                } else if(prefService == PaymentServices.cashapp) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => WebViewPage(
+                    title: "CashApp",
+                    selectedUrl: "https://cash.app/",
+                  )));
+                } else if(prefService == PaymentServices.venmo) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => WebViewPage(
+                    title: "Venmo",
+                    selectedUrl: "https://venmo.com/",
+                  )));
+                } else if(prefService == PaymentServices.zelle) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => WebViewPage(
+                    title: "Zelle",
+                    selectedUrl: "https://www.zellepay.com/",
+                  )));
+                }
               }),
           Divider(
             color: Colors.grey[400],
