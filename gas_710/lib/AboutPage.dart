@@ -14,7 +14,11 @@ class AboutPage extends StatelessWidget {
        body: new Container(
           margin: new EdgeInsets.symmetric(horizontal: 20.0),
           child: new Align(alignment: Alignment.topLeft,
-            child: new Text("The Idea\n-------------\n"
+            child: new Text("\nThe Idea\n-------------\n"
+                "We aim to provide an easy way to split the cost of fuel "
+                "with your friends.\n"
+                "Search for your destination on the Navigation page, then add "
+                "the other passengers to the ride.\n "
                 "\nbyteMe\n-------------\n"
                 "Brandon Nhem\n"
                 "Christopher Tran\n"
