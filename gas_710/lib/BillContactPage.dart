@@ -277,6 +277,20 @@ class _BillContactPageState extends State<BillContactPage> {
                   FlatButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4.0)),
+                    onPressed: () {}, // this should edit the individual trip i.e change location, miles, passengers, etc.
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.create),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical:2.0)
+                        ),
+                        Text('Edit')
+                      ],
+                    )
+                  ),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0)),
                     onPressed: () {}, // this should share this individual trip with the contact
                     child: Column(
                       children: <Widget>[
