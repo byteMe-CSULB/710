@@ -7,6 +7,7 @@ import 'package:gas_710/SettingsPage.dart';
 import 'package:gas_710/LinkPaymentPage.dart';
 import 'package:gas_710/ContactsPage.dart';
 import 'package:gas_710/auth.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 void main() => runApp(MyApp());
 
@@ -157,10 +158,12 @@ class DrawerCodeOnly extends StatelessWidget {
               title: Text("Report an issue"),
               onTap: () {
                 Navigator.pop(context);
+                sendBugReport();
                 // SnackBar at the bottom, displays that the feature is planned, but not implemented yet
-                Scaffold.of(context).showSnackBar(SnackBar(
+                /*
+                  Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text("Feature not implemented yet"),
-                ));
+                )); */
               }),
           Divider(
             color: Colors.grey[400],
@@ -182,5 +185,41 @@ class DrawerCodeOnly extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /*
+     Setups email for user to send bug report.
+     User still has to hit send button.
+  */
+  void sendBugReport() async {
+
+    // Get current date & time
+    DateTime now = DateTime.now();
+
+    String minutes;
+
+    if(now.minute < 10)
+      now.minute.toString().padLeft(1, '0');
+    else
+      minutes = now.minute.toString();
+
+    // Setup bug report email
+    final Email bugReport = Email(
+
+      // Email for developers to read bug reporst
+      recipients: ['710.bugreport@gmail.com'],
+
+      // Subject contains date & time bug was sent
+      // * TODO: Maybe setup Firebase to increment bug report numbers
+      subject: 'Bug Report ' + now.hour.toString() + ':' + minutes +
+          ', ' + now.month.toString() + '/' + now.day.toString() + '/' + now.year.toString(),
+
+      // Body
+      body: 'Describe your issue below, including what you were trying to do at the time:\n\n',
+
+      isHTML: false,
+    );
+
+    await FlutterEmailSender.send(bugReport);
   }
 }
