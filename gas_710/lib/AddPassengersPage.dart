@@ -79,7 +79,9 @@ class _MyHomePageState extends State<AddPassengersPage> {
                   ),
                 )
               : Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                  ),
                 ),
           floatingActionButton: new FloatingActionButton.extended(
             backgroundColor: tFloatingButtonColor,

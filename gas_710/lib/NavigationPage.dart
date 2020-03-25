@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:gas_710/AddPassengersPage.dart';
 import 'package:gas_710/main.dart';
-import 'package:gas_710/TripSummaryPage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,12 +12,13 @@ import 'package:google_maps_webservice/places.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:gas_710/auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-const double CAMERA_ZOOM = 13;
-const double CAMERA_TILT = 0;
-const double CAMERA_BEARING = 0;
-const LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
-const LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
+double CAMERA_ZOOM = 13;
+double CAMERA_TILT = 0;
+double CAMERA_BEARING = 0;
+LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
 const googlePlacesAPIKey = "AIzaSyD71HMbuRIt7smNaNek_R0OXBRHJMtj_fo";
 
 GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: googlePlacesAPIKey);
@@ -61,6 +61,7 @@ class _NavigationPageState extends State<NavigationPage> {
   List<Contact> contacts = new List<Contact>();
   bool _locationSearched = false;
   bool _milesGot = false;
+  bool calculationMade = false;
 
   // distance
   double miles = 0.0;
@@ -69,14 +70,22 @@ class _NavigationPageState extends State<NavigationPage> {
   double longitude = 0.0;
 
   double cost = 0.0;
+  double costPerPassenger = 0.0;
   double gas = 0.0;
   String state = "";
+
+  final databaseReference = Firestore.instance;
+
+  final noPhoneError = "NO PHONE NUMBER PROVIDED";
+  final noEmailError = "NO EMAIL PROVIDED";
 
   @override
   void initState() {
     super.initState();
     setSourceAndDestinationIcons();
     getStateLocation();
+    _getInitLocation();
+    setGas();
   }
 
   void setSourceAndDestinationIcons() async {
@@ -116,6 +125,14 @@ class _NavigationPageState extends State<NavigationPage> {
     });
   }
 
+  _getInitLocation() async {
+    var currentLocation = await Geolocator()
+      .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    await _moveToPosition(currentLocation);
+  }
+
+  PanelController _pc = new PanelController();
+
   @override
   Widget build(BuildContext context) {
     CameraPosition initialLocation = CameraPosition(
@@ -135,17 +152,14 @@ class _NavigationPageState extends State<NavigationPage> {
         title: new Text("Navigation Page"),
         backgroundColor: Colors.purple,
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 525.0),
-        child: FloatingActionButton(
-          onPressed: _getLocation,
-          backgroundColor: Colors.amber,
-          child: Icon(Icons.location_on),
-        ),
-      ),
       body: SlidingUpPanel(
+        controller: _pc,
         borderRadius: radius,
-        minHeight: 60,
+        minHeight: 70,
+        backdropTapClosesPanel: true,
+        backdropEnabled: true,
+        backdropOpacity: 0.3,
+        parallaxEnabled: true,
         panel: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -155,54 +169,139 @@ class _NavigationPageState extends State<NavigationPage> {
                 child: Container(
                   alignment: Alignment.topLeft,
                   child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
                             padding: EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
-                            child: Text(
-                              'Add Passengers',
-                              style: TextStyle(
-                                fontSize: 23.0,
+                            child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                'Add Passengers',
+                                style: TextStyle(
+                                  fontSize: 23.0,
+                                ),
                               ),
+                              Spacer(),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.purple,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.location_on),
+                                  onPressed: () {
+                                    if(_pc.isAttached) {
+                                      if(_pc.isPanelOpen) {
+                                        _pc.close();
+                                        _getLocation();
+                                      } else {
+                                        _getLocation();
+                                      }
+                                    }
+                                  },
+                                  tooltip: "Get Your Current Location",
+                                  iconSize: 36,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10.0,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.purple,
+                                  shape: BoxShape.circle
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.group_add),
+                                  onPressed: () {
+                                    if(_pc.isAttached) {
+                                      if(_pc.isPanelClosed) {
+                                        _pc.open();
+                                        _getPassengers(context);
+                                      } else {
+                                        _getPassengers(context);
+                                      }
+                                    }
+                                  },
+                                  tooltip: "Add Passengers to a Trip",
+                                  iconSize: 36,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                             ),
                           ),
-                          Align(
-                              alignment: Alignment.topCenter,
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: RaisedButton(
-                                  color: Colors.amber,
-                                  child: Text(
-                                    "Add Passengers",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  onPressed: () {
-                                    _getPassengers(context);
-                                  },
-                                ),
-                              )),
                           Expanded(
                             child: Container(
-                              child: ListView.builder(
-                              itemCount: contacts.length,
-                              itemBuilder: (BuildContext context, int index) =>
-                                  Chip(
-                                // dynamically add contacts to trip
-                                avatar: (contacts[index].avatar != null &&
-                                        contacts[index].avatar.length > 0)
-                                    ? CircleAvatar(
-                                        backgroundImage:
-                                            MemoryImage(contacts[index].avatar))
-                                    : CircleAvatar(
-                                        child: Text(contacts[index].initials()),
-                                      ),
-                                label: Text(contacts[index].displayName,
-                                    style: TextStyle(color: Colors.black)),
-                                backgroundColor: Colors.blue[100],
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.grey[100],
                               ),
+                              child: passengers > 0 ? ListView.builder(
+                              itemCount: contacts.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final item = contacts[index].displayName + ' - ' +contacts[index].phones.first.value.toString();
+                                return Dismissible(
+                                  key : Key(item),
+                                  child: Card(
+                                    elevation: 4.0,
+                                    child: ListTile(
+                                      leading: (contacts[index].avatar != null &&
+                                            contacts[index].avatar.length > 0)
+                                        ? CircleAvatar(
+                                            backgroundImage:
+                                                MemoryImage(contacts[index].avatar),
+                                            maxRadius: 30,)
+                                        : CircleAvatar(
+                                            child: Text(contacts[index].initials(),
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 36,
+                                              )
+                                            ),
+                                            backgroundColor: Colors.purple,
+                                            maxRadius: 30,
+                                          ),
+                                        title: Text(
+                                          contacts[index].displayName,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold
+                                          ),
+                                        ),
+                                        subtitle: Text(contacts[index].phones.first.value.toString() == null ? noPhoneError :
+                                          contacts[index].phones.first.value.toString()
+                                        ),
+                                        trailing: Text((index + 1).toString()),
+                                    ),
+                                  ),
+                                  onDismissed: (direction) {
+                                    setState(() {
+                                      contacts.removeAt(index);
+                                      passengers --;
+                                      setCostPP();
+                                    });
+                                    Scaffold.of(context)
+                                      .showSnackBar(SnackBar(content: Text("$item removed")));
+                                  },
+                                );
+                              },
                               scrollDirection: Axis.vertical,
+                            ) : Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                'Try adding some contacts!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: Colors.grey[400]
+                                ),
+                              ),
                             )),
                           ),
                         ],
@@ -213,7 +312,7 @@ class _NavigationPageState extends State<NavigationPage> {
                 alignment: Alignment.centerRight,
                 child: Container(
                   child: Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 16.0),
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
@@ -239,9 +338,8 @@ class _NavigationPageState extends State<NavigationPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              (passengers == 0) ?
-                              'Cost Per Passenger: 0.0'
-                              : 'Cost Per Passenger: ${(cost / passengers).toStringAsFixed(2)}',
+                              (passengers == 0 || miles == 0) ? 'Cost Per Passenger: 0.0' 
+                              : 'Cost Per Passenger: $costPerPassenger',
                               style: TextStyle(
                                 fontSize: 20.0,
                                 color: Colors.grey[700],
@@ -292,7 +390,7 @@ class _NavigationPageState extends State<NavigationPage> {
             initialCameraPosition: initialLocation,
           ),
           Positioned(
-            top: 20.0,
+            top: 30.0,
             right: 15.0,
             left: 15.0,
             child: Container(
@@ -310,7 +408,8 @@ class _NavigationPageState extends State<NavigationPage> {
                   Prediction p = await PlacesAutocomplete.show(
                       context: context,
                       mode: Mode.overlay,
-                      apiKey: googlePlacesAPIKey);
+                      apiKey: googlePlacesAPIKey,
+                  );
                   //if user picks an address, send it to the search bar
                   if (p != null) {
                     displayPrediction(p);
@@ -375,6 +474,10 @@ class _NavigationPageState extends State<NavigationPage> {
           result[0].position.latitude,
           result[0].position.longitude);
       miles = convertMetersToMiles(distanceInMeter);
+      if(miles > 0) {
+        setCost();
+        setCostPP();
+      }
       _locationSearched = true;
       _milesGot = true;
       latitude = result[0].position.latitude;
@@ -465,7 +568,6 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   double convertMetersToMiles(double m) {
-    setGas();
     return double.parse((m * 0.00062137).toStringAsFixed(2));
   }
 
@@ -497,27 +599,148 @@ class _NavigationPageState extends State<NavigationPage> {
 
     passengerResult = await Navigator.push(context,
         new MaterialPageRoute(builder: (context) => AddPassengersPage()));
-    if (passengerResult != null) {
-      contacts = passengerResult;
-      passengers = passengerResult.length;
-      setCost();
-    }
+    setState((){
+      if (passengerResult != null) {
+        contacts = passengerResult;
+        passengers = passengerResult.length;
+        if(miles > 0) {
+          setCost();
+          setCostPP();
+        }
+      }
+    });
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(Icons.directions, size: 60.0),
+                  title: Text(
+                    'Your Trip',
+                    style: TextStyle(
+                      fontSize: 30.0,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '$miles miles to $searchAddr',
+                    style: TextStyle(
+                      fontSize: 15.0,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 35.0,
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) => SizedBox(
+                      width: 5.0,
+                    ),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: contacts.length,
+                    itemBuilder: (BuildContext context, int index) => 
+                    Chip(
+                      avatar: (contacts[index].avatar != null &&
+                              contacts[index].avatar.length > 0)
+                          ? CircleAvatar(
+                              backgroundImage:
+                                  MemoryImage(contacts[index].avatar))
+                          : CircleAvatar(
+                              child: Text(
+                                contacts[index].initials(),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                )
+                              ),
+                              backgroundColor: Colors.purple,
+                            ),
+                      label: Text(contacts[index].displayName,
+                          style: TextStyle(color: Colors.black)),
+                    ),
+                  ),
+                ),
+                ButtonBar(
+                  children: <Widget>[
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.pop(context); 
+                      },
+                      child: Text(
+                        'Go Back'
+                      ),
+                    ),
+                    RaisedButton(
+                      onPressed: () {
+                        if(signedIn) {
+                          addTrip();
+                          addContact();
+                          if(_pc.isAttached) {
+                            if(_pc.isPanelOpen) {
+                              _pc.close();
+                            }
+                          }
+                          Navigator.pop(context);
+                          openMap(searchAddr);
+                          searchAddr = null;
+                        } else {
+                          showAlertDialog(context);
+                        }
+                      },
+                      child: Text(
+                        'Start Trip'
+                      ),
+                      color: Colors.amber
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  showAlertDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: Text('Warning'),
+      content: Text('Your Trips Will Not Be Saved Unless You Are Signed In. \n\nPlease Check Settings.'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Open GoogleMaps'),
+          onPressed: () {
+            if(_pc.isAttached) {
+              if(_pc.isPanelOpen) {
+                _pc.close();
+              }
+            }
+            Navigator.pop(context);
+            openMap(searchAddr);
+            searchAddr = null;
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      }
+    );
   }
 
   //when Confirm Passengers button gets pressed
   confirmPassengerButtonPress() {
     if (contacts.length > 0 && _milesGot && _locationSearched) {
-      Navigator.push(
-          context,
-          new MaterialPageRoute(
-              builder: (context) => new TripSummaryPage(
-                  selected: contacts,
-                  location: searchAddr,
-                  miles: miles,
-                  lat: latitude,
-                  long: longitude,
-                  costPerPassenger: (cost/passengers),
-                  totalCost: cost)));
+      _showConfirmDialog();
     } else {
       if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
         Fluttertoast.showToast(
@@ -547,17 +770,111 @@ class _NavigationPageState extends State<NavigationPage> {
     }
   }
 
-  setGas() {
+  setGas() async {
     // TODO: change collection to 'costPerState' when updated in Firebase
-    var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: state).getDocuments();
-    query.then((value) =>
-      gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
+    var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: 'California').getDocuments();
+    query.then((value) => gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
   }
 
   setCost() {
-    int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
-    double tempCost= ((miles * gas) / fuelEfficiency);
-    cost = double.parse(tempCost.toStringAsFixed(2));
-    print('Cost: $cost');
+    setState(() {
+      int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
+      print('Gas: $gas Miles: $miles');
+      double tempCost= ((miles * gas) / fuelEfficiency);
+      cost = double.parse(tempCost.toStringAsFixed(2));
+      print('Cost: $cost');
+      calculationMade = true;
+    });
+  }
+
+  setCostPP() {
+    String temp = (cost / passengers).toStringAsFixed(2);
+    setState(() {
+      costPerPassenger = double.parse(temp);
+    });
+  }
+
+  static Future<void> openMap(String location) async {
+    String googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$location';
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
+
+  void addTrip() async { // this is different from addPassengers() bc this one stores all passengers in one
+    var userReference = databaseReference.collection('userData').document(firebaseUser.email);
+    print('addTrip: selected.length = ${contacts.length}');
+    var passengers = [];
+    for(int i = 0; i < contacts.length; i++) {
+      passengers.add(contacts[i].displayName);
+    }
+    print('addTrip: Sending $passengers to Firebase');
+    await userReference.collection("trips")
+      .add({
+        'passengers' : passengers,
+        'miles' : miles,
+        'location' : searchAddr,
+        'date' : DateTime.now(),
+        'price' : cost,
+        'route' : GeoPoint(latitude, longitude)
+      });
+  }
+
+  void addContact() async { // we add per individual
+    var userReference = databaseReference.collection('userData').document(firebaseUser.email);
+    var test = await userReference.collection('userData').document(firebaseUser.email).collection('contacts').getDocuments();
+    if(test.documents.length == 0) { // no collection created.
+      userReference.collection('contacts').document('init').setData({
+        'displayName' : 'init',
+        'emailAddress' : 'int',
+        'phoneNumber' : 'int',
+        'avatar' : 'init',
+        'bill' : 0.0,
+      });
+    }
+    for(int i = 0; i < contacts.length; i++) {
+      var query = 
+        await userReference.collection('contacts').where('displayName', isEqualTo: contacts[i].displayName).getDocuments();
+      if(query.documents.length == 0) {
+        String emails, phoneNumbers = '';
+        if(contacts[i].emails.isNotEmpty) {
+          emails = contacts[i].emails.first.value.toString();
+        } else {
+          emails = noEmailError;
+        }
+        if(contacts[i].phones.isNotEmpty) {
+          phoneNumbers = contacts[i].phones.first.value.toString();
+        } else {
+          phoneNumbers = noPhoneError;
+        }
+        
+        var avatar;
+        if(contacts[i].avatar != null && contacts[i].avatar.length > 0) {
+          avatar = String.fromCharCodes(contacts[i].avatar);
+        } else {
+          avatar = 'none';
+        }
+
+        print('addContacts: Sending ${contacts[i].displayName} - $emails - $phoneNumbers');
+        await userReference.collection("contacts")
+          .add({
+            'displayName' : contacts[i].displayName,
+            'emailAddress' : emails,
+            'phoneNumber' : phoneNumbers,
+            'avatar' : avatar,
+            'bill' : costPerPassenger
+        });
+      } else if(query.documents.length == 1) { // contact exists within Firebase
+        var docId = query.documents[0].documentID;
+        var updatedBill = query.documents[0]['bill'] + costPerPassenger;
+        await userReference.collection('contacts').document(docId).updateData({
+          'bill' : updatedBill
+        });
+      }
+    }
+    userReference.collection('contacts').document('init').delete();
   }
 }

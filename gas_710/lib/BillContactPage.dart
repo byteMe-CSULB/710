@@ -9,12 +9,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:gas_710/PdfViewPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 
-class BillContactPage extends StatelessWidget {
+class BillContactPage extends StatefulWidget {
   final name, money, avatar; // required keys from BillingPage.dart
-  BillContactPage({Key key, @required this.name, @required this.money, @required this.avatar})
+  const BillContactPage({Key key, @required this.name, @required this.money, @required this.avatar})
       : super(key: key); // eventually we should add more keys
 
+   @override
+  _BillContactPageState createState() => _BillContactPageState();
+}
+
+class _BillContactPageState extends State<BillContactPage> {
   final databaseReference = Firestore.instance.collection('userData').document(firebaseUser.email);
   bool sortDesc = true;
 
@@ -23,11 +29,11 @@ class BillContactPage extends StatelessWidget {
     return new Scaffold(
       drawer: new DrawerCodeOnly(), // provides nav drawer
       appBar: new AppBar(
-        title: new Text(name),
+        title: new Text(widget.name),
         backgroundColor: Colors.purple,
         actions: <Widget>[
           StreamBuilder(
-            stream: databaseReference.collection('trips').where('passengers', arrayContains: name).snapshots(),
+            stream: databaseReference.collection('trips').where('passengers', arrayContains: widget.name).snapshots(),
             builder: (context, snapshot) {
               if(!snapshot.hasData) {
                 return IconButton(
@@ -35,7 +41,7 @@ class BillContactPage extends StatelessWidget {
                   onPressed: () {
                     print('Cannot make PDF');
                   },
-                  tooltip: 'Save all of $name\'s trips as a PDF',
+                  tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
                 ); 
               }
               return IconButton(
@@ -47,7 +53,7 @@ class BillContactPage extends StatelessWidget {
                     _generatePdf(context, snapshot);
                   }
                 },
-                tooltip: 'Save all of $name\'s trips as a PDF',
+                tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
               );
             }
           )
@@ -60,16 +66,16 @@ class BillContactPage extends StatelessWidget {
               children: <Widget>[
                 Center(
                   child: 
-                    (avatar.toString() != 'none' && (avatar != null && avatar.length > 0))
+                    (widget.avatar.toString() != 'none' && (widget.avatar != null && widget.avatar.length > 0))
                       ? 
                     CircleAvatar(
-                      backgroundImage: MemoryImage(avatar),
+                      backgroundImage: MemoryImage(widget.avatar),
                       radius: 48.0,
                     )
                       : 
                     CircleAvatar(
                       child: Text(
-                        name[0],
+                        widget.name[0],
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 48.0
@@ -87,7 +93,7 @@ class BillContactPage extends StatelessWidget {
                   children: <Widget>[
                   Center(
                     child: Text(
-                      name,
+                      widget.name,
                       style: TextStyle(
                         fontSize: 32,
                       ),
@@ -95,7 +101,7 @@ class BillContactPage extends StatelessWidget {
                   ),
                   Center(
                     child: Text(
-                      '\$' + money.toString(),
+                      '\$' + widget.money.toString(),
                       style: TextStyle(
                         fontSize: 32,
                         color: Colors.green
@@ -121,9 +127,9 @@ class BillContactPage extends StatelessWidget {
                 ),
               ),
               StreamBuilder(
-                stream: databaseReference.collection('contacts').where('displayName', isEqualTo: name).snapshots(),
+                stream: databaseReference.collection('contacts').where('displayName', isEqualTo: widget.name).snapshots(),
                 builder: (context, snapshot) {
-                  if(!snapshot.hasData) return CircularProgressIndicator();
+                  if(!snapshot.hasData) return CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
                   return Container(
                     height: 150,
                     child: Column(
@@ -156,19 +162,24 @@ class BillContactPage extends StatelessWidget {
                     ),
                   ),
                   Spacer(),
-                  IconButton( // it's a useless button for now
+                  IconButton(
                     icon: Icon(Icons.filter_list),
                     color: Colors.grey,
                     onPressed: () {
-                      sortDesc = !sortDesc;
+                      setState((){
+                          sortDesc = !sortDesc;
+                      });
                     },
+                    tooltip: 'Sort by date',
                   ),
                 ]
               ),
               StreamBuilder(
-                stream: databaseReference.collection('trips').where('passengers', arrayContains: name).orderBy('date').snapshots(),
+                stream: sortDesc ? 
+                 databaseReference.collection('trips').where('passengers', arrayContains: widget.name).orderBy('date', descending: true).snapshots():
+                 databaseReference.collection('trips').where('passengers', arrayContains: widget.name).orderBy('date').snapshots(),
                 builder: (context, snapshot) {
-                  if(!snapshot.hasData) return CircularProgressIndicator();
+                  if(!snapshot.hasData) return CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
                   return Expanded(child: _cardListView(context, snapshot));
                 }
               ),
@@ -192,22 +203,124 @@ class BillContactPage extends StatelessWidget {
     return ListView.builder(
         itemCount: trips.length,
         itemBuilder: (context, index) {
-          return Card(
-            elevation: 2,
-            child: ListTile(
-              leading: Text(
-                (index + 1).toString(), // for quick ordering, essentially should be in chronological order
-              ),
-              title: Text(
-                trips[index],
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Text(
-                dates[index]
+          return ExpansionTileCard(
+            leading: Text(
+              (index + 1).toString(), // for quick ordering, essentially should be in chronological order
+            ),
+            title: Text(
+              trips[index],
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
             ),
+            subtitle: Text(
+              dates[index]
+            ),
+            children: <Widget>[
+              Divider(
+                thickness: 1.0,
+                height: 1.0,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Text(
+                    'Passengers on This Trip (${snapshot.data.documents[index]['price']})',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                )
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 2.0,
+                  ),
+                  child: Text(
+                    snapshot.data.documents[index]['passengers'].toString().replaceAll('[', '').replaceAll(']', ''),
+                    style: TextStyle(
+                      fontSize: 16.0,
+                    )
+                  )
+                ),
+              ),
+              ButtonBar(
+                alignment: MainAxisAlignment.spaceAround,
+                buttonHeight: 52.0,
+                buttonMinWidth: 90.0,
+                children: <Widget>[
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0)),
+                    onPressed: () {}, // this should keep the bill in firebase
+                                      // but just say it's paid and still show it to users
+                                      // might need to add another field to trip collection
+                                      // for firebase
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.check),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical:2.0)
+                        ),
+                        Text('Paid')
+                      ],
+                    )
+                  ),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0)),
+                    onPressed: () {}, // this should edit the individual trip i.e change location, miles, passengers, etc.
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.create),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical:2.0)
+                        ),
+                        Text('Edit')
+                      ],
+                    )
+                  ),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0)),
+                    onPressed: () {}, // this should share this individual trip with the contact
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.share),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical:2.0)
+                        ),
+                        Text('Share')
+                      ],
+                    )
+                  ),
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4.0)),
+                    onPressed: () {}, // this should delete any record of this trip for everyone involved
+                                      // maybe do like a alert dialog that lets them know that it deletes it
+                                      // for EVERYONE
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.delete),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical:2.0)
+                        ),
+                        Text('Delete')
+                      ],
+                    )
+                  )
+                ],
+              ),
+            ],
           );
         }
     );
@@ -236,7 +349,7 @@ class BillContactPage extends StatelessWidget {
     pdf.addPage(
       pdfLib.MultiPage(
         build: (context) => [
-          pdfLib.Text('Contact Name - $name'),
+          pdfLib.Text('Contact Name - ${widget.name}'),
           pdfLib.Table.fromTextArray(context: context, data: data)
         ]
       )
