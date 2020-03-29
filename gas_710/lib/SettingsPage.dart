@@ -67,8 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: Colors.purple,
       ),
       resizeToAvoidBottomPadding: false,
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
+      body: ListView(
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -152,7 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Sign in Here!',
+                'Sign in',
                 style: TextStyle(
                   fontSize: 24
                 )
@@ -163,14 +162,14 @@ class _SettingsPageState extends State<SettingsPage> {
             width: double.infinity,
             height: 10.0,
           ),
-          _signInButton(), // log in with Google Button
+          Center(child: _signInButton()), // log in with Google Button
           SizedBox(
             width: double.infinity,
             height: 10.0,
           ),
           Divider(),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
             child: Row(
               children: <Widget>[ 
                 Align(
@@ -183,7 +182,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: Icon(
+                    Icons.edit
+                  ),
+                  color: Colors.grey,
                   onPressed: () {
                     _showEditDialog();
                   },
@@ -192,40 +194,32 @@ class _SettingsPageState extends State<SettingsPage> {
               ]
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Name - $_name',
-                    style: TextStyle(
-                      fontSize: 18.0
-                    )
+          SizedBox(
+            width: double.infinity,
+            height: 190.0,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text('Name'),
+                    trailing: Text(_name),
                   ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Email - $_email',
-                    style: TextStyle(
-                      fontSize: 18.0
-                    )
+                  ListTile(
+                    leading: Icon(Icons.email),
+                    title: Text('Email'),
+                    trailing: Text(_email),
                   ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Name - $_number',
-                    style: TextStyle(
-                      fontSize: 18.0
-                    )  
+                  ListTile(
+                    leading: Icon(Icons.phone),
+                    title: Text('Phone'),
+                    trailing: Text(_number),
                   ),
-                )
-              ],
-            )
+                ],
+              )
+            ),
           )
         ],
       ),
