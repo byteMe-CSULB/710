@@ -16,17 +16,20 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {  
   String _name, _email, _number;
+  double _mpg;
 
-  Future editProfile(String editName, editEmail, editNumber) async {
+  Future editProfile(String editName, String editEmail, String editNumber, double editMPG) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('profileName', editName);
     prefs.setString('profileEmail', editEmail);
     prefs.setString('profileNumber', editNumber);
+    prefs.setDouble('profileMPG', editMPG);
 
     setState(() {
       _name = prefs.getString('profileName');
       _email = prefs.getString('profileEmail');
       _number = prefs.getString('profileNumber');
+      _mpg = prefs.getDouble('profileMPG');
     });
   }
 
@@ -36,6 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _name = (prefs.getString('profileName') ?? "No Name Set");
       _email = (prefs.getString('profileEmail') ?? "No Email Set");
       _number = (prefs.getString('profileNumber') ?? "No Number Set");
+      _mpg = (prefs.getInt('profileMPG') ?? 0.0);
     });
   }
 
@@ -48,6 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final textControllerName = TextEditingController();
   final textControllerEmail = TextEditingController();
   final textControllerNumber = TextEditingController();
+  final textControllerMPG = TextEditingController();
 
 
   @override
@@ -55,6 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
     textControllerName.dispose();
     textControllerEmail.dispose();
     textControllerNumber.dispose();
+    textControllerMPG.dispose();
     super.dispose();
   }
 
@@ -196,7 +202,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           SizedBox(
             width: double.infinity,
-            height: 190.0,
+            height: 240.0,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -216,6 +222,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: Icon(Icons.phone),
                     title: Text('Phone'),
                     trailing: Text(_number),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.directions_car),
+                    title: Text('Miles per Gallon'),
+                    trailing: Text('$_mpg'),
                   ),
                 ],
               )
@@ -268,77 +279,105 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _showEditDialog() {
     String editName, editEmail, editNumber;
+    double editMPG;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Edit Profile",
-                    style: TextStyle(
-                      fontSize: 24.0,
-                    ))
-                ),
-                TextFormField(
-                  controller: textControllerName,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.person),
-                    border: InputBorder.none,
-                    hintText: 'Enter full name'
+            child: SizedBox(
+              width: double.infinity,
+              height: 327.0,
+              child: ListView(
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Edit Profile",
+                      style: TextStyle(
+                        fontSize: 24.0,
+                      ))
                   ),
-                ),
-                TextFormField(
-                  controller: textControllerEmail,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.email),
-                    border: InputBorder.none,
-                    hintText: 'Enter email'
-                  ),
-                ),
-                TextFormField(
-                  controller: textControllerNumber,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.phone),
-                    border: InputBorder.none,
-                    hintText: 'Enter number'
-                  ),
-                  keyboardType: TextInputType.numberWithOptions(),
-                ),
-                ButtonBar(
-                  children: <Widget>[
-                    FlatButton(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        textControllerName.clear();
-                        textControllerEmail.clear();
-                        textControllerNumber.clear();
-                        Navigator.pop(context);
-                      },
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: textControllerName,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.person),
+                        border: InputBorder.none,
+                        hintText: 'Enter full name'
+                      ),
                     ),
-                    RaisedButton(
-                      child: Text('Confirm'),
-                      color: Colors.amber,
-                      onPressed: () {
-                        editName = textControllerName.text;
-                        editEmail = textControllerEmail.text;
-                        editNumber = textControllerNumber.text;
-                        print('Saving Profile - $editName $editEmail $editNumber');
-                        editProfile(editName, editEmail, editNumber);
-                        textControllerName.clear();
-                        textControllerEmail.clear();
-                        textControllerNumber.clear();
-                        Navigator.pop(context);
-                      },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: textControllerEmail,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.email),
+                        border: InputBorder.none,
+                        hintText: 'Enter email'
+                      ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: textControllerNumber,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.phone),
+                        border: InputBorder.none,
+                        hintText: 'Enter phone number'
+                      ),
+                      keyboardType: TextInputType.numberWithOptions(),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+                    child: TextFormField(
+                      controller: textControllerMPG,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.directions_car),
+                        border: InputBorder.none,
+                        hintText: 'Enter MPG'
+                      ),
+                      keyboardType: TextInputType.numberWithOptions(),
+                    ),
+                  ),
+                  ButtonBar(
+                    children: <Widget>[
+                      FlatButton(
+                        child: Text('Cancel'),
+                        onPressed: () {
+                          textControllerName.clear();
+                          textControllerEmail.clear();
+                          textControllerNumber.clear();
+                          textControllerMPG.clear();
+                          Navigator.pop(context);
+                        },
+                      ),
+                      RaisedButton(
+                        child: Text('Confirm'),
+                        color: Colors.amber,
+                        onPressed: () {
+                          editName = textControllerName.text;
+                          editEmail = textControllerEmail.text;
+                          editNumber = textControllerNumber.text;
+                          editMPG = double.parse(textControllerMPG.text);
+                          print('Saving Profile - $editName $editEmail $editNumber $editMPG');
+                          editProfile(editName, editEmail, editNumber, editMPG);
+                          textControllerName.clear();
+                          textControllerEmail.clear();
+                          textControllerNumber.clear();
+                          textControllerMPG.clear();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             )
           )
         );
