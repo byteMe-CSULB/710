@@ -76,11 +76,7 @@ class BillingPage extends StatelessWidget {
             onTap: () {
               String contactName = snapshot.data.documents[index]['displayName'];
               String dollars;
-              if (snapshot.data.documents[index]['bill'] > 0) {
-                dollars = snapshot.data.documents[index]['bill'].toStringAsFixed(2);
-              } else {
-                dollars = (-1 * snapshot.data.documents[index]['bill']).toStringAsFixed(2);
-              }
+              dollars = snapshot.data.documents[index]['bill'].toStringAsFixed(2);
               var avatar;
               if(snapshot.data.documents[index]['avatar'] != 'none') {
                 avatar = Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits);
@@ -90,7 +86,7 @@ class BillingPage extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) => BillContactPage(
                   name: contactName,
-                  money: dollars,
+                  money: double.parse(dollars),
                   avatar: avatar)));
             },
             onLongPress: () {
