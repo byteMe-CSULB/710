@@ -95,6 +95,15 @@ class _NavigationPageState extends State<NavigationPage> {
 
   void getUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.getString('profileName') == "No Name Set") {
+      Fluttertoast.showToast(
+        msg: 'Update Contact Profile in Settings!',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIos: 1,
+        fontSize: 16.0,
+      );    
+    }
     setState(() {
       _driver.displayName = (prefs.getString('profileName') ?? "No Name Set");
       _driver.emails = [Item(label: 'work', value: (prefs.getString('profileEmail') ?? "No Email Set"))];
