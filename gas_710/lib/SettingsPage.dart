@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _name = (prefs.getString('profileName') ?? "No Name Set");
       _email = (prefs.getString('profileEmail') ?? "No Email Set");
       _number = (prefs.getString('profileNumber') ?? "No Number Set");
-      _mpg = (prefs.getInt('profileMPG') ?? 0.0);
+      _mpg = (prefs.getDouble('profileMPG') ?? 0.0);
     });
   }
 
@@ -211,22 +211,22 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.person),
                     title: Text('Name'),
-                    trailing: Text(_name),
+                    trailing: Text(_name ?? "No Name Set"),
                   ),
                   ListTile(
                     leading: Icon(Icons.email),
-                    title: Text('Email'),
+                    title: Text('Email' ?? "No Email Set"),
                     trailing: Text(_email),
                   ),
                   ListTile(
                     leading: Icon(Icons.phone),
-                    title: Text('Phone'),
+                    title: Text('Phone' ?? "No Number Set"),
                     trailing: Text(_number),
                   ),
                   ListTile(
                     leading: Icon(Icons.directions_car),
                     title: Text('Miles per Gallon'),
-                    trailing: Text('$_mpg'),
+                    trailing: Text('$_mpg' ?? "No MPG Set"),
                   ),
                 ],
               )
