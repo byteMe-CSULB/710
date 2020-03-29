@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 import 'package:gas_710/auth.dart';
 import 'package:gas_710/AccountPage.dart';
 
@@ -17,7 +17,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return new Scaffold
     (
-      drawer: new DrawerCodeOnly(), // provides nav drawer
+      drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Settings Page"),
         backgroundColor: Colors.purple,

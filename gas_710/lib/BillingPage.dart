@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
 import 'package:gas_710/WebViewPage.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/SettingsPage.dart';
@@ -15,7 +15,7 @@ class BillingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: new DrawerCodeOnly(), // provides nav drawer
+      drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Billing Page"),
         backgroundColor: Colors.purple,

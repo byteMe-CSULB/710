@@ -1,4 +1,4 @@
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/auth.dart';
@@ -27,7 +27,7 @@ class _BillContactPageState extends State<BillContactPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: new DrawerCodeOnly(), // provides nav drawer
+      drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text(widget.name),
         backgroundColor: Colors.purple,
