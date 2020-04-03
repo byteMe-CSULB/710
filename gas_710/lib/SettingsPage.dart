@@ -252,7 +252,8 @@ class _SettingsPageState extends State<SettingsPage> {
         });
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-      highlightElevation: 0,
+      highlightElevation: 4,
+      highlightedBorderColor: Colors.purple[400],
       borderSide: BorderSide(color: Colors.grey),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -267,7 +268,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 'Sign in with Google',
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.grey,
+                  color: Colors.black,
                 ),
               ),
             )
