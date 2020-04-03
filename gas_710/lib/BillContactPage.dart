@@ -104,7 +104,7 @@ class _BillContactPageState extends State<BillContactPage> {
                       '\$' + widget.money.toString(),
                       style: TextStyle(
                         fontSize: 32,
-                        color: Colors.green
+                        color: (widget.money > 0) ? Colors.green : Colors.red
                       ),
                     ),
                   ),
@@ -229,7 +229,23 @@ class _BillContactPageState extends State<BillContactPage> {
                     vertical: 8.0,
                   ),
                   child: Text(
-                    'Passengers on This Trip (${snapshot.data.documents[index]['price']})',
+                    'Miles - ${snapshot.data.documents[index]['miles']}',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                )
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Text(
+                    'Passengers on This Trip (\$${snapshot.data.documents[index]['price']})',
                     style: TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold
@@ -252,10 +268,30 @@ class _BillContactPageState extends State<BillContactPage> {
                   )
                 ),
               ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Text(
+                    snapshot.data.documents[index]['driverPhone'] == "NO PHONE NUMBER PROVIDED" 
+                      ? 
+                    'Driver - ${snapshot.data.documents[index]['driverName']} (${snapshot.data.documents[index]['driverEmail']})'
+                      :
+                    'Driver - ${snapshot.data.documents[index]['driverName']} [${snapshot.data.documents[index]['driverPhone']}]',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                )
+              ),
               ButtonBar(
                 alignment: MainAxisAlignment.spaceAround,
                 buttonHeight: 52.0,
-                buttonMinWidth: 90.0,
+                buttonMinWidth: 70.0,
                 children: <Widget>[
                   FlatButton(
                     shape: RoundedRectangleBorder(

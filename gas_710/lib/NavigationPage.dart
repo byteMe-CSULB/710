@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:gas_710/auth.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 double CAMERA_ZOOM = 13;
 double CAMERA_TILT = 0;
@@ -79,6 +80,9 @@ class _NavigationPageState extends State<NavigationPage> {
   final noPhoneError = "NO PHONE NUMBER PROVIDED";
   final noEmailError = "NO EMAIL PROVIDED";
 
+  bool userDriving = true;
+  Contact _driver = Contact();
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +90,25 @@ class _NavigationPageState extends State<NavigationPage> {
     getStateLocation();
     _getInitLocation();
     setGas();
+    getUserProfile();
+  }
+
+  void getUserProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(prefs.getString('profileName') == "No Name Set") {
+      Fluttertoast.showToast(
+        msg: 'Update Contact Profile in Settings!',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIos: 1,
+        fontSize: 16.0,
+      );    
+    }
+    setState(() {
+      _driver.displayName = (prefs.getString('profileName') ?? "No Name Set");
+      _driver.emails = [Item(label: 'work', value: (prefs.getString('profileEmail') ?? "No Email Set"))];
+      _driver.phones = [Item(label: 'mobile', value: (prefs.getString('profileNunber') ?? "No Number Set"))];
+    });
   }
 
   void setSourceAndDestinationIcons() async {
@@ -278,10 +301,26 @@ class _NavigationPageState extends State<NavigationPage> {
                                           contacts[index].phones.first.value.toString()
                                         ),
                                         trailing: Text((index + 1).toString()),
+                                        onLongPress: () {
+                                          setState(() {
+                                            _driver.displayName = contacts[index].displayName;
+                                            _driver.emails = contacts[index].emails;
+                                            _driver.phones = contacts[index].phones;
+                                            userDriving = false;
+                                          });
+                                          Scaffold.of(context).showSnackBar(SnackBar(content: Text('$item has been assigned as driver')));
+                                        },
                                     ),
                                   ),
                                   onDismissed: (direction) {
                                     setState(() {
+                                      if(_driver.displayName == contacts[index].displayName
+                                      && 
+                                      _driver.phones.first.value.toString() == contacts[index].phones.first.value.toString()) {
+                                        userDriving = true;
+                                        getUserProfile();
+                                        Scaffold.of(context).showSnackBar(SnackBar(content: Text("You are the driver")));
+                                      }
                                       contacts.removeAt(index);
                                       passengers --;
                                       setCostPP();
@@ -360,19 +399,40 @@ class _NavigationPageState extends State<NavigationPage> {
                   ),
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: RaisedButton(
-                    color: passengers > 0 ? Colors.amber : Colors.grey[400],
-                    child: Text(
-                      "Confirm Passengers",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    onPressed: confirmPassengerButtonPress,
+              Row(
+                children:<Widget>[
+                  Checkbox(
+                    value: userDriving,
+                    activeColor: Colors.amber,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        userDriving = newValue;
+                        if(newValue) {
+                          getUserProfile();
+                        }
+                      });
+                    },
                   ),
-                ),
+                  Text('I am the driver!'),
+                  Spacer(),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: RaisedButton(
+                        color: passengers > 0 ? Colors.amber : Colors.grey[400],
+                        child: Text(
+                          "Confirm Passengers",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onPressed: confirmPassengerButtonPress,
+                        onLongPress: () {
+                          print(_driver.displayName);
+                        },
+                      ),
+                    ),
+                  ),
+                ]
               )
             ],
           ),
@@ -663,6 +723,8 @@ class _NavigationPageState extends State<NavigationPage> {
                             ),
                       label: Text(contacts[index].displayName,
                           style: TextStyle(color: Colors.black)),
+                      backgroundColor: (_driver.phones.first.value.toString() == contacts[index].phones.first.value.toString())
+                        ? Colors.amber : Colors.grey[300],
                     ),
                   ),
                 ),
@@ -811,6 +873,18 @@ class _NavigationPageState extends State<NavigationPage> {
     for(int i = 0; i < contacts.length; i++) {
       passengers.add(contacts[i].displayName);
     }
+    String driverName, driverEmail, driverPhone;
+    driverName = _driver.displayName;
+    if(_driver.emails.isEmpty) {
+      driverEmail = noEmailError;
+    } else {
+      driverEmail = _driver.emails.first.value.toString();
+    }
+    if(_driver.phones.isEmpty) {
+      driverPhone = noPhoneError;
+    } else {
+      driverPhone = _driver.phones.first.value.toString();
+    }
     print('addTrip: Sending $passengers to Firebase');
     await userReference.collection("trips")
       .add({
@@ -819,14 +893,18 @@ class _NavigationPageState extends State<NavigationPage> {
         'location' : searchAddr,
         'date' : DateTime.now(),
         'price' : cost,
-        'route' : GeoPoint(latitude, longitude)
+        'pricePerPassenger' : costPerPassenger,
+        'route' : GeoPoint(latitude, longitude),
+        'driverName' : driverName,
+        'driverEmail' : driverEmail,
+        'driverPhone' : driverPhone,
       });
   }
 
   void addContact() async { // we add per individual
     var userReference = databaseReference.collection('userData').document(firebaseUser.email);
     var test = await userReference.collection('userData').document(firebaseUser.email).collection('contacts').getDocuments();
-    if(test.documents.length == 0) { // no collection created.
+    if(test.documents.length == 0) { // no record of collection
       userReference.collection('contacts').document('init').setData({
         'displayName' : 'init',
         'emailAddress' : 'int',
@@ -857,19 +935,35 @@ class _NavigationPageState extends State<NavigationPage> {
         } else {
           avatar = 'none';
         }
-
-        print('addContacts: Sending ${contacts[i].displayName} - $emails - $phoneNumbers');
-        await userReference.collection("contacts")
-          .add({
-            'displayName' : contacts[i].displayName,
-            'emailAddress' : emails,
-            'phoneNumber' : phoneNumbers,
-            'avatar' : avatar,
-            'bill' : costPerPassenger
-        });
+        if(_driver.phones.first.value.toString() == contacts[i].phones.first.value.toString()) {
+          print('addContacts: Sending DRIVER ${contacts[i].displayName} - $emails - $phoneNumbers');
+          await userReference.collection("contacts")
+            .add({
+              'displayName' : contacts[i].displayName,
+              'emailAddress' : emails,
+              'phoneNumber' : phoneNumbers,
+              'avatar' : avatar,
+              'bill' : (costPerPassenger * -1)
+          });
+        } else {
+          print('addContacts: Sending passenger ${contacts[i].displayName} - $emails - $phoneNumbers');
+          await userReference.collection("contacts")
+            .add({
+              'displayName' : contacts[i].displayName,
+              'emailAddress' : emails,
+              'phoneNumber' : phoneNumbers,
+              'avatar' : avatar,
+              'bill' : costPerPassenger
+          });
+        }
       } else if(query.documents.length == 1) { // contact exists within Firebase
         var docId = query.documents[0].documentID;
-        var updatedBill = query.documents[0]['bill'] + costPerPassenger;
+        var updatedBill;
+        if(userDriving) {
+          updatedBill = query.documents[0]['bill'] + costPerPassenger;
+        } else if(_driver.phones.first.value.toString() == query.documents[0]['phoneNumber']) {
+          updatedBill = query.documents[0]['bill'] - cost;
+        }
         await userReference.collection('contacts').document(docId).updateData({
           'bill' : updatedBill
         });
