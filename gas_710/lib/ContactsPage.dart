@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -100,7 +100,7 @@ class _ContactListPageState extends State<ContactListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: new DrawerCodeOnly(), // provides the nav drawer
+      drawer: NavigationDrawer(), // provides the nav drawer
       appBar: new AppBar(
         title: new Text("Contacts Page"),
         backgroundColor: Colors.purple,

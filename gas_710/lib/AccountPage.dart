@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/SettingsPage.dart';
 import 'package:gas_710/auth.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 
 class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       drawer: new DrawerCodeOnly(), // provides nav drawer
+       drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Account Page"),
         backgroundColor: Colors.purple,

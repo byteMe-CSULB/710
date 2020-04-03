@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:gas_710/AddPassengersPage.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -170,7 +170,7 @@ class _NavigationPageState extends State<NavigationPage> {
     );
 
     return new Scaffold(
-      drawer: new DrawerCodeOnly(), // provides nav drawer
+      drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Navigation Page"),
         backgroundColor: Colors.purple,

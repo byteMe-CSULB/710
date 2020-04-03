@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 
 class InfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        drawer: new DrawerCodeOnly(), // provides nav drawer
+        drawer: NavigationDrawer(), // provides nav drawer
         appBar: new AppBar(
           title: new Text("Info Page"),
           backgroundColor: Colors.purple,

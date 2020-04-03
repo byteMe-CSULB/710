@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 import 'package:device_apps/device_apps.dart';
 import 'dart:async';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -21,7 +20,7 @@ class WebViewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: new DrawerCodeOnly(), // provides nav drawer
+      drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text(title),
         backgroundColor: Colors.purple,
