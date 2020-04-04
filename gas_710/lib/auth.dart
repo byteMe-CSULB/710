@@ -54,6 +54,13 @@ Future<String> signInWithGoogle() async {
 Future sharedLoginStatus(bool value) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setBool('signedIn', value);
+  if(value) {
+    await prefs.setString('gName', name);
+    await prefs.setString('gEmail', email);
+    await prefs.setString('gImage', imageUrl);
+  } else {
+    prefs?.clear();
+  }
 }
 
 void addToDatabase(FirebaseUser currentUser) async {
