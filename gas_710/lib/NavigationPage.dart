@@ -58,11 +58,11 @@ class _NavigationPageState extends State<NavigationPage> {
   // number of passengers
   int passengers = 0;
 
-  // mock contact list
   List<Contact> contacts = new List<Contact>();
   bool _locationSearched = false;
   bool _milesGot = false;
   bool calculationMade = false;
+  bool _userProfileSet = false;
 
   // distance
   double miles = 0.0;
@@ -95,6 +95,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   void getUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    print(prefs.getString('profileName'));
     if(prefs.getString('profileName') == "No Name Set") {
       Fluttertoast.showToast(
         msg: 'Update Contact Profile in Settings!',
@@ -103,6 +104,8 @@ class _NavigationPageState extends State<NavigationPage> {
         timeInSecForIos: 1,
         fontSize: 16.0,
       );    
+    } else {
+      _userProfileSet = true;
     }
     setState(() {
       _driver.displayName = (prefs.getString('profileName') ?? "No Name Set");
@@ -420,7 +423,7 @@ class _NavigationPageState extends State<NavigationPage> {
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
                       child: RaisedButton(
-                        color: passengers > 0 ? Colors.amber : Colors.grey[400],
+                        color: ((passengers > 0) && (_locationSearched) && (_userProfileSet)) ? Colors.amber : Colors.grey[400],
                         child: Text(
                           "Confirm Passengers",
                           style: TextStyle(color: Colors.black),
@@ -801,7 +804,8 @@ class _NavigationPageState extends State<NavigationPage> {
 
   //when Confirm Passengers button gets pressed
   confirmPassengerButtonPress() {
-    if (contacts.length > 0 && _milesGot && _locationSearched) {
+    print(_userProfileSet);
+    if (contacts.length > 0 && _milesGot && _locationSearched && _userProfileSet) {
       _showConfirmDialog();
     } else {
       if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
@@ -823,6 +827,14 @@ class _NavigationPageState extends State<NavigationPage> {
       } else if (!_milesGot || !_locationSearched) {
         Fluttertoast.showToast(
           msg: 'Destination not set',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIos: 1,
+          fontSize: 16.0,
+        );
+      } else if (!_userProfileSet) {
+        Fluttertoast.showToast(
+          msg: 'Update Contact Profile in Settings',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIos: 1,
