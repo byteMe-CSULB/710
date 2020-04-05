@@ -149,7 +149,8 @@ class InfoPage extends StatelessWidget {
                       ],
                     ),
                   );
-                })
+                }),
+                //TODO: Create Rankings (see UserGuide for mockup)
           ],
         ));
   }
