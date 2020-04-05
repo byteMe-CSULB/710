@@ -216,12 +216,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: Icon(Icons.email),
                     title: Text('Email' ?? "No Email Set"),
-                    trailing: Text(_email),
+                    trailing: Text(_email ?? "No Email Set"),
                   ),
                   ListTile(
                     leading: Icon(Icons.phone),
                     title: Text('Phone' ?? "No Number Set"),
-                    trailing: Text(_number),
+                    trailing: Text(_number ?? "No Number Set"),
                   ),
                   ListTile(
                     leading: Icon(Icons.directions_car),
