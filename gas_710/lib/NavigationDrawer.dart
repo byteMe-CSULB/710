@@ -8,6 +8,7 @@ import 'package:gas_710/ContactsPage.dart';
 import 'package:gas_710/WebViewPage.dart';
 import 'package:gas_710/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gas_710/OnBoardingPage.dart';
 
 class NavigationDrawer extends StatefulWidget {
   @override
@@ -179,6 +180,7 @@ class NavigationDrawerState extends State<NavigationDrawer> {
                     : Scaffold.of(context)
                         .showSnackBar(SnackBar(content: Text("Not signed in")));
                 signOutGoogle(); // call signout method from auth.dart
+                Navigator.push(context, MaterialPageRoute(builder: (context) => OnBoardingPage()));
               }),
         ],
       ),
