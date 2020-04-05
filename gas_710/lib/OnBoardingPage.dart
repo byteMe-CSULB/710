@@ -3,6 +3,7 @@ import 'package:introduction_screen/introduction_screen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnBoardingPage extends StatefulWidget {
   @override
@@ -10,6 +11,20 @@ class OnBoardingPage extends StatefulWidget {
 }
 
 class _OnBoardingPageState extends State<OnBoardingPage> {
+  @override
+  void initState() { 
+    super.initState();
+    _initSharedPrefs();
+  }
+
+  _initSharedPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('profileName', "No Name Set");
+    prefs.setString('profileEmail', "No Email Set");
+    prefs.setString('profileNumber', "No Number Set");
+    prefs.setDouble('profileMPG', 0.0);
+  }
+
   final introKey = GlobalKey<IntroductionScreenState>();
 
   void _onIntroEnd(context) {
