@@ -101,7 +101,10 @@ class _BillContactPageState extends State<BillContactPage> {
                   ),
                   Center(
                     child: Text(
-                      '\$' + widget.money.toString(),
+                      (widget.money.toString().contains('-'))
+                      ? '-\$${(widget.money * -1).toString()}'
+                      : '\$${widget.money.toString()}',
+                      // '\$' + widget.money.toString(),
                       style: TextStyle(
                         fontSize: 32,
                         color: (widget.money > 0) ? Colors.green : Colors.red
@@ -162,6 +165,17 @@ class _BillContactPageState extends State<BillContactPage> {
                     ),
                   ),
                   Spacer(),
+                  Text(
+                    'Sorting by: ',
+                    style: TextStyle(color: Colors.grey)
+                  ),
+                  Text(
+                    sortDesc ? 'Most Recent' : 'Least Recent',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600]
+                    )
+                  ),
                   IconButton(
                     icon: Icon(Icons.filter_list),
                     color: Colors.grey,

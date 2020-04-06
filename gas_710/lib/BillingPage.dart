@@ -50,27 +50,35 @@ class BillingPage extends StatelessWidget {
             leading: (snapshot.data.documents[index]['avatar'].toString() != 'none' 
             && (Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits) != null && 
             Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits).length > 0))
-                        ? CircleAvatar(backgroundImage: MemoryImage(Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits)))
-                        : CircleAvatar(child: 
-                        Text(
-                          snapshot.data.documents[index]['displayName'][0],
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24.0
+                        ? CircleAvatar(
+                          backgroundImage: MemoryImage(
+                            Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits
+                            )
                           ),
+                          maxRadius: 30,
+                        )
+                        : CircleAvatar(
+                          child: Text(
+                            snapshot.data.documents[index]['displayName'][0],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 36.0
+                            ),
+                          ),
+                          backgroundColor: Colors.purple,
+                          maxRadius: 30,
                         ),
-                        backgroundColor: Colors.purple),
             title: Text(
               snapshot.data.documents[index]['displayName'],
               style: TextStyle(
-                fontSize: 18.0
+                fontSize: 24.0
               ),
             ),
             subtitle: Text(
               snapshot.data.documents[index]['bill'].toStringAsFixed(2),
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 15.0
+                fontSize: 18.0
               ),
             ),
             trailing: (snapshot.data.documents[index]['bill'] > 0) ? _requestButton(context) :  _payButton(context),
