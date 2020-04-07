@@ -39,14 +39,44 @@ class NavigationDrawerState extends State<NavigationDrawer> {
     return new Drawer(
       child: new ListView(
         children: <Widget>[
-          UserAccountsDrawerHeader(
-            accountName: Text(_gName ?? 'No name provided check settings', style: TextStyle(color: Colors.black)),
-            accountEmail: Text(_gEmail ?? 'No email provided check settings', style: TextStyle(color: Colors.black)),
-            currentAccountPicture: (_gImage != 'no image') 
-            ? CircleAvatar(backgroundImage: NetworkImage(imageUrl),)
-            : CircleAvatar(child: Text(':(', style: TextStyle(fontSize: 24))),
-            decoration: BoxDecoration(color: Colors.amber),
-          ),
+          signedIn
+              ? new UserAccountsDrawerHeader(
+                  // IF signed in, nav header is filled with Login Details from auth.dart
+                  accountName: new Text(
+                    name,
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  accountEmail: new Text(
+                    email,
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundImage: NetworkImage(
+                      imageUrl,
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                      color: Colors
+                          .amber), // IF not signed in, message displayed to sign in through settings page
+                )
+              : new DrawerHeader(
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                        "Please sign in, check Settings!", // message to sign in
+                        style: TextStyle(fontSize: 17)),
+                  ),
+                  decoration: BoxDecoration(color: Colors.amber),
+                ),
+          // TODO: fix bug
+          // UserAccountsDrawerHeader( 
+          //   accountName: Text(_gName ?? 'No name provided check settings', style: TextStyle(color: Colors.black)),
+          //   accountEmail: Text(_gEmail ?? 'No email provided check settings', style: TextStyle(color: Colors.black)),
+          //   currentAccountPicture: (_gImage != 'no image') 
+          //   ? CircleAvatar(backgroundImage: NetworkImage(imageUrl),)
+          //   : CircleAvatar(child: Text(':(', style: TextStyle(fontSize: 24))),
+          //   decoration: BoxDecoration(color: Colors.amber),
+          // ),
           // Buttons in nav drawer
           new ListTile(
             leading: Icon(Icons.navigation),
