@@ -104,7 +104,6 @@ class _BillContactPageState extends State<BillContactPage> {
                       (widget.money.toString().contains('-'))
                       ? '-\$${(widget.money * -1).toString()}'
                       : '\$${widget.money.toString()}',
-                      // '\$' + widget.money.toString(),
                       style: TextStyle(
                         fontSize: 32,
                         color: (widget.money > 0) ? Colors.green : Colors.red
