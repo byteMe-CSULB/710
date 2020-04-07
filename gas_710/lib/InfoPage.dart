@@ -63,7 +63,7 @@ class InfoPage extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Row(children: <Widget>[
                             Text(
-                              '${values['averageCarpoolSize']} ',
+                              '${values['averageCarpoolSize'].toStringAsFixed(2)} ',
                               style: TextStyle(
                                   fontSize: 24.0, fontWeight: FontWeight.bold),
                             ),
@@ -114,7 +114,7 @@ class InfoPage extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Row(children: <Widget>[
                             Text(
-                              '${values['averageTripDistance']} ',
+                              '${values['averageTripDistance'].toStringAsFixed(2)} ',
                               style: TextStyle(
                                   fontSize: 24.0, fontWeight: FontWeight.bold),
                             ),
