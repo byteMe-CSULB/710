@@ -37,7 +37,6 @@ class AccountPage extends StatelessWidget {
                 name,
                 style: TextStyle(
                     fontSize: 25,
-                    color: Colors.deepPurple,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
@@ -52,7 +51,6 @@ class AccountPage extends StatelessWidget {
                 email,
                 style: TextStyle(
                     fontSize: 25,
-                    color: Colors.deepPurple,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 40),
@@ -66,7 +64,7 @@ class AccountPage extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Sign Out',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 elevation: 5,
