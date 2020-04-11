@@ -77,7 +77,6 @@ class BillingPage extends StatelessWidget {
             subtitle: Text(
               snapshot.data.documents[index]['bill'].toStringAsFixed(2),
               style: TextStyle(
-                color: Colors.black,
                 fontSize: 18.0
               ),
             ),
