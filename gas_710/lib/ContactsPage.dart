@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+//TODO: change for dark mode
+
 class ContactsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
