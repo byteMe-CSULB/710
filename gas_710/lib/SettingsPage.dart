@@ -14,11 +14,9 @@ class SettingsPage extends StatefulWidget {
   _SettingsPageState createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {  
+class _SettingsPageState extends State<SettingsPage> {  
   String _name, _email, _number;
   double _mpg;
-
-  String _dropDownValue;
 
   Future editProfile(String editName, String editEmail, String editNumber, double editMPG) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -45,41 +43,10 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
     });
   }
 
-  Future setTheme(String value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('theme', value);
-    setState(() {
-      _dropDownValue = prefs.getString('theme');
-    });
-  }
-
-  Future getTheme() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _dropDownValue = (prefs.getString('theme') ?? 'Light');
-    });
-  }
-
   @override
   void initState() { 
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     getProfile();
-    getTheme();
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    final Brightness brightness = 
-    WidgetsBinding.instance.window.platformBrightness;
-    //inform listeners and rebuild widget tree
-    if(brightness == Brightness.dark) {
-      setTheme('Dark');
-    } else if(brightness == Brightness.light) {
-      setTheme('Light');
-    } else {
-      setTheme('Light');
-    }
   }
 
   final textControllerName = TextEditingController();
@@ -90,7 +57,6 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     textControllerName.dispose();
     textControllerEmail.dispose();
     textControllerNumber.dispose();
@@ -109,42 +75,6 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
       resizeToAvoidBottomPadding: false,
       body: ListView(
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children:<Widget>[
-                Text(
-                  'Theme',
-                  style: TextStyle(
-                    fontSize: 24.0
-                  )
-                ),
-                Spacer(),
-                DropdownButton<String>(
-                  value: _dropDownValue,
-                  icon: Icon(Icons.expand_more),
-                  iconSize: 24,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.amber),
-                  underline: Container(
-                    height: 2.0,
-                    color: Colors.amber[800]
-                  ),
-                  onChanged: (String newValue) {
-                    setTheme(newValue);
-                  },
-                  items: <String>['Light', 'Dark']
-                  .map<DropdownMenuItem<String>>((String value){
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value)
-                    );
-                  }).toList(),
-                ),
-              ]
-            ),
-          ),
-          Divider(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Align(
@@ -314,7 +244,7 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
 
   Widget _signInButton() {
     return RaisedButton(
-      color: _dropDownValue == 'Dark' ? Colors.grey[700] : Colors.white,
+      color: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? Colors.grey[700] : Colors.white,
       splashColor: Colors.grey,
       onPressed: () {
         signInWithGoogle().whenComplete(() {
@@ -341,7 +271,7 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
                 'Sign in with Google',
                 style: TextStyle(
                   fontSize: 20,
-                  color: _dropDownValue == 'Dark' ? Colors.white : Colors.black,
+                  color: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? Colors.white : Colors.black,
                 ),
               ),
             )
