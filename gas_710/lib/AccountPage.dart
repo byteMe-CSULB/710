@@ -30,8 +30,7 @@ class AccountPage extends StatelessWidget {
                 'NAME',
                 style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54),
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 name,
@@ -44,8 +43,7 @@ class AccountPage extends StatelessWidget {
                 'EMAIL',
                 style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54),
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 email,
