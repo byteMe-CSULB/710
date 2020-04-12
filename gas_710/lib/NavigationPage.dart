@@ -122,10 +122,16 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     print('THEME CHANGED');
     if(brightness == Brightness.dark) {
       setTheme('Dark');
+      Route route = MaterialPageRoute(builder: (context) => NavigationPage());
+      Navigator.pushReplacement(context, route);
     } else if(brightness == Brightness.light) {
       setTheme('Light');
+      Route route = MaterialPageRoute(builder: (context) => NavigationPage());
+      Navigator.pushReplacement(context, route);
     } else {
       setTheme('Light');
+      Route route = MaterialPageRoute(builder: (context) => NavigationPage());
+      Navigator.pushReplacement(context, route);
     }
   }
 
@@ -266,7 +272,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                               Spacer(),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.purple,
+                                  color: _theme == 'Dark' ? Colors.amber : Colors.purple,
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
@@ -284,6 +290,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                                   tooltip: "Get Your Current Location",
                                   iconSize: 36,
                                   color: Colors.white,
+                                  // color: _theme == 'Dark' ? Colors.black : Colors.white,
                                 ),
                               ),
                               SizedBox(
@@ -291,7 +298,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                               ),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.purple,
+                                  color: _theme == 'Dark' ? Colors.amber : Colors.purple,
                                   shape: BoxShape.circle
                                 ),
                                 child: IconButton(
@@ -309,6 +316,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                                   tooltip: "Add Passengers to a Trip",
                                   iconSize: 36,
                                   color: Colors.white,
+                                  // color: _theme == 'Dark' ? Colors.black : Colors.white,
                                 ),
                               ),
                             ],
