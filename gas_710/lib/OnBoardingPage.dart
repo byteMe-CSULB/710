@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 
 class OnBoardingPage extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
     prefs.setString('profileEmail', "No Email Set");
     prefs.setString('profileNumber', "No Number Set");
     prefs.setDouble('profileMPG', 0.0);
+    prefs.setString('theme', MediaQuery.of(context).platformBrightness == Brightness.dark ? 'Dark' : 'Light');
   }
 
   final introKey = GlobalKey<IntroductionScreenState>();
@@ -39,7 +41,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
       titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
       bodyTextStyle: bodyStyle,
       descriptionPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-      pageColor: Colors.white,
+      // pageColor: Colors.white,
       imagePadding: EdgeInsets.zero,
     );
 
@@ -119,9 +121,11 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   }
 
   Widget _signInButton() {
-    return OutlineButton(
+    return RaisedButton(
+      color: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? Colors.grey[700] : Colors.white,
       splashColor: Colors.grey,
       onPressed: () {
+        Timer(Duration(seconds: 3), () {});
         signInWithGoogle().whenComplete(() {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -133,9 +137,6 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
         });
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-      highlightElevation: 4,
-      highlightedBorderColor: Colors.purple[400],
-      borderSide: BorderSide(color: Colors.grey),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Row(
@@ -149,7 +150,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                 'Sign in with Google',
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.black,
+                  color: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? Colors.white : Colors.black,
                 ),
               ),
             )
