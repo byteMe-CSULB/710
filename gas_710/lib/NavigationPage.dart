@@ -138,7 +138,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void getTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _theme = prefs.getString('theme');
+      _theme = (prefs.getString('theme') ?? MediaQuery.of(context).platformBrightness == Brightness.dark ? 'Dark' : 'Light');
     });
     print('Theme $_theme');
   }
@@ -179,7 +179,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    //TODO: change so that map style changes with theme
     if(_theme == 'Dark') {
       controller.setMapStyle(_darkMapStyle);
     } else if(_theme == 'Light'){
@@ -290,7 +289,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                                   tooltip: "Get Your Current Location",
                                   iconSize: 36,
                                   color: Colors.white,
-                                  // color: _theme == 'Dark' ? Colors.black : Colors.white,
                                 ),
                               ),
                               SizedBox(
@@ -316,7 +314,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                                   tooltip: "Add Passengers to a Trip",
                                   iconSize: 36,
                                   color: Colors.white,
-                                  // color: _theme == 'Dark' ? Colors.black : Colors.white,
                                 ),
                               ),
                             ],
