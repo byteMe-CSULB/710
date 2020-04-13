@@ -903,6 +903,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   setGas() async {
     // TODO: change collection to 'costPerState' when updated in Firebase
+    // TODO: change so that it actually gets the location instead of pulling California's gas
     var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: 'California').getDocuments();
     query.then((value) => gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
   }
