@@ -270,7 +270,10 @@ class _NavigationPageState extends State<NavigationPage> {
                               child: passengers > 0 ? ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) {
-                                final item = contacts[index].displayName + ' - ' +contacts[index].phones.first.value.toString();
+                                // final item = contacts[index].displayName + ' - ' + contacts[index].phones.first.value.toString();
+                                String displayName = contacts[index].displayName;
+                                String phone = contacts[index].phones.isEmpty ? "" : contacts[index].phones.first.value.toString();
+                                final item = displayName + phone;
                                 return Dismissible(
                                   key : Key(item),
                                   child: Card(
@@ -293,15 +296,15 @@ class _NavigationPageState extends State<NavigationPage> {
                                             maxRadius: 30,
                                           ),
                                         title: Text(
-                                          contacts[index].displayName,
+                                          displayName,
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold
                                           ),
                                         ),
-                                        subtitle: Text(contacts[index].phones.first.value.toString() == null ? noPhoneError :
-                                          contacts[index].phones.first.value.toString()
+                                        subtitle: Text(phone == "" ? noPhoneError :
+                                          phone
                                         ),
                                         trailing: Text((index + 1).toString()),
                                         onLongPress: () {
@@ -726,8 +729,8 @@ class _NavigationPageState extends State<NavigationPage> {
                             ),
                       label: Text(contacts[index].displayName,
                           style: TextStyle(color: Colors.black)),
-                      backgroundColor: (_driver.phones.first.value.toString() == contacts[index].phones.first.value.toString())
-                        ? Colors.amber : Colors.grey[300],
+                      backgroundColor:
+                      Colors.blue
                     ),
                   ),
                 ),
@@ -852,7 +855,26 @@ class _NavigationPageState extends State<NavigationPage> {
 
   setCost() {
     setState(() {
-      int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
+
+      // change later
+      double fuelEfficiency = 19; // let's just assume someone has an OK car mpg
+
+      Future getProfile() async {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        setState(() {
+          //_name = (prefs.getString('profileName') ?? "No Name Set");
+          //_email = (prefs.getString('profileEmail') ?? "No Email Set");
+          //_number = (prefs.getString('profileNumber') ?? "No Number Set");
+          fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
+        });
+      }
+
+      getProfile();
+
+      //
+
+
+
       print('Gas: $gas Miles: $miles');
       double tempCost= ((miles * gas) / fuelEfficiency);
       cost = double.parse(tempCost.toStringAsFixed(2));
