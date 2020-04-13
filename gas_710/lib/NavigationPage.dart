@@ -270,10 +270,9 @@ class _NavigationPageState extends State<NavigationPage> {
                               child: passengers > 0 ? ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) {
-                                // final item = contacts[index].displayName + ' - ' + contacts[index].phones.first.value.toString();
                                 String displayName = contacts[index].displayName;
                                 String phone = contacts[index].phones.isEmpty ? "" : contacts[index].phones.first.value.toString();
-                                final item = displayName + phone;
+                                final item = displayName + " - " + phone;
                                 return Dismissible(
                                   key : Key(item),
                                   child: Card(
@@ -309,9 +308,7 @@ class _NavigationPageState extends State<NavigationPage> {
                                         trailing: Text((index + 1).toString()),
                                         onLongPress: () {
                                           setState(() {
-                                            _driver.displayName = contacts[index].displayName;
-                                            _driver.emails = contacts[index].emails;
-                                            _driver.phones = contacts[index].phones;
+                                            _driver = contacts[index];
                                             userDriving = false;
                                           });
                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text('$item has been assigned as driver')));
@@ -320,9 +317,7 @@ class _NavigationPageState extends State<NavigationPage> {
                                   ),
                                   onDismissed: (direction) {
                                     setState(() {
-                                      if(_driver.displayName == contacts[index].displayName
-                                      && 
-                                      _driver.phones.first.value.toString() == contacts[index].phones.first.value.toString()) {
+                                      if(_driver == contacts[index]) {
                                         userDriving = true;
                                         getUserProfile();
                                         Scaffold.of(context).showSnackBar(SnackBar(content: Text("You are the driver")));
@@ -729,8 +724,7 @@ class _NavigationPageState extends State<NavigationPage> {
                             ),
                       label: Text(contacts[index].displayName,
                           style: TextStyle(color: Colors.black)),
-                      backgroundColor:
-                      Colors.blue
+                      backgroundColor: (_driver == contacts[index]) ? Colors.amber : Colors.grey[300]
                     ),
                   ),
                 ),
@@ -855,16 +849,12 @@ class _NavigationPageState extends State<NavigationPage> {
 
   setCost() {
     setState(() {
-
       // change later
       double fuelEfficiency = 19; // let's just assume someone has an OK car mpg
 
       Future getProfile() async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         setState(() {
-          //_name = (prefs.getString('profileName') ?? "No Name Set");
-          //_email = (prefs.getString('profileEmail') ?? "No Email Set");
-          //_number = (prefs.getString('profileNumber') ?? "No Number Set");
           fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
         });
       }
@@ -872,8 +862,6 @@ class _NavigationPageState extends State<NavigationPage> {
       getProfile();
 
       //
-
-
 
       print('Gas: $gas Miles: $miles');
       double tempCost= ((miles * gas) / fuelEfficiency);
