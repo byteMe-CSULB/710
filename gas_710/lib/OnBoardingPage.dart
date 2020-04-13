@@ -179,7 +179,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
         padding: const EdgeInsets.all(8.0),
         child: SizedBox(
           width: double.infinity,
-          height: 430.0,
+          height: 450.0,
           child: Form(
             key: _profileKey,
             child: Column(
