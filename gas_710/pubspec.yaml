@@ -32,7 +32,7 @@ dependencies:
   flutter_google_places: ^0.2.3 # https://pub.dev/packages/flutter_google_places
   google_maps_webservice: ^0.0.16 # https://pub.dev/packages/google_maps_webservice
   contacts_service: ^0.3.10   # https://pub.dev/packages/contacts_service
-  permission_handler: ^4.2.0+hotfix.3 # https://pub.dev/packages/permission_handler
+  permission_handler: ^5.0.0+hotfix.3 # https://pub.dev/packages/permission_handler
   intl: ^0.16.1               # https://pub.dev/packages/intl
   sliding_up_panel: ^1.0.0    # https://pub.dev/packages/sliding_up_panel
 
