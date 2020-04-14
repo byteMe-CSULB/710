@@ -128,20 +128,19 @@ class _ContactListPageState extends State<ContactListPage> {
                     },
                     leading: (c.avatar != null && c.avatar.length > 0)
                         ? CircleAvatar(backgroundImage: MemoryImage(c.avatar))
-                        : CircleAvatar(child: 
-                        Text(
-                          c.initials(),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Colors.purple),
+                        : CircleAvatar(
+                            child: Text(
+                              c.initials(),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.purple),
                     title: Text(c.displayName ?? ""),
                   );
                 },
               )
             : Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.amber)
-                ),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.amber)),
               ),
       ),
     );
