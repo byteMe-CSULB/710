@@ -226,10 +226,10 @@ class _BillContactPageState extends State<BillContactPage> {
         itemBuilder: (context, index) {
           return ExpansionTileCard(
             leading: Text(
-              ((paidTrips[index])
-                      ? (index + 1).toString() + '\n Paid'
-                      : index + 1)
-                  .toString(), // for quick ordering, essentially should be in chronological order
+              (paidTrips[index])
+                  ? (index + 1).toString() + '\n Paid'
+                  : (index + 1)
+                      .toString(), // for quick ordering, essentially should be in chronological order
             ),
             title: Text(
               trips[index],
