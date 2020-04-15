@@ -46,9 +46,7 @@ class _BillContactPageState extends State<BillContactPage> {
   Future<PermissionStatus> requestPermission(Permission permission) async {
     final status = await permission.request();
     setState((){
-      print(status);
       _storagePermissionStatus = status;
-      print(_storagePermissionStatus);
     });
     return status;
   }

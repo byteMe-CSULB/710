@@ -56,9 +56,7 @@ class _MyHomePageState extends State<AddPassengersPage> {
   Future<PermissionStatus> requestPermission(Permission permission) async {
     final status = await permission.request();
     setState((){
-      print(status);
       _contactPermissionStatus = status;
-      print(_contactPermissionStatus);
     });
     return status;
   }

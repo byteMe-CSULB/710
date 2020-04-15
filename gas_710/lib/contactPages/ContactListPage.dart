@@ -33,9 +33,7 @@ class _ContactListPageState extends State<ContactListPage> {
   Future<PermissionStatus> requestPermission(Permission permission) async {
     final status = await permission.request();
     setState((){
-      print(status);
       _contactPermissionStatus = status;
-      print(_contactPermissionStatus);
     });
     return status;
   }
@@ -98,6 +96,7 @@ class _ContactListPageState extends State<ContactListPage> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         backgroundColor: Colors.amber,
+        tooltip: 'Add new contact',
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => AddContactPage())).then((_){
             refreshContacts();
