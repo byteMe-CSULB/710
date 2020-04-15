@@ -30,6 +30,30 @@ class _BillContactPageState extends State<BillContactPage> {
       Firestore.instance.collection('userData').document(firebaseUser.email);
   bool sortDesc = true;
 
+  Permission _storagePermission = Permission.storage;
+  PermissionStatus _storagePermissionStatus = PermissionStatus.undetermined;
+
+  @override
+  initState() {
+    super.initState();
+    _listenForPermissionStatus();
+  }
+
+  void _listenForPermissionStatus() async {
+    final status = await _storagePermission.status;
+    setState(() => _storagePermissionStatus = status);
+  }
+
+  Future<PermissionStatus> requestPermission(Permission permission) async {
+    final status = await permission.request();
+    setState((){
+      print(status);
+      _storagePermissionStatus = status;
+      print(_storagePermissionStatus);
+    });
+    return status;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -56,11 +80,24 @@ class _BillContactPageState extends State<BillContactPage> {
                   return IconButton(
                     icon: Icon(Icons.picture_as_pdf),
                     onPressed: () async {
-                      PermissionStatus permissionStatus =
-                          await _getContactPermission();
-                      if (permissionStatus == PermissionStatus.granted) {
+                      if (_storagePermissionStatus == PermissionStatus.granted) {
                         print('Creating PDF');
                         _generatePdf(context, snapshot);
+                      } else {
+                        requestPermission(_storagePermission).then((PermissionStatus status){
+                          if(status == PermissionStatus.granted) {
+                            print('Creating PDF');
+                            _generatePdf(context, snapshot);
+                          } else {
+                            Fluttertoast.showToast(
+                              msg: 'Storage permission required to create PDF',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIos: 1,
+                              fontSize: 16.0,
+                            );
+                          }
+                        });
                       }
                     },
                     tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
@@ -432,21 +469,6 @@ class _BillContactPageState extends State<BillContactPage> {
         builder: (_) => PdfViewPage(path: path),
       ),
     );
-  }
-
-  Future<PermissionStatus> _getContactPermission() async {
-    PermissionStatus permission = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.storage);
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.disabled) {
-      Map<PermissionGroup, PermissionStatus> permissionStatus =
-          await PermissionHandler()
-              .requestPermissions([PermissionGroup.storage]);
-      return permissionStatus[PermissionGroup.storage] ??
-          PermissionStatus.unknown;
-    } else {
-      return permission;
-    }
   }
 
   // Alert Dialog when deleting Trip

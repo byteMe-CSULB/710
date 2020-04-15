@@ -23,6 +23,9 @@ class ContactListPage extends StatefulWidget {
 }
 
 class _ContactListPageState extends State<ContactListPage> {
+  Permission _contactPermission = Permission.contacts;
+  PermissionStatus _contactPermissionStatus = PermissionStatus.undetermined;
+
   List<Contact> _contacts;
   var selected = [];
   var selectedContacts = new List<String>();
@@ -30,17 +33,31 @@ class _ContactListPageState extends State<ContactListPage> {
   @override
   initState() {
     super.initState();
+    _listenForPermissionStatus();
+    requestPermission(_contactPermission);
     refreshContacts();
   }
 
+  void _listenForPermissionStatus() async {
+    final status = await _contactPermission.status;
+    setState(() => _contactPermissionStatus = status);
+  }
+
+  Future<PermissionStatus> requestPermission(Permission permission) async {
+    final status = await permission.request();
+    setState((){
+      print(status);
+      _contactPermissionStatus = status;
+      print(_contactPermissionStatus);
+    });
+    return status;
+  }
+
   refreshContacts() async {
-    PermissionStatus permissionStatus = await _getContactPermission();
-    if (permissionStatus == PermissionStatus.granted) {
+    if (_contactPermissionStatus == PermissionStatus.granted) {
       // Load without thumbnails initially.
       var contacts =
           (await ContactsService.getContacts(withThumbnails: false)).toList();
-//      var contacts = (await ContactsService.getContactsForPhone("8554964652"))
-//          .toList();
       setState(() {
         _contacts = contacts;
       });
@@ -53,7 +70,7 @@ class _ContactListPageState extends State<ContactListPage> {
         });
       }
     } else {
-      _handleInvalidPermissions(permissionStatus);
+      _handleInvalidPermissions(_contactPermissionStatus);
     }
   }
 
@@ -67,31 +84,16 @@ class _ContactListPageState extends State<ContactListPage> {
     refreshContacts();
   }
 
-  Future<PermissionStatus> _getContactPermission() async {
-    PermissionStatus permission = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.contacts);
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.disabled) {
-      Map<PermissionGroup, PermissionStatus> permissionStatus =
-          await PermissionHandler()
-              .requestPermissions([PermissionGroup.contacts]);
-      return permissionStatus[PermissionGroup.contacts] ??
-          PermissionStatus.unknown;
-    } else {
-      return permission;
-    }
-  }
-
-  void _handleInvalidPermissions(PermissionStatus permissionStatus) {
-    if (permissionStatus == PermissionStatus.denied) {
+  void _handleInvalidPermissions(PermissionStatus _contactPermissionStatus) {
+    if (_contactPermissionStatus == PermissionStatus.denied) {
       throw new PlatformException(
           code: "PERMISSION_DENIED",
-          message: "Access to location data denied",
+          message: "Access to contact data denied",
           details: null);
-    } else if (permissionStatus == PermissionStatus.disabled) {
+    } else if (_contactPermissionStatus == PermissionStatus.denied) {
       throw new PlatformException(
           code: "PERMISSION_DISABLED",
-          message: "Location data is not available on device",
+          message: "Contact data is not available on device",
           details: null);
     }
   }
