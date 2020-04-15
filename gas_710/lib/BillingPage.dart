@@ -90,7 +90,7 @@ class _BillingPageState extends State<BillingPage> {
                 ),
                 subtitle: Text(
                   snapshot.data.documents[index]['bill'].toStringAsFixed(2),
-                  style: TextStyle(color: Colors.black, fontSize: 18.0),
+                  style: TextStyle(fontSize: 18.0),
                 ),
                 trailing: Wrap(
                   spacing: 10, // space between two icons

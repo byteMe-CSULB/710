@@ -1,4 +1,3 @@
-import 'package:gas_710/NavigationDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/auth.dart';
@@ -47,9 +46,7 @@ class _BillContactPageState extends State<BillContactPage> {
   Future<PermissionStatus> requestPermission(Permission permission) async {
     final status = await permission.request();
     setState((){
-      print(status);
       _storagePermissionStatus = status;
-      print(_storagePermissionStatus);
     });
     return status;
   }
@@ -57,7 +54,6 @@ class _BillContactPageState extends State<BillContactPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        drawer: NavigationDrawer(), // provides nav drawer
         appBar: new AppBar(
           title: new Text(widget.name),
           backgroundColor: Colors.purple,
@@ -105,53 +101,42 @@ class _BillContactPageState extends State<BillContactPage> {
                 })
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: <
-              Widget>[
-            Center(
-              child: (widget.avatar.toString() != 'none' &&
-                      (widget.avatar != null && widget.avatar.length > 0))
-                  ? CircleAvatar(
-                      backgroundImage: MemoryImage(widget.avatar),
-                      radius: 48.0,
+        body: Column(mainAxisAlignment: MainAxisAlignment.start, 
+        children: <Widget>[
+          Container(
+            height: 200,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: (widget.avatar.toString() != 'none' && (widget.avatar != null && widget.avatar.length > 0))
+                  ? MemoryImage(
+                      widget.avatar
                     )
-                  : CircleAvatar(
-                      child: Text(
-                        widget.name[0],
-                        style: TextStyle(color: Colors.white, fontSize: 48.0),
-                      ),
-                      radius: 48.0,
-                      backgroundColor: Colors.purple),
+                  : AssetImage('assets/noAvatar.jpg'),
+                  fit: BoxFit.fill,
+              )
             ),
-            SizedBox(
-              height: 20,
-            ),
-            Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-              Center(
-                child: Text(
-                  widget.name,
-                  style: TextStyle(
-                    fontSize: 32,
-                  ),
-                ),
+          ),
+          ListTile(
+            title: Text(
+              widget.name,
+              style: TextStyle(
+                fontSize: 36.0,
               ),
-              Center(
-                child: Text(
-                  (widget.money.toString().contains('-'))
-                      ? '-\$${(widget.money * -1).toString()}'
-                      : '\$${widget.money.toString()}',
-                  style: TextStyle(
-                      fontSize: 32,
-                      color: (widget.money > 0) ? Colors.green : Colors.red),
-                ),
-              ),
-            ]),
-            SizedBox(height: 10),
-            Divider(
-              thickness: 0.8,
             ),
-            Align(
+            subtitle: Text(
+              (widget.money.toString().contains('-'))
+                ? '-\$${(widget.money * -1).toString()}'
+                : '\$${widget.money.toString()}',
+              style: TextStyle(
+                fontSize: 36.0,
+                color: (widget.money > 0) ? Colors.green : Colors.red,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+            child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Contact Information',
@@ -161,38 +146,42 @@ class _BillContactPageState extends State<BillContactPage> {
                 ),
               ),
             ),
-            StreamBuilder(
-                stream: databaseReference
-                    .collection('contacts')
-                    .where('displayName', isEqualTo: widget.name)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.amber));
-                  return Container(
-                    height: 150,
-                    child: Column(children: <Widget>[
-                      ListTile(
-                        leading: Icon(Icons.phone),
-                        title: Text('Phone Number'),
-                        subtitle:
-                            Text(snapshot.data.documents[0]['phoneNumber']),
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.email),
-                        title: Text('Email Address'),
-                        subtitle:
-                            Text(snapshot.data.documents[0]['emailAddress']),
-                      ),
-                    ]),
-                  );
-                }),
-            Divider(
-              thickness: 0.8,
-            ),
-            Row(children: <Widget>[
+          ),
+          StreamBuilder(
+              stream: databaseReference
+                  .collection('contacts')
+                  .where('displayName', isEqualTo: widget.name)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.amber));
+                return Container(
+                  height: 150,
+                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                  child: Column(children: <Widget>[
+                    ListTile(
+                      leading: Icon(Icons.phone),
+                      title: Text('Phone Number'),
+                      subtitle:
+                          Text(snapshot.data.documents[0]['phoneNumber']),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.email),
+                      title: Text('Email Address'),
+                      subtitle:
+                          Text(snapshot.data.documents[0]['emailAddress']),
+                    ),
+                  ]),
+                );
+              }),
+          Divider(
+            thickness: 0.8,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+            child: Row(children: <Widget>[
               Text(
                 'Recent Trips',
                 style: TextStyle(
@@ -216,27 +205,27 @@ class _BillContactPageState extends State<BillContactPage> {
                 tooltip: 'Sort by date',
               ),
             ]),
-            StreamBuilder(
-                stream: sortDesc
-                    ? databaseReference
-                        .collection('trips')
-                        .where('passengers', arrayContains: widget.name)
-                        .orderBy('date', descending: true)
-                        .snapshots()
-                    : databaseReference
-                        .collection('trips')
-                        .where('passengers', arrayContains: widget.name)
-                        .orderBy('date')
-                        .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.amber));
-                  return Expanded(child: _cardListView(context, snapshot));
-                }),
-          ]),
-        ));
+          ),
+          StreamBuilder(
+              stream: sortDesc
+                  ? databaseReference
+                      .collection('trips')
+                      .where('passengers', arrayContains: widget.name)
+                      .orderBy('date', descending: true)
+                      .snapshots()
+                  : databaseReference
+                      .collection('trips')
+                      .where('passengers', arrayContains: widget.name)
+                      .orderBy('date')
+                      .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.amber));
+                return Expanded(child: _cardListView(context, snapshot));
+              }),
+        ]));
   }
 
   Widget _cardListView(
@@ -492,11 +481,15 @@ class _BillContactPageState extends State<BillContactPage> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          textColor: Colors.red,
-          child: const Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: TextStyle(
+              color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.black : Colors.white
+            )
+          ),
         ),
         // Button for 'Only Me'
-        new FlatButton(
+        new RaisedButton(
           onPressed: () {
             Navigator.of(context).pop();
             databaseReference
@@ -512,11 +505,11 @@ class _BillContactPageState extends State<BillContactPage> {
               'passengers': FieldValue.arrayUnion([widget.name + "(Deleted)"])
             });
           },
-          textColor: Colors.amber,
+          color: Colors.amber,
           child: const Text('Only Me'),
         ),
         //Button to Delete For All
-        new FlatButton(
+        new RaisedButton(
           onPressed: () {
             showDialog(
               context: context,
@@ -534,10 +527,15 @@ class _BillContactPageState extends State<BillContactPage> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      textColor: Colors.red,
-                      child: const Text('Cancel'),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.black : Colors.white
+                        )
+                      ),
                     ),
-                    new FlatButton(
+                    new RaisedButton(
+                      color: Colors.red,
                       onPressed: () {
                         Navigator.of(context).pop();
                         databaseReference
@@ -546,13 +544,12 @@ class _BillContactPageState extends State<BillContactPage> {
                             .delete();
                         Navigator.of(context).pop();
                       },
-                      textColor: Theme.of(context).primaryColor,
                       child: const Text('Delete'),
                     ),
                   ]),
             );
           },
-          textColor: Theme.of(context).primaryColor,
+          color: Colors.red,
           child: const Text('Delete For All'),
         ),
       ],

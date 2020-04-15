@@ -96,7 +96,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 setState(() {
                   prefService = value;
                 });
-              }
+              },
+              activeColor: Colors.amber,
             )
           ),
           ListTile(
@@ -108,7 +109,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 setState(() {
                   prefService = value;
                 });
-              }
+              },
+              activeColor: Colors.amber,
             )
           ),
           ListTile(
@@ -120,7 +122,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 setState(() {
                   prefService = value;
                 });
-              }
+              },
+              activeColor: Colors.amber,
             )
           ),
           ListTile(
@@ -132,7 +135,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 setState(() {
                   prefService = value;
                 });
-              }
+              },
+              activeColor: Colors.amber,
             )
           ),
           ListTile(
@@ -144,7 +148,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 setState(() {
                   prefService = value;
                 });
-              }
+              },
+              activeColor: Colors.amber,
             )
           ),
           Divider(),
@@ -238,7 +243,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _signInButton() {
-    return OutlineButton(
+    return RaisedButton(
+      color: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? Colors.grey[700] : Colors.white,
       splashColor: Colors.grey,
       onPressed: () {
         signInWithGoogle().whenComplete(() {
@@ -252,9 +258,6 @@ class _SettingsPageState extends State<SettingsPage> {
         });
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-      highlightElevation: 4,
-      highlightedBorderColor: Colors.purple[400],
-      borderSide: BorderSide(color: Colors.grey),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Row(
@@ -268,7 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 'Sign in with Google',
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.black,
+                  color: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? Colors.white : Colors.black,
                 ),
               ),
             )
