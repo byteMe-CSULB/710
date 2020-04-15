@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:gas_710/contactPages/ContactListPage.dart';
 import 'package:gas_710/contactPages/UpdateContactsPage.dart';
 import 'package:gas_710/contactPages/AddressTileWidget.dart';
 import 'package:gas_710/contactPages/ItemsTileWidget.dart';
@@ -18,10 +19,15 @@ class ContactDetailsPage extends StatelessWidget {
         actions: <Widget>[
           //make sure to return to contacts page after delete
           IconButton(
+            tooltip: 'Delete contact',
             icon: Icon(Icons.delete),
-            onPressed: () => ContactsService.deleteContact(_contact),
+            onPressed: () {
+              ContactsService.deleteContact(_contact);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ContactListPage()));
+            }
           ),
           IconButton(
+            tooltip: 'Update contact',
             icon: Icon(Icons.update),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
