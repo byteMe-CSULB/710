@@ -10,7 +10,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/SettingsPage.dart';
 import 'package:flutter_sms/flutter_sms_platform.dart';
 
-class BillingPage extends StatelessWidget {
+class BillingPage extends StatefulWidget {
+  @override
+  _BillingPageState createState() => _BillingPageState();
+}
+
+class _BillingPageState extends State<BillingPage> {
   String defaultTextMessage =
       "This is a default test message! Cost: \$"; // Default text message
   List<String> recipentsPhoneNumber = []; // List of phone numbers to text
