@@ -138,7 +138,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void getTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _theme = (prefs.getString('theme') ?? MediaQuery.of(context).platformBrightness == Brightness.dark ? 'Dark' : 'Light');
+      _theme = (prefs.getString('theme') ?? (MediaQuery.of(context).platformBrightness == Brightness.dark ? 'Dark' : 'Light'));
     });
     print('Theme $_theme');
   }

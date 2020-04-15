@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:gas_710/contactPages/AddContactPage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'package:gas_710/NavigationDrawer.dart';
@@ -21,7 +22,6 @@ class _ContactListPageState extends State<ContactListPage> {
   initState() {
     super.initState();
     _listenForPermissionStatus();
-    requestPermission(_contactPermission);
     refreshContacts();
   }
 
@@ -41,6 +41,7 @@ class _ContactListPageState extends State<ContactListPage> {
   }
 
   refreshContacts() async {
+    _contactPermissionStatus = await requestPermission(_contactPermission);
     if (_contactPermissionStatus == PermissionStatus.granted) {
       // Load without thumbnails initially.
       var contacts =
@@ -98,7 +99,7 @@ class _ContactListPageState extends State<ContactListPage> {
         child: Icon(Icons.add),
         backgroundColor: Colors.amber,
         onPressed: () {
-          Navigator.of(context).pushNamed("/add").then((_) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddContactPage())).then((_){
             refreshContacts();
           });
         },

@@ -483,11 +483,15 @@ class _BillContactPageState extends State<BillContactPage> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          textColor: Colors.red,
-          child: const Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: TextStyle(
+              color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.black : Colors.white
+            )
+          ),
         ),
         // Button for 'Only Me'
-        new FlatButton(
+        new RaisedButton(
           onPressed: () {
             Navigator.of(context).pop();
             databaseReference
@@ -503,11 +507,11 @@ class _BillContactPageState extends State<BillContactPage> {
               'passengers': FieldValue.arrayUnion([widget.name + "(Deleted)"])
             });
           },
-          textColor: Colors.amber,
+          color: Colors.amber,
           child: const Text('Only Me'),
         ),
         //Button to Delete For All
-        new FlatButton(
+        new RaisedButton(
           onPressed: () {
             showDialog(
               context: context,
@@ -525,10 +529,15 @@ class _BillContactPageState extends State<BillContactPage> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      textColor: Colors.red,
-                      child: const Text('Cancel'),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.black : Colors.white
+                        )
+                      ),
                     ),
-                    new FlatButton(
+                    new RaisedButton(
+                      color: Colors.red,
                       onPressed: () {
                         Navigator.of(context).pop();
                         databaseReference
@@ -537,13 +546,12 @@ class _BillContactPageState extends State<BillContactPage> {
                             .delete();
                         Navigator.of(context).pop();
                       },
-                      textColor: Theme.of(context).primaryColor,
                       child: const Text('Delete'),
                     ),
                   ]),
             );
           },
-          textColor: Theme.of(context).primaryColor,
+          color: Colors.red,
           child: const Text('Delete For All'),
         ),
       ],
