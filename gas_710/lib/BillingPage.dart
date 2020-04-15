@@ -16,6 +16,7 @@ class BillingPage extends StatefulWidget {
 }
 
 class _BillingPageState extends State<BillingPage> {
+  // TODO: modify defaultTextMessage string
   String defaultTextMessage =
       "This is a default test message! Cost: \$"; // Default text message
   List<String> recipentsPhoneNumber = []; // List of phone numbers to text
