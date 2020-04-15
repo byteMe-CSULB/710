@@ -9,6 +9,7 @@ import 'package:gas_710/PdfViewPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
+import 'dart:collection';
 
 class BillContactPage extends StatefulWidget {
   final name, money, avatar; // required keys from BillingPage.dart
@@ -27,6 +28,30 @@ class _BillContactPageState extends State<BillContactPage> {
   final databaseReference =
       Firestore.instance.collection('userData').document(firebaseUser.email);
   bool sortDesc = true;
+
+  Permission _storagePermission = Permission.storage;
+  PermissionStatus _storagePermissionStatus = PermissionStatus.undetermined;
+
+  @override
+  initState() {
+    super.initState();
+    _listenForPermissionStatus();
+  }
+
+  void _listenForPermissionStatus() async {
+    final status = await _storagePermission.status;
+    setState(() => _storagePermissionStatus = status);
+  }
+
+  Future<PermissionStatus> requestPermission(Permission permission) async {
+    final status = await permission.request();
+    setState((){
+      print(status);
+      _storagePermissionStatus = status;
+      print(_storagePermissionStatus);
+    });
+    return status;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +78,24 @@ class _BillContactPageState extends State<BillContactPage> {
                   return IconButton(
                     icon: Icon(Icons.picture_as_pdf),
                     onPressed: () async {
-                      PermissionStatus permissionStatus =
-                          await _getContactPermission();
-                      if (permissionStatus == PermissionStatus.granted) {
+                      if (_storagePermissionStatus == PermissionStatus.granted) {
                         print('Creating PDF');
                         _generatePdf(context, snapshot);
+                      } else {
+                        requestPermission(_storagePermission).then((PermissionStatus status){
+                          if(status == PermissionStatus.granted) {
+                            print('Creating PDF');
+                            _generatePdf(context, snapshot);
+                          } else {
+                            Fluttertoast.showToast(
+                              msg: 'Storage permission required to create PDF',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIos: 1,
+                              fontSize: 16.0,
+                            );
+                          }
+                        });
                       }
                     },
                     tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
@@ -196,11 +234,17 @@ class _BillContactPageState extends State<BillContactPage> {
       BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
     // card list view builder widget
     var snapshotLength = snapshot.data.documents.length;
-    var trips = [];
+    var trips = []; //location names
     var dates = [];
-
+    List<String> tripId = []; //list of trip id from Firebase.
+    List<bool> paidTrips = []; //List of paid Trips
     for (int i = 0; i < snapshotLength; i++) {
       trips.add(snapshot.data.documents[i]['location']);
+      tripId.add(snapshot.data.documents[i].documentID); //Get trips id
+      //Get passengersPaid data from Firebase
+      HashMap tempPaidTrips = new HashMap<String, dynamic>.from(
+          snapshot.data.documents[i]['passengersPaid']);
+      paidTrips.add(tempPaidTrips[widget.name]);
       DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
       dates.add(DateFormat.yMMMMd().format(myDateTime).toString());
     }
@@ -209,9 +253,11 @@ class _BillContactPageState extends State<BillContactPage> {
         itemCount: trips.length,
         itemBuilder: (context, index) {
           return ExpansionTileCard(
-            leading: Text(
-              (index + 1)
-                  .toString(), // for quick ordering, essentially should be in chronological order
+            leading: Text( // TODO: find a place for the PAID tag
+              (paidTrips[index])
+                  ? (index + 1).toString() + '\n Paid'
+                  : (index + 1)
+                      .toString(), // for quick ordering, essentially should be in chronological order
             ),
             title: Text(
               trips[index],
@@ -288,10 +334,21 @@ class _BillContactPageState extends State<BillContactPage> {
                   FlatButton(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.0)),
-                      onPressed: () {}, // this should keep the bill in firebase
+                      onPressed: () {
+                        HashMap passengersPaidList =
+                            new HashMap<String, dynamic>.from(snapshot
+                                .data.documents[index]['passengersPaid']);
+                        if (!passengersPaidList[widget.name]) {
+                          passengersPaidList.update(widget.name, (v) => true);
+                          databaseReference
+                              .collection('trips')
+                              .document(tripId[index])
+                              .updateData(
+                                  {'passengersPaid': passengersPaidList});
+                        }
+                      },
+                      // this should keep the bill in firebase
                       // but just say it's paid and still show it to users
-                      // might need to add another field to trip collection
-                      // for firebase
                       child: Column(
                         children: <Widget>[
                           Icon(Icons.check),
@@ -329,13 +386,19 @@ class _BillContactPageState extends State<BillContactPage> {
                           Text('Share')
                         ],
                       )),
+                  //Delete Button
                   FlatButton(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.0)),
-                      onPressed:
-                          () {}, // this should delete any record of this trip for everyone involved
-                      // maybe do like a alert dialog that lets them know that it deletes it
-                      // for EVERYONE
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) =>
+                              _buildDeleteDialog(context, tripId, index),
+                        );
+                      }, // this deletes only the current passenger from the trip
+                      //update Firebase to add "(Delete)" at the end of the passenger's name
+                      //This allows the other passengers to still see the trip and have the trip still saved in Firebase.
                       child: Column(
                         children: <Widget>[
                           Icon(Icons.delete),
@@ -399,19 +462,92 @@ class _BillContactPageState extends State<BillContactPage> {
     );
   }
 
-  Future<PermissionStatus> _getContactPermission() async {
-    PermissionStatus permission = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.storage);
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.disabled) {
-      Map<PermissionGroup, PermissionStatus> permissionStatus =
-          await PermissionHandler()
-              .requestPermissions([PermissionGroup.storage]);
-      return permissionStatus[PermissionGroup.storage] ??
-          PermissionStatus.unknown;
-    } else {
-      return permission;
-    }
+  // Alert Dialog when deleting Trip
+  Widget _buildDeleteDialog(
+      BuildContext context, List<String> tripId, int index) {
+    return new AlertDialog(
+      title: new Text("Delete This Trip"),
+      content: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Text(
+              "Pressing \'Delete For All\' will delete the whole trip for everyone. \n"),
+          new Text(
+              "Pressing \'Only Me\' will delete the trip just for this passenger. Other passengers can still see this trip. \n"),
+        ],
+      ),
+      actions: <Widget>[
+        //Button to Cancel
+        new FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          textColor: Colors.red,
+          child: const Text('Cancel'),
+        ),
+        // Button for 'Only Me'
+        new FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            databaseReference
+                .collection('trips')
+                .document(tripId[index])
+                .updateData({
+              'passengers': FieldValue.arrayRemove([widget.name])
+            });
+            databaseReference
+                .collection('trips')
+                .document(tripId[index])
+                .updateData({
+              'passengers': FieldValue.arrayUnion([widget.name + "(Deleted)"])
+            });
+          },
+          textColor: Colors.amber,
+          child: const Text('Only Me'),
+        ),
+        //Button to Delete For All
+        new FlatButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => new AlertDialog(
+                  title: new Text("Are you sure you want to delete this trip?"),
+                  content: new Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new Text("This cannot be undone.\n"),
+                      ]),
+                  actions: <Widget>[
+                    //Button to Cancel
+                    new FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      textColor: Colors.red,
+                      child: const Text('Cancel'),
+                    ),
+                    new FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        databaseReference
+                            .collection('trips')
+                            .document(tripId[index])
+                            .delete();
+                        Navigator.of(context).pop();
+                      },
+                      textColor: Theme.of(context).primaryColor,
+                      child: const Text('Delete'),
+                    ),
+                  ]),
+            );
+          },
+          textColor: Theme.of(context).primaryColor,
+          child: const Text('Delete For All'),
+        ),
+      ],
+    );
   }
 }
 
