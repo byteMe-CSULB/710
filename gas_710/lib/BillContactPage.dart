@@ -225,7 +225,7 @@ class _BillContactPageState extends State<BillContactPage> {
         itemCount: trips.length,
         itemBuilder: (context, index) {
           return ExpansionTileCard(
-            leading: Text(
+            leading: Text( // TODO: find a place for the PAID tag
               (paidTrips[index])
                   ? (index + 1).toString() + '\n Paid'
                   : (index + 1)
