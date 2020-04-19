@@ -70,6 +70,7 @@ class _NavigationPageState extends State<NavigationPage> {
   double latitude = 0.0;
   double longitude = 0.0;
 
+  double fuelEfficiency = 0.0;
   double cost = 0.0;
   double costPerPassenger = 0.0;
   double gas = 0.0;
@@ -397,6 +398,18 @@ class _NavigationPageState extends State<NavigationPage> {
                             ),
                           ),
                         ]),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child:
+                Text( (passengers == 0 ? "" :
+                '(price per gallon * miles) / (miles per gallon * passengers)\n'
+                    '   ($gas * $miles) / ($fuelEfficiency * $passengers)'),
+                  style: TextStyle(
+                    fontSize: 11.0,
+                    color: Colors.grey[700],
                   ),
                 ),
               ),
@@ -849,19 +862,15 @@ class _NavigationPageState extends State<NavigationPage> {
 
   setCost() {
     setState(() {
-      // change later
-      double fuelEfficiency = 19; // let's just assume someone has an OK car mpg
 
       Future getProfile() async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         setState(() {
-          fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
+          this.fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
         });
       }
 
       getProfile();
-
-      //
 
       print('Gas: $gas Miles: $miles');
       double tempCost= ((miles * gas) / fuelEfficiency);
