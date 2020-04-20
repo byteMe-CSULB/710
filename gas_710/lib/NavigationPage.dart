@@ -92,6 +92,7 @@ class _NavigationPageState extends State<NavigationPage> {
     _getInitLocation();
     setGas();
     getUserProfile();
+    getFuelEfficiency();
   }
 
   void getUserProfile() async {
@@ -405,10 +406,9 @@ class _NavigationPageState extends State<NavigationPage> {
                 alignment: Alignment.centerRight,
                 child:
                 Text( (passengers == 0 ? "" :
-                '(price per gallon * miles) / (miles per gallon * passengers)\n'
-                    '   ($gas * $miles) / ($fuelEfficiency * $passengers)'),
+                    'Cost per passenger: ($gas * $miles) / ($fuelEfficiency * $passengers) '),
                   style: TextStyle(
-                    fontSize: 11.0,
+                    fontSize: 17.0,
                     color: Colors.grey[700],
                   ),
                 ),
@@ -863,16 +863,9 @@ class _NavigationPageState extends State<NavigationPage> {
   setCost() {
     setState(() {
 
-      Future getProfile() async {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        setState(() {
-          this.fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
-        });
-      }
 
-      getProfile();
 
-      print('Gas: $gas Miles: $miles');
+      print('Gas: $gas Miles: $miles FuelEfficiency $fuelEfficiency');
       double tempCost= ((miles * gas) / fuelEfficiency);
       cost = double.parse(tempCost.toStringAsFixed(2));
       print('Cost: $cost');
@@ -1001,5 +994,12 @@ class _NavigationPageState extends State<NavigationPage> {
       }
     }
     userReference.collection('contacts').document('init').delete();
+  }
+
+  Future getFuelEfficiency() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      this.fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
+    });
   }
 }
