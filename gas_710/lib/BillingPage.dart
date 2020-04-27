@@ -8,159 +8,188 @@ import 'package:gas_710/NavigationDrawer.dart';
 import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/SettingsPage.dart';
+import 'package:flutter_sms/flutter_sms_platform.dart';
 
-class BillingPage extends StatelessWidget {
-  final databaseReference = signedIn ? Firestore.instance.collection('userData').document(firebaseUser.email) : null;
+class BillingPage extends StatefulWidget {
+  @override
+  _BillingPageState createState() => _BillingPageState();
+}
+
+class _BillingPageState extends State<BillingPage> {
+  // TODO: modify defaultTextMessage string
+  String defaultTextMessage =
+      "This is a default test message! Cost: \$"; // Default text message
+  List<String> recipentsPhoneNumber = []; // List of phone numbers to text
+  final databaseReference = signedIn
+      ? Firestore.instance.collection('userData').document(firebaseUser.email)
+      : null;
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      drawer: NavigationDrawer(), // provides nav drawer
-      appBar: new AppBar(
-        title: new Text("Billing Page"),
-        backgroundColor: Colors.purple,
-      ),
-      body: signedIn ? StreamBuilder(
-        stream: databaseReference.collection('contacts').snapshots(),
-        builder: (context, snapshot) {
-          if(!snapshot.hasData) return 
-          Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.amber)));
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Expanded(child: _listView(snapshot)),
-              ],
-            ),
-          );
-        }
-      ) : _signedOut(context)
-    );
+        drawer: NavigationDrawer(), // provides nav drawer
+        appBar: new AppBar(
+          title: new Text("Billing Page"),
+          backgroundColor: Colors.purple,
+        ),
+        body: signedIn
+            ? StreamBuilder(
+                stream: databaseReference.collection('contacts').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(
+                        child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.amber)));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Expanded(child: _listView(snapshot)),
+                      ],
+                    ),
+                  );
+                })
+            : _signedOut(context));
   }
 
-  _listView(AsyncSnapshot<QuerySnapshot> snapshot) { 
+  _listView(AsyncSnapshot<QuerySnapshot> snapshot) {
     return ListView.builder(
-      itemCount: snapshot.data.documents.length,
-      itemBuilder: (context, index) {
-        return Card(
-          elevation: 5,
-          child: ListTile(
-            contentPadding: EdgeInsets.all(8.0),
-            leading: (snapshot.data.documents[index]['avatar'].toString() != 'none' 
-            && (Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits) != null && 
-            Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits).length > 0))
-                        ? CircleAvatar(
-                          backgroundImage: MemoryImage(
-                            Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits
-                            )
-                          ),
-                          maxRadius: 30,
-                        )
-                        : CircleAvatar(
-                          child: Text(
-                            snapshot.data.documents[index]['displayName'][0],
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 36.0
-                            ),
-                          ),
-                          backgroundColor: Colors.purple,
-                          maxRadius: 30,
+        itemCount: snapshot.data.documents.length,
+        itemBuilder: (context, index) {
+          return Card(
+            elevation: 5,
+            child: ListTile(
+                contentPadding: EdgeInsets.all(8.0),
+                leading: (snapshot.data.documents[index]['avatar'].toString() !=
+                            'none' &&
+                        (Uint8List.fromList(snapshot.data
+                                    .documents[index]['avatar'].codeUnits) !=
+                                null &&
+                            Uint8List.fromList(snapshot.data
+                                        .documents[index]['avatar'].codeUnits)
+                                    .length >
+                                0))
+                    ? CircleAvatar(
+                        backgroundImage: MemoryImage(Uint8List.fromList(snapshot
+                            .data.documents[index]['avatar'].codeUnits)),
+                        maxRadius: 30,
+                      )
+                    : CircleAvatar(
+                        child: Text(
+                          snapshot.data.documents[index]['displayName'][0],
+                          style: TextStyle(color: Colors.white, fontSize: 36.0),
                         ),
-            title: Text(
-              snapshot.data.documents[index]['displayName'],
-              style: TextStyle(
-                fontSize: 24.0
-              ),
-            ),
-            subtitle: Text(
-              snapshot.data.documents[index]['bill'].toStringAsFixed(2),
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18.0
-              ),
-            ),
-            trailing: (snapshot.data.documents[index]['bill'] > 0) ? _requestButton(context) :  _payButton(context),
-            onTap: () {
-              String contactName = snapshot.data.documents[index]['displayName'];
-              String dollars;
-              dollars = snapshot.data.documents[index]['bill'].toStringAsFixed(2);
-              var avatar;
-              if(snapshot.data.documents[index]['avatar'] != 'none') {
-                avatar = Uint8List.fromList(snapshot.data.documents[index]['avatar'].codeUnits);
-              } else {
-                avatar = 'none';
-              }
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) => BillContactPage(
-                  name: contactName,
-                  money: double.parse(dollars),
-                  avatar: avatar)));
-            },
-            onLongPress: () {
-              String contactName = snapshot.data.documents[index]['displayName'].toString();
-              bool youOwe;
-              String dollars;
-              if (snapshot.data.documents[index]['bill'] > 0) {
-                youOwe = false;
-                dollars = snapshot.data.documents[index]['bill'].toStringAsFixed(2);
-              } else {
-                youOwe = true;
-                dollars = (-1 * snapshot.data.documents[index]['bill']).toStringAsFixed(2);
-              }
-              Fluttertoast.showToast(
-                msg: youOwe ? 'You owe $contactName \$$dollars' : '$contactName owes you \$$dollars',
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIos: 1,
-                fontSize: 16.0,
-              );
-            }
-          ),
-        );
-      }
-    );
+                        backgroundColor: Colors.purple,
+                        maxRadius: 30,
+                      ),
+                title: Text(
+                  snapshot.data.documents[index]['displayName'],
+                  style: TextStyle(fontSize: 24.0),
+                ),
+                subtitle: Text(
+                  snapshot.data.documents[index]['bill'].toStringAsFixed(2),
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                trailing: Wrap(
+                  spacing: 10, // space between two icons
+                  children: <Widget>[
+                    (snapshot.data.documents[index]['bill'] > 0)
+                        ? _requestButton(context)
+                        : _payButton(context),
+                    _textButton(
+                        context,
+                        snapshot.data.documents[index]['displayName'],
+                        snapshot.data.documents[index]['phoneNumber'],
+                        snapshot.data.documents[index]['bill']),
+                  ],
+                ),
+                onTap: () {
+                  String contactName =
+                      snapshot.data.documents[index]['displayName'];
+                  String dollars;
+                  dollars =
+                      snapshot.data.documents[index]['bill'].toStringAsFixed(2);
+                  var avatar;
+                  if (snapshot.data.documents[index]['avatar'] != 'none') {
+                    avatar = Uint8List.fromList(
+                        snapshot.data.documents[index]['avatar'].codeUnits);
+                  } else {
+                    avatar = 'none';
+                  }
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BillContactPage(
+                              name: contactName,
+                              money: double.parse(dollars),
+                              avatar: avatar)));
+                },
+                onLongPress: () {
+                  String contactName =
+                      snapshot.data.documents[index]['displayName'].toString();
+                  bool youOwe;
+                  String dollars;
+                  if (snapshot.data.documents[index]['bill'] > 0) {
+                    youOwe = false;
+                    dollars = snapshot.data.documents[index]['bill']
+                        .toStringAsFixed(2);
+                  } else {
+                    youOwe = true;
+                    dollars = (-1 * snapshot.data.documents[index]['bill'])
+                        .toStringAsFixed(2);
+                  }
+                  Fluttertoast.showToast(
+                    msg: youOwe
+                        ? 'You owe $contactName \$$dollars'
+                        : '$contactName owes you \$$dollars',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIos: 1,
+                    fontSize: 16.0,
+                  );
+                }),
+          );
+        });
   }
 
   Widget _requestButton(BuildContext context) {
     return RaisedButton(
-      child: Text(
-        'Request'
-      ),
+      child: Text('Request'),
       shape: StadiumBorder(),
       color: Colors.amber,
       onPressed: () {
-        if(prefService == PaymentServices.gpay) {
+        if (prefService == PaymentServices.gpay) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "Google Pay",
-            selectedUrl: "https://pay.google.com",
-          )));
-        } else if(prefService == PaymentServices.paypal) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "Google Pay",
+                    selectedUrl: "https://pay.google.com",
+                  )));
+        } else if (prefService == PaymentServices.paypal) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "PayPal",
-            selectedUrl: "https://www.paypal.com/us/home",
-          )));
-        } else if(prefService == PaymentServices.cashapp) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "PayPal",
+                    selectedUrl: "https://www.paypal.com/us/home",
+                  )));
+        } else if (prefService == PaymentServices.cashapp) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "CashApp",
-            selectedUrl: "https://cash.app/",
-          )));
-        } else if(prefService == PaymentServices.venmo) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "CashApp",
+                    selectedUrl: "https://cash.app/",
+                  )));
+        } else if (prefService == PaymentServices.venmo) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "Venmo",
-            selectedUrl: "https://venmo.com/",
-          )));
-        } else if(prefService == PaymentServices.zelle) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "Venmo",
+                    selectedUrl: "https://venmo.com/",
+                  )));
+        } else if (prefService == PaymentServices.zelle) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "Zelle",
-            selectedUrl: "https://www.zellepay.com/",
-          )));
+              builder: (BuildContext context) => WebViewPage(
+                    title: "Zelle",
+                    selectedUrl: "https://www.zellepay.com/",
+                  )));
         }
       },
     );
@@ -168,43 +197,41 @@ class BillingPage extends StatelessWidget {
 
   Widget _payButton(BuildContext context) {
     return RaisedButton(
-      child: Text(
-        'Pay'
-      ),
+      child: Text('Pay'),
       shape: StadiumBorder(),
       color: Colors.amber,
       onPressed: () {
-        if(prefService == PaymentServices.gpay) {
+        if (prefService == PaymentServices.gpay) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "Google Pay",
-            selectedUrl: "https://pay.google.com",
-          )));
-        } else if(prefService == PaymentServices.paypal) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "Google Pay",
+                    selectedUrl: "https://pay.google.com",
+                  )));
+        } else if (prefService == PaymentServices.paypal) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "PayPal",
-            selectedUrl: "https://www.paypal.com/us/home",
-          )));
-        } else if(prefService == PaymentServices.cashapp) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "PayPal",
+                    selectedUrl: "https://www.paypal.com/us/home",
+                  )));
+        } else if (prefService == PaymentServices.cashapp) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "CashApp",
-            selectedUrl: "https://cash.app/",
-          )));
-        } else if(prefService == PaymentServices.venmo) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "CashApp",
+                    selectedUrl: "https://cash.app/",
+                  )));
+        } else if (prefService == PaymentServices.venmo) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "Venmo",
-            selectedUrl: "https://venmo.com/",
-          )));
-        } else if(prefService == PaymentServices.zelle) {
+              builder: (BuildContext context) => WebViewPage(
+                    title: "Venmo",
+                    selectedUrl: "https://venmo.com/",
+                  )));
+        } else if (prefService == PaymentServices.zelle) {
           Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context) => WebViewPage(
-            title: "Zelle",
-            selectedUrl: "https://www.zellepay.com/",
-          )));
-        }      
+              builder: (BuildContext context) => WebViewPage(
+                    title: "Zelle",
+                    selectedUrl: "https://www.zellepay.com/",
+                  )));
+        }
       },
     );
   }
@@ -225,5 +252,66 @@ class BillingPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _textButton(BuildContext context, String personName,
+      String phoneNumber, double bill) {
+    return IconButton(
+      icon: Icon(Icons.textsms),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) =>
+              _buildTextingDialog(context, personName, phoneNumber, bill),
+        );
+      },
+    );
+  }
+
+  Widget _buildTextingDialog(BuildContext context, String personName,
+      String phoneNumber, double bill) {
+    return new AlertDialog(
+      title: new Text("Text $personName"),
+      content: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new Text("Pressing \'Okay\' will send you to the texting app. \n"),
+          new Text("Phone Number: $phoneNumber \n"),
+          new Text("Message: $defaultTextMessage $bill"),
+        ],
+      ),
+      actions: <Widget>[
+        new FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          textColor: Colors.red,
+          child: const Text('Cancel'),
+        ),
+        new FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            //Add their phone in the list
+            recipentsPhoneNumber.add(phoneNumber);
+            // Open message app
+            _sendSMS(
+                defaultTextMessage + bill.toString(), recipentsPhoneNumber);
+            recipentsPhoneNumber.clear();
+          },
+          textColor: Theme.of(context).primaryColor,
+          child: const Text('Okay'),
+        ),
+      ],
+    );
+  }
+
+  void _sendSMS(String message, List<String> recipents) async {
+    String _result = await FlutterSmsPlatform.instance
+        .sendSMS(message: message, recipients: recipents)
+        .catchError((onError) {
+      print(onError);
+    });
+    print(_result);
   }
 }

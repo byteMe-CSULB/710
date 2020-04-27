@@ -15,6 +15,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:gas_710/auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 double CAMERA_ZOOM = 13;
 double CAMERA_TILT = 0;
@@ -29,7 +30,7 @@ class NavigationPage extends StatefulWidget {
   _NavigationPageState createState() => _NavigationPageState();
 }
 
-class _NavigationPageState extends State<NavigationPage> {
+class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObserver {
   Completer<GoogleMapController> _controller = Completer();
   TextEditingController _textController = new TextEditingController();
 
@@ -84,15 +85,64 @@ class _NavigationPageState extends State<NavigationPage> {
   bool userDriving = true;
   Contact _driver = Contact();
 
+  String _theme;
+  String _darkMapStyle;
+  String _lightMapStyle;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    getTheme();
+    rootBundle.loadString('assets/dark_map_theme.json').then((string) {
+     _darkMapStyle = string;
+    });
+    rootBundle.loadString('assets/light_map_theme.json').then((string) {
+     _lightMapStyle = string;
+    });
     setSourceAndDestinationIcons();
     getStateLocation();
     _getInitLocation();
     setGas();
     getUserProfile();
     getFuelEfficiency();
+  }
+
+  Future setTheme(String value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('theme', value);
+    setState(() {
+      _theme = prefs.getString('theme');
+    });
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    final Brightness brightness = 
+    WidgetsBinding.instance.window.platformBrightness;
+    //inform listeners and rebuild widget tree
+    print('THEME CHANGED');
+    if(brightness == Brightness.dark) {
+      setTheme('Dark');
+      Route route = MaterialPageRoute(builder: (context) => NavigationPage());
+      Navigator.pushReplacement(context, route);
+    } else if(brightness == Brightness.light) {
+      setTheme('Light');
+      Route route = MaterialPageRoute(builder: (context) => NavigationPage());
+      Navigator.pushReplacement(context, route);
+    } else {
+      setTheme('Light');
+      Route route = MaterialPageRoute(builder: (context) => NavigationPage());
+      Navigator.pushReplacement(context, route);
+    }
+  }
+
+  void getTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _theme = (prefs.getString('theme') ?? (MediaQuery.of(context).platformBrightness == Brightness.dark ? 'Dark' : 'Light'));
+    });
+    print('Theme $_theme');
   }
 
   void getUserProfile() async {
@@ -131,6 +181,13 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   void _onMapCreated(GoogleMapController controller) {
+    if(_theme == 'Dark') {
+      controller.setMapStyle(_darkMapStyle);
+    } else if(_theme == 'Light'){
+      controller.setMapStyle(_lightMapStyle);
+    } else {
+      controller.setMapStyle(_lightMapStyle);
+    }
     _controller.complete(controller);
   }
 
@@ -182,6 +239,7 @@ class _NavigationPageState extends State<NavigationPage> {
       ),
       body: SlidingUpPanel(
         controller: _pc,
+        color: _theme == 'Dark' ? Color.fromRGBO(18, 18, 18, 1.0) : Color.fromRGBO(255, 255, 255, 1.0),
         borderRadius: radius,
         minHeight: 70,
         backdropTapClosesPanel: true,
@@ -215,7 +273,7 @@ class _NavigationPageState extends State<NavigationPage> {
                               Spacer(),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.purple,
+                                  color: _theme == 'Dark' ? Colors.amber : Colors.purple,
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
@@ -240,7 +298,7 @@ class _NavigationPageState extends State<NavigationPage> {
                               ),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.purple,
+                                  color: _theme == 'Dark' ? Colors.amber : Colors.purple,
                                   shape: BoxShape.circle
                                 ),
                                 child: IconButton(
@@ -267,7 +325,7 @@ class _NavigationPageState extends State<NavigationPage> {
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey[100],
+                                color: _theme == 'Dark' ? Colors.grey[900] : Colors.grey[100],
                               ),
                               child: passengers > 0 ? ListView.builder(
                               itemCount: contacts.length,
@@ -299,7 +357,6 @@ class _NavigationPageState extends State<NavigationPage> {
                                         title: Text(
                                           displayName,
                                           style: TextStyle(
-                                            color: Colors.black,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold
                                           ),
@@ -437,7 +494,6 @@ class _NavigationPageState extends State<NavigationPage> {
                         color: ((passengers > 0) && (_locationSearched) && (_userProfileSet)) ? Colors.amber : Colors.grey[400],
                         child: Text(
                           "Confirm Passengers",
-                          style: TextStyle(color: Colors.black),
                         ),
                         onPressed: confirmPassengerButtonPress,
                         onLongPress: () {
@@ -472,7 +528,7 @@ class _NavigationPageState extends State<NavigationPage> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                color: Colors.white,
+                color: _theme == 'Dark' ? Color.fromRGBO(18, 18, 18, 1.0) : Colors.white,
               ),
               child: TextField(
                 readOnly: false,
@@ -664,6 +720,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   void dispose() {
     _textController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -856,6 +913,7 @@ class _NavigationPageState extends State<NavigationPage> {
 
   setGas() async {
     // TODO: change collection to 'costPerState' when updated in Firebase
+    // TODO: change so that it actually gets the location instead of pulling California's gas
     var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: 'California').getDocuments();
     query.then((value) => gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
   }

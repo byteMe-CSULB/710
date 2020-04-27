@@ -4,7 +4,7 @@ import 'package:gas_710/BillingPage.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
 import 'package:gas_710/SettingsPage.dart';
-import 'package:gas_710/ContactsPage.dart';
+import 'package:gas_710/contactPages/ContactListPage.dart';
 import 'package:gas_710/WebViewPage.dart';
 import 'package:gas_710/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,7 +64,7 @@ class NavigationDrawerState extends State<NavigationDrawer> {
                     alignment: Alignment.bottomLeft,
                     child: Text(
                         "Please sign in, check Settings!", // message to sign in
-                        style: TextStyle(fontSize: 17)),
+                        style: TextStyle(fontSize: 17, color: Colors.black)),
                   ),
                   decoration: BoxDecoration(color: Colors.amber),
                 ),
@@ -141,7 +141,7 @@ class NavigationDrawerState extends State<NavigationDrawer> {
               Navigator.push(
                   context,
                   new MaterialPageRoute(
-                      builder: (context) => new ContactsPage()));
+                      builder: (context) => new ContactListPage()));
             },
           ),
           new ListTile(
