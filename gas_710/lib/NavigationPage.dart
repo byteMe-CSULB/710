@@ -379,13 +379,23 @@ class _NavigationPageState extends State<NavigationPage> {
                           ),
                           Align(
                             alignment: Alignment.centerRight,
-                            child: Text(
-                              (passengers == 0 || miles == 0) ? 'Cost Per Passenger: 0.0' 
-                              : 'Cost Per Passenger: $costPerPassenger',
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.grey[700],
+                            child: InkWell(
+                              child: Text(
+                                (passengers == 0 || miles == 0) ? 'Cost Per Passenger: 0.0' 
+                                : 'Cost Per Passenger: $costPerPassenger',
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  color: Colors.grey[700],
+                                  decoration: (passengers == 0 || miles == 0) ? null : TextDecoration.underline 
+                                ),
                               ),
+                              onTap: () {
+                                if(passengers != 0 || miles != 0) {
+                                  Fluttertoast.showToast(
+                                    msg: '(${gas.toStringAsFixed(2)} GAS x $miles MILES) / ($fuelEfficiency MPG x $passengers PASSENGERS) '
+                                  );
+                                }
+                              },
                             )
                           ),
                           Align(
@@ -398,18 +408,8 @@ class _NavigationPageState extends State<NavigationPage> {
                               ),
                             ),
                           ),
-                        ]),
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child:
-                Text( (passengers == 0 ? "" :
-                    'Cost per passenger: ($gas * $miles) / ($fuelEfficiency * $passengers) '),
-                  style: TextStyle(
-                    fontSize: 17.0,
-                    color: Colors.grey[700],
+                        ]
+                      ),
                   ),
                 ),
               ),
