@@ -71,6 +71,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   double latitude = 0.0;
   double longitude = 0.0;
 
+  double fuelEfficiency = 0.0;
   double cost = 0.0;
   double costPerPassenger = 0.0;
   double gas = 0.0;
@@ -104,6 +105,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     _getInitLocation();
     setGas();
     getUserProfile();
+    getFuelEfficiency();
   }
 
   Future setTheme(String value) async {
@@ -328,7 +330,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                               child: passengers > 0 ? ListView.builder(
                               itemCount: contacts.length,
                               itemBuilder: (BuildContext context, int index) {
-                                final item = contacts[index].displayName + ' - ' +contacts[index].phones.first.value.toString();
+                                String displayName = contacts[index].displayName;
+                                String phone = contacts[index].phones.isEmpty ? "" : contacts[index].phones.first.value.toString();
+                                final item = displayName + " - " + phone;
                                 return Dismissible(
                                   key : Key(item),
                                   child: Card(
@@ -351,21 +355,19 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                                             maxRadius: 30,
                                           ),
                                         title: Text(
-                                          contacts[index].displayName,
+                                          displayName,
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold
                                           ),
                                         ),
-                                        subtitle: Text(contacts[index].phones.first.value.toString() == null ? noPhoneError :
-                                          contacts[index].phones.first.value.toString()
+                                        subtitle: Text(phone == "" ? noPhoneError :
+                                          phone
                                         ),
                                         trailing: Text((index + 1).toString()),
                                         onLongPress: () {
                                           setState(() {
-                                            _driver.displayName = contacts[index].displayName;
-                                            _driver.emails = contacts[index].emails;
-                                            _driver.phones = contacts[index].phones;
+                                            _driver = contacts[index];
                                             userDriving = false;
                                           });
                                           Scaffold.of(context).showSnackBar(SnackBar(content: Text('$item has been assigned as driver')));
@@ -374,9 +376,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                                   ),
                                   onDismissed: (direction) {
                                     setState(() {
-                                      if(_driver.displayName == contacts[index].displayName
-                                      && 
-                                      _driver.phones.first.value.toString() == contacts[index].phones.first.value.toString()) {
+                                      if(_driver == contacts[index]) {
                                         userDriving = true;
                                         getUserProfile();
                                         Scaffold.of(context).showSnackBar(SnackBar(content: Text("You are the driver")));
@@ -436,13 +436,23 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                           ),
                           Align(
                             alignment: Alignment.centerRight,
-                            child: Text(
-                              (passengers == 0 || miles == 0) ? 'Cost Per Passenger: 0.0' 
-                              : 'Cost Per Passenger: $costPerPassenger',
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.grey[700],
+                            child: InkWell(
+                              child: Text(
+                                (passengers == 0 || miles == 0) ? 'Cost Per Passenger: 0.0' 
+                                : 'Cost Per Passenger: $costPerPassenger',
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  color: Colors.grey[700],
+                                  decoration: (passengers == 0 || miles == 0) ? null : TextDecoration.underline 
+                                ),
                               ),
+                              onTap: () {
+                                if(passengers != 0 || miles != 0) {
+                                  Fluttertoast.showToast(
+                                    msg: '(${gas.toStringAsFixed(2)} GAS x $miles MILES) / ($fuelEfficiency MPG x $passengers PASSENGERS) '
+                                  );
+                                }
+                              },
                             )
                           ),
                           Align(
@@ -455,7 +465,8 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                               ),
                             ),
                           ),
-                        ]),
+                        ]
+                      ),
                   ),
                 ),
               ),
@@ -783,8 +794,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                             ),
                       label: Text(contacts[index].displayName,
                           style: TextStyle(color: Colors.black)),
-                      backgroundColor: (_driver.phones.first.value.toString() == contacts[index].phones.first.value.toString())
-                        ? Colors.amber : Colors.grey[300],
+                      backgroundColor: (_driver == contacts[index]) ? Colors.amber : Colors.grey[300]
                     ),
                   ),
                 ),
@@ -910,8 +920,10 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   setCost() {
     setState(() {
-      int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
-      print('Gas: $gas Miles: $miles');
+
+
+
+      print('Gas: $gas Miles: $miles FuelEfficiency $fuelEfficiency');
       double tempCost= ((miles * gas) / fuelEfficiency);
       cost = double.parse(tempCost.toStringAsFixed(2));
       print('Cost: $cost');
@@ -1040,5 +1052,12 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
       }
     }
     userReference.collection('contacts').document('init').delete();
+  }
+
+  Future getFuelEfficiency() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      this.fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
+    });
   }
 }
