@@ -507,6 +507,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
             mapType: MapType.normal,
             onMapCreated: _onMapCreated,
             initialCameraPosition: initialLocation,
+            onLongPress: (LatLng destination) {
+              longPressAndNavigate(destination);
+            },
           ),
           Positioned(
             top: 30.0,
@@ -575,6 +578,40 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     final c = await _controller.future;
     final p = CameraPosition(target: LatLng(lat, long), zoom: 15.0);
     c.animateCamera(CameraUpdate.newCameraPosition(p));
+  }
+
+  longPressAndNavigate(LatLng destination) {
+    _markers.clear(); // clears any previous search queries
+    _polylines.clear();
+    polylineCoordinates.clear();
+    Geolocator().placemarkFromCoordinates(destination.latitude, destination.longitude).then((result) async {
+      Placemark placemark = result[0];
+      animateTo(placemark.position.latitude,
+          placemark.position.longitude); // takes us to the location
+      var currentLocation = await Geolocator().getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best); // pings YOUR location
+      double distanceInMeter = await Geolocator().distanceBetween(
+          currentLocation.latitude,
+          currentLocation.longitude,
+          placemark.position.latitude,
+          placemark.position.longitude);
+      miles = convertMetersToMiles(distanceInMeter);
+      if(miles > 0) {
+        setCost();
+        setCostPP();
+      }
+      _locationSearched = true;
+      _milesGot = true;
+      latitude = placemark.position.latitude;
+      longitude = placemark.position.longitude;
+      searchAddr = '${placemark.subThoroughfare} ${placemark.thoroughfare} ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.postalCode}';
+      print(
+          "Distance to $searchAddr is $distanceInMeter meters from your location");
+      setMapPins(currentLocation.latitude, currentLocation.longitude,
+          placemark.position.latitude, placemark.position.longitude);
+      setPolylines(currentLocation.latitude, currentLocation.longitude,
+          placemark.position.latitude, placemark.position.longitude);
+    });
   }
 
   searchandNavigate() {
