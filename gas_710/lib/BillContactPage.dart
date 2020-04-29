@@ -12,7 +12,7 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'dart:collection';
 
 class BillContactPage extends StatefulWidget {
-  final name, money, avatar; // required keys from BillingPage.dart
+  final name, money, avatar; // required keys from BillingPassengersPage.dart
   const BillContactPage(
       {Key key,
       @required this.name,
@@ -45,7 +45,7 @@ class _BillContactPageState extends State<BillContactPage> {
 
   Future<PermissionStatus> requestPermission(Permission permission) async {
     final status = await permission.request();
-    setState((){
+    setState(() {
       _storagePermissionStatus = status;
     });
     return status;
@@ -76,12 +76,14 @@ class _BillContactPageState extends State<BillContactPage> {
                   return IconButton(
                     icon: Icon(Icons.picture_as_pdf),
                     onPressed: () async {
-                      if (_storagePermissionStatus == PermissionStatus.granted) {
+                      if (_storagePermissionStatus ==
+                          PermissionStatus.granted) {
                         print('Creating PDF');
                         _generatePdf(context, snapshot);
                       } else {
-                        requestPermission(_storagePermission).then((PermissionStatus status){
-                          if(status == PermissionStatus.granted) {
+                        requestPermission(_storagePermission)
+                            .then((PermissionStatus status) {
+                          if (status == PermissionStatus.granted) {
                             print('Creating PDF');
                             _generatePdf(context, snapshot);
                           } else {
@@ -101,21 +103,19 @@ class _BillContactPageState extends State<BillContactPage> {
                 })
           ],
         ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.start, 
-        children: <Widget>[
+        body: Column(mainAxisAlignment: MainAxisAlignment.start, children: <
+            Widget>[
           Container(
             height: 200,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
-              image: DecorationImage(
-                image: (widget.avatar.toString() != 'none' && (widget.avatar != null && widget.avatar.length > 0))
-                  ? MemoryImage(
-                      widget.avatar
-                    )
+                image: DecorationImage(
+              image: (widget.avatar.toString() != 'none' &&
+                      (widget.avatar != null && widget.avatar.length > 0))
+                  ? MemoryImage(widget.avatar)
                   : AssetImage('assets/noAvatar.jpg'),
-                  fit: BoxFit.fill,
-              )
-            ),
+              fit: BoxFit.fill,
+            )),
           ),
           ListTile(
             title: Text(
@@ -126,8 +126,8 @@ class _BillContactPageState extends State<BillContactPage> {
             ),
             subtitle: Text(
               (widget.money.toString().contains('-'))
-                ? '-\$${(widget.money * -1).toString()}'
-                : '\$${widget.money.toString()}',
+                  ? '-\$${(widget.money * -1).toString()}'
+                  : '\$${widget.money.toString()}',
               style: TextStyle(
                 fontSize: 36.0,
                 color: (widget.money > 0) ? Colors.green : Colors.red,
@@ -155,8 +155,7 @@ class _BillContactPageState extends State<BillContactPage> {
               builder: (context, snapshot) {
                 if (!snapshot.hasData)
                   return CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.amber));
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
                 return Container(
                   height: 150,
                   padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
@@ -164,8 +163,7 @@ class _BillContactPageState extends State<BillContactPage> {
                     ListTile(
                       leading: Icon(Icons.phone),
                       title: Text('Phone Number'),
-                      subtitle:
-                          Text(snapshot.data.documents[0]['phoneNumber']),
+                      subtitle: Text(snapshot.data.documents[0]['phoneNumber']),
                     ),
                     ListTile(
                       leading: Icon(Icons.email),
@@ -221,8 +219,7 @@ class _BillContactPageState extends State<BillContactPage> {
               builder: (context, snapshot) {
                 if (!snapshot.hasData)
                   return CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.amber));
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
                 return Expanded(child: _cardListView(context, snapshot));
               }),
         ]));
@@ -251,7 +248,8 @@ class _BillContactPageState extends State<BillContactPage> {
         itemCount: trips.length,
         itemBuilder: (context, index) {
           return ExpansionTileCard(
-            leading: Text( // TODO: find a place for the PAID tag
+            leading: Text(
+              // TODO: find a place for the PAID tag
               (paidTrips[index])
                   ? (index + 1).toString() + '\n Paid'
                   : (index + 1)
@@ -481,12 +479,12 @@ class _BillContactPageState extends State<BillContactPage> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text(
-            'Cancel',
-            style: TextStyle(
-              color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.black : Colors.white
-            )
-          ),
+          child: Text('Cancel',
+              style: TextStyle(
+                  color: MediaQuery.of(context).platformBrightness ==
+                          Brightness.light
+                      ? Colors.black
+                      : Colors.white)),
         ),
         // Button for 'Only Me'
         new RaisedButton(
@@ -527,12 +525,13 @@ class _BillContactPageState extends State<BillContactPage> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.black : Colors.white
-                        )
-                      ),
+                      child: Text('Cancel',
+                          style: TextStyle(
+                              color:
+                                  MediaQuery.of(context).platformBrightness ==
+                                          Brightness.light
+                                      ? Colors.black
+                                      : Colors.white)),
                     ),
                     new RaisedButton(
                       color: Colors.red,
