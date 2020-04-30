@@ -12,9 +12,13 @@ import 'package:flutter_sms/flutter_sms_platform.dart';
 
 class BillingPassengersPage extends StatefulWidget {
   final passengerList,
-      pricePerPassenger; // required keys from BillingPassengersPage.dart
+      priceOwedPassengerList,
+      tripLocation; // required keys from BillingPassengersPage.dart
   const BillingPassengersPage(
-      {Key key, @required this.passengerList, @required this.pricePerPassenger})
+      {Key key,
+      @required this.passengerList,
+      @required this.priceOwedPassengerList,
+      @required this.tripLocation})
       : super(key: key);
 
   @override
@@ -35,12 +39,18 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
     return new Scaffold(
         drawer: NavigationDrawer(), // provides nav drawer
         appBar: new AppBar(
-          title: new Text("Billing Page"),
+          title: new Text(
+            widget.tripLocation ?? 'Billing Page',
+            maxLines: 3,
+          ),
           backgroundColor: Colors.purple,
         ),
         body: signedIn
             ? StreamBuilder(
-                stream: databaseReference.collection('contacts').snapshots(),
+                stream: databaseReference
+                    .collection('contacts')
+                    .where('displayName', whereIn: widget.passengerList)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return Center(
@@ -62,7 +72,7 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
 
   _listView(AsyncSnapshot<QuerySnapshot> snapshot) {
     return ListView.builder(
-        itemCount: widget.passengerList.length,
+        itemCount: snapshot.data.documents.length,
         itemBuilder: (context, index) {
           return Card(
             elevation: 5,
@@ -95,7 +105,10 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
                   style: TextStyle(fontSize: 24.0),
                 ),
                 subtitle: Text(
-                  snapshot.data.documents[index]['bill'].toString(),
+                  '\$' +
+                      widget.priceOwedPassengerList[
+                              snapshot.data.documents[index]['displayName']]
+                          .toString(),
                   style: TextStyle(fontSize: 18.0),
                 ),
                 trailing: Wrap(
@@ -108,15 +121,17 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
                         context,
                         snapshot.data.documents[index]['displayName'],
                         snapshot.data.documents[index]['phoneNumber'],
-                        snapshot.data.documents[index]['bill']),
+                        widget.priceOwedPassengerList[
+                            snapshot.data.documents[index]['displayName']]),
                   ],
                 ),
                 onTap: () {
                   String contactName =
                       snapshot.data.documents[index]['displayName'];
                   String dollars;
-                  dollars =
-                      snapshot.data.documents[index]['bill'].toStringAsFixed(2);
+                  dollars = widget.priceOwedPassengerList[
+                          snapshot.data.documents[index]['displayName']]
+                      .toString();
                   var avatar;
                   if (snapshot.data.documents[index]['avatar'] != 'none') {
                     avatar = Uint8List.fromList(
@@ -137,13 +152,18 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
                       snapshot.data.documents[index]['displayName'].toString();
                   bool youOwe;
                   String dollars;
-                  if (snapshot.data.documents[index]['bill'] > 0) {
+                  if (widget.priceOwedPassengerList[
+                          snapshot.data.documents[index]['displayName']] >
+                      0) {
                     youOwe = false;
-                    dollars = snapshot.data.documents[index]['bill']
-                        .toStringAsFixed(2);
+                    dollars = widget.priceOwedPassengerList[
+                            snapshot.data.documents[index]['displayName']]
+                        .toString();
                   } else {
                     youOwe = true;
-                    dollars = (-1 * snapshot.data.documents[index]['bill'])
+                    dollars = (-1 *
+                            widget.priceOwedPassengerList[
+                                snapshot.data.documents[index]['displayName']])
                         .toStringAsFixed(2);
                   }
                   Fluttertoast.showToast(

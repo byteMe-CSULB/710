@@ -232,14 +232,14 @@ class _BillContactPageState extends State<BillContactPage> {
     var trips = []; //location names
     var dates = [];
     List<String> tripId = []; //list of trip id from Firebase.
-    List<bool> paidTrips = []; //List of paid Trips
+    List<double> owedTrips = []; //List of paid Trips
     for (int i = 0; i < snapshotLength; i++) {
       trips.add(snapshot.data.documents[i]['location']);
       tripId.add(snapshot.data.documents[i].documentID); //Get trips id
-      //Get passengersPaid data from Firebase
-      HashMap tempPaidTrips = new HashMap<String, dynamic>.from(
-          snapshot.data.documents[i]['passengersPaid']);
-      paidTrips.add(tempPaidTrips[widget.name]);
+      //Get passengersOwed data from Firebase
+      HashMap tempOwedTrips = new HashMap<String, dynamic>.from(
+          snapshot.data.documents[i]['passengersOwed']);
+      owedTrips.add(tempOwedTrips[widget.name]);
       DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
       dates.add(DateFormat.yMMMMd().format(myDateTime).toString());
     }
@@ -249,8 +249,7 @@ class _BillContactPageState extends State<BillContactPage> {
         itemBuilder: (context, index) {
           return ExpansionTileCard(
             leading: Text(
-              // TODO: find a place for the PAID tag
-              (paidTrips[index])
+              (owedTrips[index] == 0.0)
                   ? (index + 1).toString() + '\n Paid'
                   : (index + 1)
                       .toString(), // for quick ordering, essentially should be in chronological order
@@ -276,6 +275,18 @@ class _BillContactPageState extends State<BillContactPage> {
                     ),
                     child: Text(
                         'Miles - ${snapshot.data.documents[index]['miles']}',
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold)),
+                  )),
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 1.0,
+                    ),
+                    child: Text(
+                        'Price per Passenger - \$${snapshot.data.documents[index]['pricePerPassenger']}',
                         style: TextStyle(
                             fontSize: 18.0, fontWeight: FontWeight.bold)),
                   )),
@@ -331,16 +342,16 @@ class _BillContactPageState extends State<BillContactPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.0)),
                       onPressed: () {
-                        HashMap passengersPaidList =
+                        HashMap passengersOwedList =
                             new HashMap<String, dynamic>.from(snapshot
-                                .data.documents[index]['passengersPaid']);
-                        if (!passengersPaidList[widget.name]) {
-                          passengersPaidList.update(widget.name, (v) => true);
+                                .data.documents[index]['passengersOwed']);
+                        if (passengersOwedList[widget.name] > 0.0) {
+                          passengersOwedList.update(widget.name, (v) => 0.0);
                           databaseReference
                               .collection('trips')
                               .document(tripId[index])
                               .updateData(
-                                  {'passengersPaid': passengersPaidList});
+                                  {'passengersOwed': passengersOwedList});
                         }
                       },
                       // this should keep the bill in firebase

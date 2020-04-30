@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -38,7 +39,10 @@ class _BillingPageState extends State<BillingPage> {
         body: signedIn
             ? StreamBuilder(
                 //Get trips from firebase
-                stream: databaseReference.collection('trips').snapshots(),
+                stream: databaseReference
+                    .collection('trips')
+                    .orderBy('date', descending: true)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return Center(
@@ -62,7 +66,9 @@ class _BillingPageState extends State<BillingPage> {
     var dates = [];
     for (int i = 0; i < snapshot.data.documents.length; i++) {
       DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
-      dates.add(DateFormat.yMMMMd().format(myDateTime).toString());
+      dates.add(DateFormat.yMMMMd().format(myDateTime).toString() +
+          " " +
+          DateFormat("h:mm a").format(myDateTime).toString());
     }
     return ListView.builder(
         itemCount: snapshot.data.documents.length,
@@ -79,13 +85,18 @@ class _BillingPageState extends State<BillingPage> {
                 "Passengers: " +
                     snapshot.data.documents[index]['passengers'].length
                         .toString() +
-                    "\nDate: " +
+                    "\nDater: " +
                     dates[index],
                 style: TextStyle(fontSize: 12.0),
               ),
               onTap: () {
+                // Get passenger names
                 List<dynamic> passengerList =
                     snapshot.data.documents[index]['passengers'];
+                // Get price owed from passengers
+                HashMap priceOwedPassengerList =
+                    new HashMap<String, dynamic>.from(
+                        snapshot.data.documents[index]['passengersOwed']);
                 //Remove the text 'Delete' in their name
                 for (int i = 0; i < passengerList.length; i++) {
                   if (passengerList[i].toString().contains('(Deleted')) {
@@ -94,42 +105,17 @@ class _BillingPageState extends State<BillingPage> {
                         .substring(0, passengerList[i].toString().length - 9);
                   }
                 }
-                print(passengerList);
-                String pricePerPassenger = snapshot
-                    .data.documents[index]['pricePerPassenger']
-                    .toString();
+                String tripLocation =
+                    snapshot.data.documents[index]['location'].toString();
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => BillingPassengersPage(
                               passengerList: passengerList,
-                              pricePerPassenger: pricePerPassenger,
+                              priceOwedPassengerList: priceOwedPassengerList,
+                              tripLocation: tripLocation,
                             )));
               },
-//                onLongPress: () {
-//                  String contactName =
-//                      snapshot.data.documents[index]['displayName'].toString();
-//                  bool youOwe;
-//                  String dollars;
-//                  if (snapshot.data.documents[index]['bill'] > 0) {
-//                    youOwe = false;
-//                    dollars = snapshot.data.documents[index]['bill']
-//                        .toStringAsFixed(2);
-//                  } else {
-//                    youOwe = true;
-//                    dollars = (-1 * snapshot.data.documents[index]['bill'])
-//                        .toStringAsFixed(2);
-//                  }
-//                  Fluttertoast.showToast(
-//                    msg: youOwe
-//                        ? 'You owe $contactName \$$dollars'
-//                        : '$contactName owes you \$$dollars',
-//                    toastLength: Toast.LENGTH_SHORT,
-//                    gravity: ToastGravity.BOTTOM,
-//                    timeInSecForIos: 1,
-//                    fontSize: 16.0,
-//                  );
-//                }
             ),
           );
         });
