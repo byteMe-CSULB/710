@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/AboutPage.dart';
-import 'package:gas_710/BillingPassengersPage.dart';
 import 'package:gas_710/BillingPage.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
@@ -10,6 +9,7 @@ import 'package:gas_710/WebViewPage.dart';
 import 'package:gas_710/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gas_710/OnBoardingPage.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart'; 
 
 class NavigationDrawer extends StatefulWidget {
   @override
@@ -191,10 +191,7 @@ class NavigationDrawerState extends State<NavigationDrawer> {
               title: Text("Report an issue"),
               onTap: () {
                 Navigator.pop(context);
-                // SnackBar at the bottom, displays that the feature is planned, but not implemented yet
-                Scaffold.of(context).showSnackBar(SnackBar(
-                  content: Text("Feature not implemented yet"),
-                ));
+                sendBugReport();
               }),
           Divider(
             color: Colors.grey[400],
@@ -218,5 +215,34 @@ class NavigationDrawerState extends State<NavigationDrawer> {
         ],
       ),
     );
+  }
+
+  sendBugReport() async {
+    // Get current date & time
+    DateTime now = DateTime.now();
+    String minutes;
+
+    if(now.minute < 10)
+      now.minute.toString().padLeft(1, '0');
+    else
+      minutes = now.minute.toString();
+
+    // Setup bug report email
+    final Email bugReport = Email(
+
+      // Email for developers to read bug report
+      recipients: ['710.bugreport@gmail.com'],
+
+      // Subject contains date & time bug was sent
+      // * TODO: Maybe setup Firebase to increment bug report numbers
+      subject: 'Bug Report ' + now.hour.toString() + ':' + minutes +
+          ', ' + now.month.toString() + '/' + now.day.toString() + '/' + now.year.toString(),
+
+      // Body
+      body: 'Describe your issue below, including what you were trying to do at the time:\n\n',
+
+      isHTML: false,
+    );
+    await FlutterEmailSender.send(bugReport);
   }
 }
