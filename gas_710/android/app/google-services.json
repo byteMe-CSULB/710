@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "310606083871-ffc6eo5gpi02ndu8uvle1s479jqoltrq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.byteMe.gas_710",
+            "certificate_hash": "4759b4f4e9583c1fe622d566615d0d4cd7701b1f"
+          }
+        },
+        {
           "client_id": "310606083871-3an57ura09d0frlqjjcs300gg7vg43n9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
