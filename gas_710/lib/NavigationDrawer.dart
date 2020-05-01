@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/AboutPage.dart';
+import 'package:gas_710/BillingPassengersPage.dart';
 import 'package:gas_710/BillingPage.dart';
 import 'package:gas_710/InfoPage.dart';
 import 'package:gas_710/NavigationPage.dart';
@@ -18,13 +19,14 @@ class NavigationDrawer extends StatefulWidget {
 class NavigationDrawerState extends State<NavigationDrawer> {
   bool _signedIn;
   String _gName, _gEmail, _gImage;
-  
+
   Future checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _signedIn = (prefs.getBool('signedIn') ?? false);
       _gName = (prefs.getString('gName') ?? 'No name provided check settings');
-      _gEmail = (prefs.getString('gEmail') ?? 'No email provided check settings');
+      _gEmail =
+          (prefs.getString('gEmail') ?? 'No email provided check settings');
       _gImage = (prefs.getString('gEmail') ?? 'no image');
     });
   }
@@ -69,10 +71,10 @@ class NavigationDrawerState extends State<NavigationDrawer> {
                   decoration: BoxDecoration(color: Colors.amber),
                 ),
           // TODO: fix bug
-          // UserAccountsDrawerHeader( 
+          // UserAccountsDrawerHeader(
           //   accountName: Text(_gName ?? 'No name provided check settings', style: TextStyle(color: Colors.black)),
           //   accountEmail: Text(_gEmail ?? 'No email provided check settings', style: TextStyle(color: Colors.black)),
-          //   currentAccountPicture: (_gImage != 'no image') 
+          //   currentAccountPicture: (_gImage != 'no image')
           //   ? CircleAvatar(backgroundImage: NetworkImage(imageUrl),)
           //   : CircleAvatar(child: Text(':(', style: TextStyle(fontSize: 24))),
           //   decoration: BoxDecoration(color: Colors.amber),
@@ -149,36 +151,36 @@ class NavigationDrawerState extends State<NavigationDrawer> {
               title: Text("Link to payment services"),
               onTap: () {
                 Navigator.pop(context);
-                if(prefService == PaymentServices.gpay) {
+                if (prefService == PaymentServices.gpay) {
                   Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => WebViewPage(
-                    title: "Google Pay",
-                    selectedUrl: "https://pay.google.com",
-                  )));
-                } else if(prefService == PaymentServices.paypal) {
+                      builder: (BuildContext context) => WebViewPage(
+                            title: "Google Pay",
+                            selectedUrl: "https://pay.google.com",
+                          )));
+                } else if (prefService == PaymentServices.paypal) {
                   Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => WebViewPage(
-                    title: "PayPal",
-                    selectedUrl: "https://www.paypal.com/us/home",
-                  )));
-                } else if(prefService == PaymentServices.cashapp) {
+                      builder: (BuildContext context) => WebViewPage(
+                            title: "PayPal",
+                            selectedUrl: "https://www.paypal.com/us/home",
+                          )));
+                } else if (prefService == PaymentServices.cashapp) {
                   Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => WebViewPage(
-                    title: "CashApp",
-                    selectedUrl: "https://cash.app/",
-                  )));
-                } else if(prefService == PaymentServices.venmo) {
+                      builder: (BuildContext context) => WebViewPage(
+                            title: "CashApp",
+                            selectedUrl: "https://cash.app/",
+                          )));
+                } else if (prefService == PaymentServices.venmo) {
                   Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => WebViewPage(
-                    title: "Venmo",
-                    selectedUrl: "https://venmo.com/",
-                  )));
-                } else if(prefService == PaymentServices.zelle) {
+                      builder: (BuildContext context) => WebViewPage(
+                            title: "Venmo",
+                            selectedUrl: "https://venmo.com/",
+                          )));
+                } else if (prefService == PaymentServices.zelle) {
                   Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => WebViewPage(
-                    title: "Zelle",
-                    selectedUrl: "https://www.zellepay.com/",
-                  )));
+                      builder: (BuildContext context) => WebViewPage(
+                            title: "Zelle",
+                            selectedUrl: "https://www.zellepay.com/",
+                          )));
                 }
               }),
           Divider(
@@ -210,7 +212,8 @@ class NavigationDrawerState extends State<NavigationDrawer> {
                     : Scaffold.of(context)
                         .showSnackBar(SnackBar(content: Text("Not signed in")));
                 signOutGoogle(); // call signout method from auth.dart
-                Navigator.push(context, MaterialPageRoute(builder: (context) => OnBoardingPage()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => OnBoardingPage()));
               }),
         ],
       ),

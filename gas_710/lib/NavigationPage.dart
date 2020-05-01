@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:gas_710/AddPassengersPage.dart';
@@ -30,7 +32,8 @@ class NavigationPage extends StatefulWidget {
   _NavigationPageState createState() => _NavigationPageState();
 }
 
-class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObserver {
+class _NavigationPageState extends State<NavigationPage>
+    with WidgetsBindingObserver {
   Completer<GoogleMapController> _controller = Completer();
   TextEditingController _textController = new TextEditingController();
 
@@ -71,6 +74,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   double latitude = 0.0;
   double longitude = 0.0;
 
+  double fuelEfficiency = 0.0;
   double cost = 0.0;
   double costPerPassenger = 0.0;
   double gas = 0.0;
@@ -94,16 +98,17 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     WidgetsBinding.instance.addObserver(this);
     getTheme();
     rootBundle.loadString('assets/dark_map_theme.json').then((string) {
-     _darkMapStyle = string;
+      _darkMapStyle = string;
     });
     rootBundle.loadString('assets/light_map_theme.json').then((string) {
-     _lightMapStyle = string;
+      _lightMapStyle = string;
     });
     setSourceAndDestinationIcons();
     getStateLocation();
     _getInitLocation();
     setGas();
     getUserProfile();
+    getFuelEfficiency();
   }
 
   Future setTheme(String value) async {
@@ -116,15 +121,15 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   void didChangePlatformBrightness() {
-    final Brightness brightness = 
-    WidgetsBinding.instance.window.platformBrightness;
+    final Brightness brightness =
+        WidgetsBinding.instance.window.platformBrightness;
     //inform listeners and rebuild widget tree
     print('THEME CHANGED');
-    if(brightness == Brightness.dark) {
+    if (brightness == Brightness.dark) {
       setTheme('Dark');
       Route route = MaterialPageRoute(builder: (context) => NavigationPage());
       Navigator.pushReplacement(context, route);
-    } else if(brightness == Brightness.light) {
+    } else if (brightness == Brightness.light) {
       setTheme('Light');
       Route route = MaterialPageRoute(builder: (context) => NavigationPage());
       Navigator.pushReplacement(context, route);
@@ -138,7 +143,10 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void getTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _theme = (prefs.getString('theme') ?? (MediaQuery.of(context).platformBrightness == Brightness.dark ? 'Dark' : 'Light'));
+      _theme = (prefs.getString('theme') ??
+          (MediaQuery.of(context).platformBrightness == Brightness.dark
+              ? 'Dark'
+              : 'Light'));
     });
     print('Theme $_theme');
   }
@@ -146,21 +154,29 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void getUserProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     print(prefs.getString('profileName'));
-    if(prefs.getString('profileName') == "No Name Set") {
+    if (prefs.getString('profileName') == "No Name Set") {
       Fluttertoast.showToast(
         msg: 'Update Contact Profile in Settings!',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIos: 1,
         fontSize: 16.0,
-      );    
+      );
     } else {
       _userProfileSet = true;
     }
     setState(() {
       _driver.displayName = (prefs.getString('profileName') ?? "No Name Set");
-      _driver.emails = [Item(label: 'work', value: (prefs.getString('profileEmail') ?? "No Email Set"))];
-      _driver.phones = [Item(label: 'mobile', value: (prefs.getString('profileNunber') ?? "No Number Set"))];
+      _driver.emails = [
+        Item(
+            label: 'work',
+            value: (prefs.getString('profileEmail') ?? "No Email Set"))
+      ];
+      _driver.phones = [
+        Item(
+            label: 'mobile',
+            value: (prefs.getString('profileNunber') ?? "No Number Set"))
+      ];
     });
   }
 
@@ -175,13 +191,13 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     var currentLocation = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     var currentState = await _getState(currentLocation);
-    state = currentState.toString(); // sets state to current state 
+    state = currentState.toString(); // sets state to current state
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    if(_theme == 'Dark') {
+    if (_theme == 'Dark') {
       controller.setMapStyle(_darkMapStyle);
-    } else if(_theme == 'Light'){
+    } else if (_theme == 'Light') {
       controller.setMapStyle(_lightMapStyle);
     } else {
       controller.setMapStyle(_lightMapStyle);
@@ -210,7 +226,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   _getInitLocation() async {
     var currentLocation = await Geolocator()
-      .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     await _moveToPosition(currentLocation);
   }
 
@@ -237,7 +253,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
       ),
       body: SlidingUpPanel(
         controller: _pc,
-        color: _theme == 'Dark' ? Color.fromRGBO(18, 18, 18, 1.0) : Color.fromRGBO(255, 255, 255, 1.0),
+        color: _theme == 'Dark'
+            ? Color.fromRGBO(18, 18, 18, 1.0)
+            : Color.fromRGBO(255, 255, 255, 1.0),
         borderRadius: radius,
         minHeight: 70,
         backdropTapClosesPanel: true,
@@ -260,148 +278,183 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                           Padding(
                             padding: EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
                             child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: <Widget>[
-                              Text(
-                                'Add Passengers',
-                                style: TextStyle(
-                                  fontSize: 23.0,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Text(
+                                  'Add Passengers',
+                                  style: TextStyle(
+                                    fontSize: 23.0,
+                                  ),
                                 ),
-                              ),
-                              Spacer(),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: _theme == 'Dark' ? Colors.amber : Colors.purple,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: IconButton(
-                                  icon: Icon(Icons.location_on),
-                                  onPressed: () {
-                                    if(_pc.isAttached) {
-                                      if(_pc.isPanelOpen) {
-                                        _pc.close();
-                                        _getLocation();
-                                      } else {
-                                        _getLocation();
+                                Spacer(),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: _theme == 'Dark'
+                                        ? Colors.amber
+                                        : Colors.purple,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.location_on),
+                                    onPressed: () {
+                                      if (_pc.isAttached) {
+                                        if (_pc.isPanelOpen) {
+                                          _pc.close();
+                                          _getLocation();
+                                        } else {
+                                          _getLocation();
+                                        }
                                       }
-                                    }
-                                  },
-                                  tooltip: "Get Your Current Location",
-                                  iconSize: 36,
-                                  color: Colors.white,
+                                    },
+                                    tooltip: "Get Your Current Location",
+                                    iconSize: 36,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 10.0,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: _theme == 'Dark' ? Colors.amber : Colors.purple,
-                                  shape: BoxShape.circle
+                                SizedBox(
+                                  width: 10.0,
                                 ),
-                                child: IconButton(
-                                  icon: Icon(Icons.group_add),
-                                  onPressed: () {
-                                    if(_pc.isAttached) {
-                                      if(_pc.isPanelClosed) {
-                                        _pc.open();
-                                        _getPassengers(context);
-                                      } else {
-                                        _getPassengers(context);
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: _theme == 'Dark'
+                                          ? Colors.amber
+                                          : Colors.purple,
+                                      shape: BoxShape.circle),
+                                  child: IconButton(
+                                    icon: Icon(Icons.group_add),
+                                    onPressed: () {
+                                      if (_pc.isAttached) {
+                                        if (_pc.isPanelClosed) {
+                                          _pc.open();
+                                          _getPassengers(context);
+                                        } else {
+                                          _getPassengers(context);
+                                        }
                                       }
-                                    }
-                                  },
-                                  tooltip: "Add Passengers to a Trip",
-                                  iconSize: 36,
-                                  color: Colors.white,
+                                    },
+                                    tooltip: "Add Passengers to a Trip",
+                                    iconSize: 36,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
                             ),
                           ),
                           Expanded(
                             child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: _theme == 'Dark' ? Colors.grey[900] : Colors.grey[100],
-                              ),
-                              child: passengers > 0 ? ListView.builder(
-                              itemCount: contacts.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final item = contacts[index].displayName + ' - ' +contacts[index].phones.first.value.toString();
-                                return Dismissible(
-                                  key : Key(item),
-                                  child: Card(
-                                    elevation: 4.0,
-                                    child: ListTile(
-                                      leading: (contacts[index].avatar != null &&
-                                            contacts[index].avatar.length > 0)
-                                        ? CircleAvatar(
-                                            backgroundImage:
-                                                MemoryImage(contacts[index].avatar),
-                                            maxRadius: 30,)
-                                        : CircleAvatar(
-                                            child: Text(contacts[index].initials(),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 36,
-                                              )
-                                            ),
-                                            backgroundColor: Colors.purple,
-                                            maxRadius: 30,
-                                          ),
-                                        title: Text(
-                                          contacts[index].displayName,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        subtitle: Text(contacts[index].phones.first.value.toString() == null ? noPhoneError :
-                                          contacts[index].phones.first.value.toString()
-                                        ),
-                                        trailing: Text((index + 1).toString()),
-                                        onLongPress: () {
-                                          setState(() {
-                                            _driver.displayName = contacts[index].displayName;
-                                            _driver.emails = contacts[index].emails;
-                                            _driver.phones = contacts[index].phones;
-                                            userDriving = false;
-                                          });
-                                          Scaffold.of(context).showSnackBar(SnackBar(content: Text('$item has been assigned as driver')));
-                                        },
-                                    ),
-                                  ),
-                                  onDismissed: (direction) {
-                                    setState(() {
-                                      if(_driver.displayName == contacts[index].displayName
-                                      && 
-                                      _driver.phones.first.value.toString() == contacts[index].phones.first.value.toString()) {
-                                        userDriving = true;
-                                        getUserProfile();
-                                        Scaffold.of(context).showSnackBar(SnackBar(content: Text("You are the driver")));
-                                      }
-                                      contacts.removeAt(index);
-                                      passengers --;
-                                      setCostPP();
-                                    });
-                                    Scaffold.of(context)
-                                      .showSnackBar(SnackBar(content: Text("$item removed")));
-                                  },
-                                );
-                              },
-                              scrollDirection: Axis.vertical,
-                            ) : Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                'Try adding some contacts!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  color: Colors.grey[400]
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: _theme == 'Dark'
+                                      ? Colors.grey[900]
+                                      : Colors.grey[100],
                                 ),
-                              ),
-                            )),
+                                child: passengers > 0
+                                    ? ListView.builder(
+                                        itemCount: contacts.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          String displayName =
+                                              contacts[index].displayName;
+                                          String phone =
+                                              contacts[index].phones.isEmpty
+                                                  ? ""
+                                                  : contacts[index]
+                                                      .phones
+                                                      .first
+                                                      .value
+                                                      .toString();
+                                          final item =
+                                              displayName + " - " + phone;
+                                          return Dismissible(
+                                            key: Key(item),
+                                            child: Card(
+                                              elevation: 4.0,
+                                              child: ListTile(
+                                                leading: (contacts[index]
+                                                                .avatar !=
+                                                            null &&
+                                                        contacts[index]
+                                                                .avatar
+                                                                .length >
+                                                            0)
+                                                    ? CircleAvatar(
+                                                        backgroundImage:
+                                                            MemoryImage(
+                                                                contacts[index]
+                                                                    .avatar),
+                                                        maxRadius: 30,
+                                                      )
+                                                    : CircleAvatar(
+                                                        child: Text(
+                                                            contacts[index]
+                                                                .initials(),
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 36,
+                                                            )),
+                                                        backgroundColor:
+                                                            Colors.purple,
+                                                        maxRadius: 30,
+                                                      ),
+                                                title: Text(
+                                                  displayName,
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                subtitle: Text(phone == ""
+                                                    ? noPhoneError
+                                                    : phone),
+                                                trailing: Text(
+                                                    (index + 1).toString()),
+                                                onLongPress: () {
+                                                  setState(() {
+                                                    _driver = contacts[index];
+                                                    userDriving = false;
+                                                  });
+                                                  Scaffold.of(context)
+                                                      .showSnackBar(SnackBar(
+                                                          content: Text(
+                                                              '$item has been assigned as driver')));
+                                                },
+                                              ),
+                                            ),
+                                            onDismissed: (direction) {
+                                              setState(() {
+                                                if (_driver ==
+                                                    contacts[index]) {
+                                                  userDriving = true;
+                                                  getUserProfile();
+                                                  Scaffold.of(context)
+                                                      .showSnackBar(SnackBar(
+                                                          content: Text(
+                                                              "You are the driver")));
+                                                }
+                                                contacts.removeAt(index);
+                                                passengers--;
+                                                setCostPP();
+                                              });
+                                              Scaffold.of(context).showSnackBar(
+                                                  SnackBar(
+                                                      content: Text(
+                                                          "$item removed")));
+                                            },
+                                          );
+                                        },
+                                        scrollDirection: Axis.vertical,
+                                      )
+                                    : Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          'Try adding some contacts!',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 18.0,
+                                              color: Colors.grey[400]),
+                                        ),
+                                      )),
                           ),
                         ],
                       )),
@@ -435,16 +488,28 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                             thickness: 0.8,
                           ),
                           Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              (passengers == 0 || miles == 0) ? 'Cost Per Passenger: 0.0' 
-                              : 'Cost Per Passenger: $costPerPassenger',
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.grey[700],
-                              ),
-                            )
-                          ),
+                              alignment: Alignment.centerRight,
+                              child: InkWell(
+                                child: Text(
+                                  (passengers == 0 || miles == 0)
+                                      ? 'Cost Per Passenger: 0.0'
+                                      : 'Cost Per Passenger: $costPerPassenger',
+                                  style: TextStyle(
+                                      fontSize: 20.0,
+                                      color: Colors.grey[700],
+                                      decoration:
+                                          (passengers == 0 || miles == 0)
+                                              ? null
+                                              : TextDecoration.underline),
+                                ),
+                                onTap: () {
+                                  if (passengers != 0 || miles != 0) {
+                                    Fluttertoast.showToast(
+                                        msg:
+                                            '(${gas.toStringAsFixed(2)} GAS x $miles MILES) / ($fuelEfficiency MPG x $passengers PASSENGERS) ');
+                                  }
+                                },
+                              )),
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
@@ -459,40 +524,42 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                   ),
                 ),
               ),
-              Row(
-                children:<Widget>[
-                  Checkbox(
-                    value: userDriving,
-                    activeColor: Colors.amber,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        userDriving = newValue;
-                        if(newValue) {
-                          getUserProfile();
-                        }
-                      });
-                    },
-                  ),
-                  Text('I am the driver!'),
-                  Spacer(),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: RaisedButton(
-                        color: ((passengers > 0) && (_locationSearched) && (_userProfileSet)) ? Colors.amber : Colors.grey[400],
-                        child: Text(
-                          "Confirm Passengers",
-                        ),
-                        onPressed: confirmPassengerButtonPress,
-                        onLongPress: () {
-                          print(_driver.displayName);
-                        },
+              Row(children: <Widget>[
+                Checkbox(
+                  value: userDriving,
+                  activeColor: Colors.amber,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      userDriving = newValue;
+                      if (newValue) {
+                        getUserProfile();
+                      }
+                    });
+                  },
+                ),
+                Text('I am the driver!'),
+                Spacer(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: RaisedButton(
+                      color: ((passengers > 0) &&
+                              (_locationSearched) &&
+                              (_userProfileSet))
+                          ? Colors.amber
+                          : Colors.grey[400],
+                      child: Text(
+                        "Confirm Passengers",
                       ),
+                      onPressed: confirmPassengerButtonPress,
+                      onLongPress: () {
+                        print(_driver.displayName);
+                      },
                     ),
                   ),
-                ]
-              )
+                ),
+              ])
             ],
           ),
         ),
@@ -520,7 +587,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                color: _theme == 'Dark' ? Color.fromRGBO(18, 18, 18, 1.0) : Colors.white,
+                color: _theme == 'Dark'
+                    ? Color.fromRGBO(18, 18, 18, 1.0)
+                    : Colors.white,
               ),
               child: TextField(
                 readOnly: false,
@@ -528,9 +597,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                 // When user taps search bar, autocomplete comes up
                 onTap: () async {
                   Prediction p = await PlacesAutocomplete.show(
-                      context: context,
-                      mode: Mode.overlay,
-                      apiKey: googlePlacesAPIKey,
+                    context: context,
+                    mode: Mode.overlay,
+                    apiKey: googlePlacesAPIKey,
                   );
                   //if user picks an address, send it to the search bar
                   if (p != null) {
@@ -630,7 +699,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
           result[0].position.latitude,
           result[0].position.longitude);
       miles = convertMetersToMiles(distanceInMeter);
-      if(miles > 0) {
+      if (miles > 0) {
         setCost();
         setCostPP();
       }
@@ -756,11 +825,11 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
     passengerResult = await Navigator.push(context,
         new MaterialPageRoute(builder: (context) => AddPassengersPage()));
-    setState((){
+    setState(() {
       if (passengerResult != null) {
         contacts = passengerResult;
         passengers = passengerResult.length;
-        if(miles > 0) {
+        if (miles > 0) {
           setCost();
           setCostPP();
         }
@@ -770,113 +839,105 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   void _showConfirmDialog() {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.directions, size: 60.0),
-                  title: Text(
-                    'Your Trip',
-                    style: TextStyle(
-                      fontSize: 30.0,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '$miles miles to $searchAddr',
-                    style: TextStyle(
-                      fontSize: 15.0,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 35.0,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) => SizedBox(
-                      width: 5.0,
-                    ),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: contacts.length,
-                    itemBuilder: (BuildContext context, int index) => 
-                    Chip(
-                      avatar: (contacts[index].avatar != null &&
-                              contacts[index].avatar.length > 0)
-                          ? CircleAvatar(
-                              backgroundImage:
-                                  MemoryImage(contacts[index].avatar))
-                          : CircleAvatar(
-                              child: Text(
-                                contacts[index].initials(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                )
-                              ),
-                              backgroundColor: Colors.purple,
-                            ),
-                      label: Text(contacts[index].displayName,
-                          style: TextStyle(color: Colors.black)),
-                      backgroundColor: (_driver.phones.first.value.toString() == contacts[index].phones.first.value.toString())
-                        ? Colors.amber : Colors.grey[300],
-                    ),
-                  ),
-                ),
-                ButtonBar(
-                  children: <Widget>[
-                    FlatButton(
-                      onPressed: () {
-                        Navigator.pop(context); 
-                      },
-                      child: Text(
-                        'Go Back'
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    leading: Icon(Icons.directions, size: 60.0),
+                    title: Text(
+                      'Your Trip',
+                      style: TextStyle(
+                        fontSize: 30.0,
                       ),
                     ),
-                    RaisedButton(
-                      onPressed: () {
-                        if(signedIn) {
-                          addTrip();
-                          addContact();
-                          if(_pc.isAttached) {
-                            if(_pc.isPanelOpen) {
-                              _pc.close();
-                            }
-                          }
+                    subtitle: Text(
+                      '$miles miles to $searchAddr',
+                      style: TextStyle(
+                        fontSize: 15.0,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 35.0,
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) => SizedBox(
+                        width: 5.0,
+                      ),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: contacts.length,
+                      itemBuilder: (BuildContext context, int index) => Chip(
+                          avatar: (contacts[index].avatar != null &&
+                                  contacts[index].avatar.length > 0)
+                              ? CircleAvatar(
+                                  backgroundImage:
+                                      MemoryImage(contacts[index].avatar))
+                              : CircleAvatar(
+                                  child: Text(contacts[index].initials(),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      )),
+                                  backgroundColor: Colors.purple,
+                                ),
+                          label: Text(contacts[index].displayName,
+                              style: TextStyle(color: Colors.black)),
+                          backgroundColor: (_driver == contacts[index])
+                              ? Colors.amber
+                              : Colors.grey[300]),
+                    ),
+                  ),
+                  ButtonBar(
+                    children: <Widget>[
+                      FlatButton(
+                        onPressed: () {
                           Navigator.pop(context);
-                          openMap(searchAddr);
-                          searchAddr = null;
-                        } else {
-                          showAlertDialog(context);
-                        }
-                      },
-                      child: Text(
-                        'Start Trip'
+                        },
+                        child: Text('Go Back'),
                       ),
-                      color: Colors.amber
-                    ),
-                  ],
-                ),
-              ],
+                      RaisedButton(
+                          onPressed: () {
+                            if (signedIn) {
+                              addTrip();
+                              addContact();
+                              if (_pc.isAttached) {
+                                if (_pc.isPanelOpen) {
+                                  _pc.close();
+                                }
+                              }
+                              Navigator.pop(context);
+                              openMap(searchAddr);
+                              searchAddr = null;
+                            } else {
+                              showAlertDialog(context);
+                            }
+                          },
+                          child: Text('Start Trip'),
+                          color: Colors.amber),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      }
-    );
+          );
+        });
   }
 
   showAlertDialog(BuildContext context) {
     AlertDialog alert = AlertDialog(
       title: Text('Warning'),
-      content: Text('Your Trips Will Not Be Saved Unless You Are Signed In. \n\nPlease Check Settings.'),
+      content: Text(
+          'Your Trips Will Not Be Saved Unless You Are Signed In. \n\nPlease Check Settings.'),
       actions: <Widget>[
         FlatButton(
           child: Text('Open GoogleMaps'),
           onPressed: () {
-            if(_pc.isAttached) {
-              if(_pc.isPanelOpen) {
+            if (_pc.isAttached) {
+              if (_pc.isPanelOpen) {
                 _pc.close();
               }
             }
@@ -889,17 +950,19 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     );
 
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      }
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        });
   }
 
   //when Confirm Passengers button gets pressed
   confirmPassengerButtonPress() {
     print(_userProfileSet);
-    if (contacts.length > 0 && _milesGot && _locationSearched && _userProfileSet) {
+    if (contacts.length > 0 &&
+        _milesGot &&
+        _locationSearched &&
+        _userProfileSet) {
       _showConfirmDialog();
     } else {
       if (contacts.length <= 0 && !_milesGot && !_locationSearched) {
@@ -941,15 +1004,18 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   setGas() async {
     // TODO: change collection to 'costPerState' when updated in Firebase
     // TODO: change so that it actually gets the location instead of pulling California's gas
-    var query = Firestore.instance.collection('costPerSate').where('location', isEqualTo: 'California').getDocuments();
-    query.then((value) => gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
+    var query = Firestore.instance
+        .collection('costPerSate')
+        .where('location', isEqualTo: 'California')
+        .getDocuments();
+    query.then((value) =>
+        gas = double.parse(value.documents[0]['ppg'].toString().substring(1)));
   }
 
   setCost() {
     setState(() {
-      int fuelEfficiency = 20; // let's just assume someone has an OK car mpg
-      print('Gas: $gas Miles: $miles');
-      double tempCost= ((miles * gas) / fuelEfficiency);
+      print('Gas: $gas Miles: $miles FuelEfficiency $fuelEfficiency');
+      double tempCost = ((miles * gas) / fuelEfficiency);
       cost = double.parse(tempCost.toStringAsFixed(2));
       print('Cost: $cost');
       calculationMade = true;
@@ -973,109 +1039,135 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     }
   }
 
-  void addTrip() async { // this is different from addPassengers() bc this one stores all passengers in one
-    var userReference = databaseReference.collection('userData').document(firebaseUser.email);
+  void addTrip() async {
+    // this is different from addPassengers() bc this one stores all passengers in one
+    var userReference =
+        databaseReference.collection('userData').document(firebaseUser.email);
     print('addTrip: selected.length = ${contacts.length}');
     var passengers = [];
-    for(int i = 0; i < contacts.length; i++) {
+    //This is to set the price for passenger payment in firebase.
+    HashMap passengersOwed = new HashMap<String, dynamic>();
+    for (int i = 0; i < contacts.length; i++) {
       passengers.add(contacts[i].displayName);
+      passengersOwed.putIfAbsent(
+          contacts[i].displayName, () => costPerPassenger);
     }
     String driverName, driverEmail, driverPhone;
     driverName = _driver.displayName;
-    if(_driver.emails.isEmpty) {
+    if (_driver.emails.isEmpty) {
       driverEmail = noEmailError;
     } else {
       driverEmail = _driver.emails.first.value.toString();
     }
-    if(_driver.phones.isEmpty) {
+    if (_driver.phones.isEmpty) {
       driverPhone = noPhoneError;
     } else {
       driverPhone = _driver.phones.first.value.toString();
     }
     print('addTrip: Sending $passengers to Firebase');
-    await userReference.collection("trips")
-      .add({
-        'passengers' : passengers,
-        'miles' : miles,
-        'location' : searchAddr,
-        'date' : DateTime.now(),
-        'price' : cost,
-        'pricePerPassenger' : costPerPassenger,
-        'route' : GeoPoint(latitude, longitude),
-        'driverName' : driverName,
-        'driverEmail' : driverEmail,
-        'driverPhone' : driverPhone,
-      });
+    await userReference.collection("trips").add({
+      'passengers': passengers,
+      'passengersOwed': passengersOwed,
+      'miles': miles,
+      'location': searchAddr,
+      'date': DateTime.now(),
+      'price': cost,
+      'pricePerPassenger': costPerPassenger,
+      'route': GeoPoint(latitude, longitude),
+      'driverName': driverName,
+      'driverEmail': driverEmail,
+      'driverPhone': driverPhone,
+    });
   }
 
-  void addContact() async { // we add per individual
-    var userReference = databaseReference.collection('userData').document(firebaseUser.email);
-    var test = await userReference.collection('userData').document(firebaseUser.email).collection('contacts').getDocuments();
-    if(test.documents.length == 0) { // no record of collection
+  void addContact() async {
+    // we add per individual
+    var userReference =
+        databaseReference.collection('userData').document(firebaseUser.email);
+    var test = await userReference
+        .collection('userData')
+        .document(firebaseUser.email)
+        .collection('contacts')
+        .getDocuments();
+    if (test.documents.length == 0) {
+      // no record of collection
       userReference.collection('contacts').document('init').setData({
-        'displayName' : 'init',
-        'emailAddress' : 'int',
-        'phoneNumber' : 'int',
-        'avatar' : 'init',
-        'bill' : 0.0,
+        'displayName': 'init',
+        'emailAddress': 'int',
+        'phoneNumber': 'int',
+        'avatar': 'init',
+        'bill': 0.0,
       });
     }
-    for(int i = 0; i < contacts.length; i++) {
-      var query = 
-        await userReference.collection('contacts').where('displayName', isEqualTo: contacts[i].displayName).getDocuments();
-      if(query.documents.length == 0) {
+    for (int i = 0; i < contacts.length; i++) {
+      var query = await userReference
+          .collection('contacts')
+          .where('displayName', isEqualTo: contacts[i].displayName)
+          .getDocuments();
+      if (query.documents.length == 0) {
         String emails, phoneNumbers = '';
-        if(contacts[i].emails.isNotEmpty) {
+        if (contacts[i].emails.isNotEmpty) {
           emails = contacts[i].emails.first.value.toString();
         } else {
           emails = noEmailError;
         }
-        if(contacts[i].phones.isNotEmpty) {
+        if (contacts[i].phones.isNotEmpty) {
           phoneNumbers = contacts[i].phones.first.value.toString();
         } else {
           phoneNumbers = noPhoneError;
         }
-        
+
         var avatar;
-        if(contacts[i].avatar != null && contacts[i].avatar.length > 0) {
+        if (contacts[i].avatar != null && contacts[i].avatar.length > 0) {
           avatar = String.fromCharCodes(contacts[i].avatar);
         } else {
           avatar = 'none';
         }
-        if(_driver.phones.first.value.toString() == contacts[i].phones.first.value.toString()) {
-          print('addContacts: Sending DRIVER ${contacts[i].displayName} - $emails - $phoneNumbers');
-          await userReference.collection("contacts")
-            .add({
-              'displayName' : contacts[i].displayName,
-              'emailAddress' : emails,
-              'phoneNumber' : phoneNumbers,
-              'avatar' : avatar,
-              'bill' : (costPerPassenger * -1)
+        if (_driver.phones.first.value.toString() ==
+            contacts[i].phones.first.value.toString()) {
+          print(
+              'addContacts: Sending DRIVER ${contacts[i].displayName} - $emails - $phoneNumbers');
+          await userReference.collection("contacts").add({
+            'displayName': contacts[i].displayName,
+            'emailAddress': emails,
+            'phoneNumber': phoneNumbers,
+            'avatar': avatar,
+            'bill': (costPerPassenger * -1)
           });
         } else {
-          print('addContacts: Sending passenger ${contacts[i].displayName} - $emails - $phoneNumbers');
-          await userReference.collection("contacts")
-            .add({
-              'displayName' : contacts[i].displayName,
-              'emailAddress' : emails,
-              'phoneNumber' : phoneNumbers,
-              'avatar' : avatar,
-              'bill' : costPerPassenger
+          print(
+              'addContacts: Sending passenger ${contacts[i].displayName} - $emails - $phoneNumbers');
+          await userReference.collection("contacts").add({
+            'displayName': contacts[i].displayName,
+            'emailAddress': emails,
+            'phoneNumber': phoneNumbers,
+            'avatar': avatar,
+            'bill': costPerPassenger
           });
         }
-      } else if(query.documents.length == 1) { // contact exists within Firebase
+      } else if (query.documents.length == 1) {
+        // contact exists within Firebase
         var docId = query.documents[0].documentID;
         var updatedBill;
-        if(userDriving) {
+        if (userDriving) {
           updatedBill = query.documents[0]['bill'] + costPerPassenger;
-        } else if(_driver.phones.first.value.toString() == query.documents[0]['phoneNumber']) {
+        } else if (_driver.phones.first.value.toString() ==
+            query.documents[0]['phoneNumber']) {
           updatedBill = query.documents[0]['bill'] - cost;
         }
-        await userReference.collection('contacts').document(docId).updateData({
-          'bill' : updatedBill
-        });
+        await userReference
+            .collection('contacts')
+            .document(docId)
+            .updateData({'bill': updatedBill});
       }
     }
     userReference.collection('contacts').document('init').delete();
+  }
+
+  Future getFuelEfficiency() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      this.fuelEfficiency = (prefs.getDouble('profileMPG') ?? 0.0);
+    });
   }
 }

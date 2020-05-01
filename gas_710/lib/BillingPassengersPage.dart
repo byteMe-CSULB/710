@@ -1,29 +1,34 @@
-import 'dart:collection';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
-import 'package:gas_710/BillingPassengersPage.dart';
 import 'package:gas_710/WebViewPage.dart';
 import 'package:gas_710/NavigationDrawer.dart';
 import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/SettingsPage.dart';
 import 'package:flutter_sms/flutter_sms_platform.dart';
-import 'package:intl/intl.dart';
 
-class BillingPage extends StatefulWidget {
+class BillingPassengersPage extends StatefulWidget {
+  final passengerList,
+      priceOwedPassengerList,
+      tripLocation; // required keys from BillingPassengersPage.dart
+  const BillingPassengersPage(
+      {Key key,
+      @required this.passengerList,
+      @required this.priceOwedPassengerList,
+      @required this.tripLocation})
+      : super(key: key);
+
   @override
-  _BillingPageState createState() => _BillingPageState();
+  _BillingPassengersPageState createState() => _BillingPassengersPageState();
 }
 
-class _BillingPageState extends State<BillingPage> {
-  // TODO: modify defaultTextMessage string
+class _BillingPassengersPageState extends State<BillingPassengersPage> {
   String defaultTextMessage =
-      "This is a default test message! Cost: \$"; // Default text message
+      "this is a reminder of what you owe for our recent trips! Cost: \$"; // Default text message
   List<String> recipentsPhoneNumber = []; // List of phone numbers to text
-  DateTime tripDateTime;
   final databaseReference = signedIn
       ? Firestore.instance.collection('userData').document(firebaseUser.email)
       : null;
@@ -33,15 +38,17 @@ class _BillingPageState extends State<BillingPage> {
     return new Scaffold(
         drawer: NavigationDrawer(), // provides nav drawer
         appBar: new AppBar(
-          title: new Text("Billing Page"),
+          title: new Text(
+            widget.tripLocation ?? 'Billing Page',
+            maxLines: 3,
+          ),
           backgroundColor: Colors.purple,
         ),
         body: signedIn
             ? StreamBuilder(
-                //Get trips from firebase
                 stream: databaseReference
-                    .collection('trips')
-                    .orderBy('date', descending: true)
+                    .collection('contacts')
+                    .where('displayName', whereIn: widget.passengerList)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
@@ -63,60 +70,111 @@ class _BillingPageState extends State<BillingPage> {
   }
 
   _listView(AsyncSnapshot<QuerySnapshot> snapshot) {
-    var dates = [];
-    for (int i = 0; i < snapshot.data.documents.length; i++) {
-      DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
-      dates.add(DateFormat.yMMMMd().format(myDateTime).toString() +
-          " " +
-          DateFormat("h:mm a").format(myDateTime).toString());
-    }
     return ListView.builder(
         itemCount: snapshot.data.documents.length,
         itemBuilder: (context, index) {
           return Card(
             elevation: 5,
             child: ListTile(
-              contentPadding: EdgeInsets.all(8.0),
-              title: Text(
-                snapshot.data.documents[index]['location'].toString(),
-                style: TextStyle(fontSize: 18.0),
-              ),
-              subtitle: Text(
-                "Passengers: " +
-                    snapshot.data.documents[index]['passengers'].length
-                        .toString() +
-                    "\nDater: " +
-                    dates[index],
-                style: TextStyle(fontSize: 12.0),
-              ),
-              onTap: () {
-                // Get passenger names
-                List<dynamic> passengerList =
-                    snapshot.data.documents[index]['passengers'];
-                // Get price owed from passengers
-                HashMap priceOwedPassengerList =
-                    new HashMap<String, dynamic>.from(
-                        snapshot.data.documents[index]['passengersOwed']);
-                //Remove the text 'Delete' in their name
-                for (int i = 0; i < passengerList.length; i++) {
-                  if (passengerList[i].toString().contains('(Deleted')) {
-                    passengerList[i] = passengerList[i]
-                        .toString()
-                        .substring(0, passengerList[i].toString().length - 9);
+                contentPadding: EdgeInsets.all(8.0),
+                leading: (snapshot.data.documents[index]['avatar'].toString() !=
+                            'none' &&
+                        (Uint8List.fromList(snapshot.data
+                                    .documents[index]['avatar'].codeUnits) !=
+                                null &&
+                            Uint8List.fromList(snapshot.data
+                                        .documents[index]['avatar'].codeUnits)
+                                    .length >
+                                0))
+                    ? CircleAvatar(
+                        backgroundImage: MemoryImage(Uint8List.fromList(snapshot
+                            .data.documents[index]['avatar'].codeUnits)),
+                        maxRadius: 30,
+                      )
+                    : CircleAvatar(
+                        child: Text(
+                          snapshot.data.documents[index]['displayName'][0],
+                          style: TextStyle(color: Colors.white, fontSize: 36.0),
+                        ),
+                        backgroundColor: Colors.purple,
+                        maxRadius: 30,
+                      ),
+                title: Text(
+                  snapshot.data.documents[index]['displayName'],
+                  style: TextStyle(fontSize: 24.0),
+                ),
+                subtitle: Text(
+                  '\$' +
+                      widget.priceOwedPassengerList[
+                              snapshot.data.documents[index]['displayName']]
+                          .toString(),
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                trailing: Wrap(
+                  spacing: 10, // space between two icons
+                  children: <Widget>[
+                    (snapshot.data.documents[index]['bill'] > 0)
+                        ? _requestButton(context)
+                        : _payButton(context),
+                    _textButton(
+                        context,
+                        snapshot.data.documents[index]['displayName'],
+                        snapshot.data.documents[index]['phoneNumber'],
+                        widget.priceOwedPassengerList[
+                            snapshot.data.documents[index]['displayName']]),
+                  ],
+                ),
+                onTap: () {
+                  String contactName =
+                      snapshot.data.documents[index]['displayName'];
+                  String dollars;
+                  dollars = widget.priceOwedPassengerList[
+                          snapshot.data.documents[index]['displayName']]
+                      .toString();
+                  var avatar;
+                  if (snapshot.data.documents[index]['avatar'] != 'none') {
+                    avatar = Uint8List.fromList(
+                        snapshot.data.documents[index]['avatar'].codeUnits);
+                  } else {
+                    avatar = 'none';
                   }
-                }
-                String tripLocation =
-                    snapshot.data.documents[index]['location'].toString();
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BillingPassengersPage(
-                              passengerList: passengerList,
-                              priceOwedPassengerList: priceOwedPassengerList,
-                              tripLocation: tripLocation,
-                            )));
-              },
-            ),
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BillContactPage(
+                              name: contactName,
+                              money: double.parse(dollars),
+                              avatar: avatar)));
+                },
+                onLongPress: () {
+                  String contactName =
+                      snapshot.data.documents[index]['displayName'].toString();
+                  bool youOwe;
+                  String dollars;
+                  if (widget.priceOwedPassengerList[
+                          snapshot.data.documents[index]['displayName']] >
+                      0) {
+                    youOwe = false;
+                    dollars = widget.priceOwedPassengerList[
+                            snapshot.data.documents[index]['displayName']]
+                        .toString();
+                  } else {
+                    youOwe = true;
+                    dollars = (-1 *
+                            widget.priceOwedPassengerList[
+                                snapshot.data.documents[index]['displayName']])
+                        .toStringAsFixed(2);
+                  }
+                  Fluttertoast.showToast(
+                    msg: youOwe
+                        ? 'You owe $contactName \$$dollars'
+                        : '$contactName owes you \$$dollars',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIos: 1,
+                    fontSize: 16.0,
+                  );
+                }),
           );
         });
   }
@@ -243,9 +301,9 @@ class _BillingPageState extends State<BillingPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new Text("Pressing \'Okay\' will send you to the texting app. \n"),
-          new Text("Phone Number: $phoneNumber \n"),
-          new Text("Message: $defaultTextMessage $bill"),
+          Text("Pressing \'Okay\' will send you to your default SMS app. \n"),
+          Text("Phone Number: $phoneNumber \n"),
+          Text("Message: \"Hey $personName, $defaultTextMessage $bill\""),
         ],
       ),
       actions: <Widget>[
@@ -253,21 +311,27 @@ class _BillingPageState extends State<BillingPage> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          textColor: Colors.red,
-          child: const Text('Cancel'),
+          child: Text('Cancel',
+            style: TextStyle(
+              color: MediaQuery.of(context).platformBrightness ==
+                Brightness.light
+                  ? Colors.black
+                  : Colors.white
+            )
+          )
         ),
-        new FlatButton(
+        new RaisedButton(
           onPressed: () {
             Navigator.of(context).pop();
             //Add their phone in the list
             recipentsPhoneNumber.add(phoneNumber);
             // Open message app
             _sendSMS(
-                defaultTextMessage + bill.toString(), recipentsPhoneNumber);
+                "Hey $personName," + defaultTextMessage + bill.toString(), recipentsPhoneNumber);
             recipentsPhoneNumber.clear();
           },
-          textColor: Theme.of(context).primaryColor,
-          child: const Text('Okay'),
+          child: Text('Okay'),
+          color: Colors.amber,
         ),
       ],
     );
