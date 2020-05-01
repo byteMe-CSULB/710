@@ -16,232 +16,76 @@ class InfoPage extends StatelessWidget {
           title: new Text("Info Page"),
           backgroundColor: Colors.purple,
         ),
-        body: ListView(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                child: Text('Metrics', style: TextStyle(fontSize: 48.0)),
-                alignment: Alignment.centerLeft,
+        body: StreamBuilder(
+          stream: userReference.collection('trips').snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData)
+              return Center(
+                child: CircularProgressIndicator(
+                  valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.amber)
+                ),
+              );
+            Map<String, dynamic> values = getMetrics(snapshot);
+            return GridView.count(
+              crossAxisCount: 2,
+              children: <Widget>[
+                metricContainer('Trips Taken', values['tripsTaken'].toString()),
+                metricContainer('Average Carpool Size', values['averageCarpoolSize'].toStringAsFixed(2)),
+                metricContainer('Total Passengers', values['totalPassengers'].toString()),
+                metricContainer('Total Miles', values['totalMiles'].toStringAsFixed(2)),
+                metricContainer('Average Trip Distance', values['averageTripDistance'].toStringAsFixed(2)),
+                metricContainer('Largest Bill', '\$${values['largestBill'].toString()}'),
+                metricContainer('Smallest Bill', '\$${values['smallestBill'].toString()}'),
+                metricContainer('Shortest Trip', values['shortestTrip'].toStringAsFixed(2) + ' miles'),
+                metricContainer('Shortest Destination', values['shortestDestination']),
+                metricContainer('Longest Trip', values['longestTrip'].toStringAsFixed(2) + ' miles'),
+                metricContainer('Longest Destination', values['longestDestination'])
+              ],
+            );
+          }
+        )
+    );
+  }
+
+  Widget metricContainer(String title, String msg) {
+    return Card(
+      elevation: 5.0,
+      margin: EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 32.0,
+                ),
               ),
             ),
-            Divider(
-              thickness: 2.5,
+          ),
+          Container(
+            padding: EdgeInsets.all(8.0),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Text(
+                  msg,
+                  style: TextStyle(
+                    fontSize: 42.0,
+                    fontStyle: FontStyle.italic
+                  ),
+                  softWrap: true,
+                ),
+              ),
             ),
-            StreamBuilder(
-                stream: userReference.collection('trips').snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return Center(
-                      child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.amber)),
-                    );
-                  Map<String, dynamic> values = getMetrics(snapshot);
-                  return Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['tripsTaken'].toInt()} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Trips taken',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['averageCarpoolSize'].toStringAsFixed(2)} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Average carpool size',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['totalPassengers'].toInt()} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Total passengers',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['totalMiles']} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Total miles',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['averageTripDistance'].toStringAsFixed(2)} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Average trip distance',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['largestBill']} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Largest bill',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['smallestBill']} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Smallest bill',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['shortestTrip']} ',
-                              style: TextStyle(
-                                  fontSize: 24.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Shortest trip (miles)',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                '${values['shortestDestination']} ',
-                                style: TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                '- Shortest destination',
-                                style: TextStyle(fontSize: 24.0),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Text(
-                              '${values['longestTrip']} ',
-                              style: TextStyle(
-                                  fontSize: 20.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '- Longest trip (miles)',
-                              style: TextStyle(fontSize: 24.0),
-                            ),
-                          ]),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 8.0),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                '${values['longestDestination']} ',
-                                style: TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                '- Longest destination',
-                                style: TextStyle(fontSize: 24.0),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-          ],
-        ));
+          )
+        ],
+      ),
+    );
   }
 
   Map<String, dynamic> getMetrics(AsyncSnapshot<QuerySnapshot> snapshot) {
