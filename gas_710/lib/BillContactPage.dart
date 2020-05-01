@@ -53,176 +53,191 @@ class _BillContactPageState extends State<BillContactPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text(widget.name),
-          backgroundColor: Colors.purple,
-          actions: <Widget>[
-            StreamBuilder(
-                stream: databaseReference
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              pinned: true,
+              title: Text(widget.name),
+              backgroundColor: Colors.purple,
+              actions: <Widget>[
+                StreamBuilder(
+                  stream: databaseReference
                     .collection('trips')
                     .where('passengers', arrayContains: widget.name)
                     .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return IconButton(
+                          icon: Icon(Icons.picture_as_pdf),
+                          onPressed: () {
+                            print('Cannot make PDF');
+                          },
+                          tooltip:
+                            'Save all of ${widget.name}\'s trips as a PDF',
+                        );
+                      }
                     return IconButton(
                       icon: Icon(Icons.picture_as_pdf),
-                      onPressed: () {
-                        print('Cannot make PDF');
+                      onPressed: () async {
+                        if (_storagePermissionStatus ==
+                          PermissionStatus.granted) {
+                            print('Creating PDF');
+                            _generatePdf(context, snapshot);
+                        } else {
+                          requestPermission(_storagePermission)
+                            .then((PermissionStatus status) {
+                            if (status == PermissionStatus.granted) {
+                              print('Creating PDF');
+                              _generatePdf(context, snapshot);
+                            } else {
+                              Fluttertoast.showToast(
+                                msg: 'Storage permission required to create PDF',
+                                toastLength: Toast.LENGTH_LONG,
+                                gravity: ToastGravity.BOTTOM,
+                                timeInSecForIos: 1,
+                                fontSize: 16.0,
+                              );
+                            }
+                            });
+                        }
                       },
                       tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
                     );
-                  }
-                  return IconButton(
-                    icon: Icon(Icons.picture_as_pdf),
-                    onPressed: () async {
-                      if (_storagePermissionStatus ==
-                          PermissionStatus.granted) {
-                        print('Creating PDF');
-                        _generatePdf(context, snapshot);
-                      } else {
-                        requestPermission(_storagePermission)
-                            .then((PermissionStatus status) {
-                          if (status == PermissionStatus.granted) {
-                            print('Creating PDF');
-                            _generatePdf(context, snapshot);
-                          } else {
-                            Fluttertoast.showToast(
-                              msg: 'Storage permission required to create PDF',
-                              toastLength: Toast.LENGTH_LONG,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIos: 1,
-                              fontSize: 16.0,
-                            );
-                          }
-                        });
-                      }
-                    },
-                    tooltip: 'Save all of ${widget.name}\'s trips as a PDF',
-                  );
-                })
-          ],
-        ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.start, children: <
-            Widget>[
-          Container(
-            height: 200,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-              image: (widget.avatar.toString() != 'none' &&
-                      (widget.avatar != null && widget.avatar.length > 0))
-                  ? MemoryImage(widget.avatar)
-                  : AssetImage('assets/noAvatar.jpg'),
-              fit: BoxFit.fill,
-            )),
-          ),
-          ListTile(
-            title: Text(
-              widget.name,
-              style: TextStyle(
-                fontSize: 36.0,
-              ),
+                  })
+                ],
+              )
+            ];
+          },
+          body: Column(mainAxisAlignment: MainAxisAlignment.start, 
+          children: <Widget>[
+            Container(
+              height: 200,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                image: (widget.avatar.toString() != 'none' &&
+                        (widget.avatar != null && widget.avatar.length > 0))
+                    ? MemoryImage(widget.avatar)
+                    : AssetImage('assets/noAvatar.jpg'),
+                fit: BoxFit.fill,
+              )),
             ),
-            subtitle: Text(
-              (widget.money.toString().contains('-'))
-                  ? '-\$${(widget.money * -1).toString()}'
-                  : '\$${widget.money.toString()}',
-              style: TextStyle(
-                fontSize: 36.0,
-                color: (widget.money > 0) ? Colors.green : Colors.red,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Contact Information',
+            ListTile(
+              title: Text(
+                widget.name,
                 style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
+                  fontSize: 36.0,
+                ),
+              ),
+              subtitle: Text(
+                (widget.money.toString().contains('-'))
+                    ? '-\$${(widget.money * -1).toString()}'
+                    : '\$${widget.money.toString()}',
+                style: TextStyle(
+                  fontSize: 36.0,
+                  color: (widget.money > 0) ? Colors.green : Colors.red,
                 ),
               ),
             ),
-          ),
-          StreamBuilder(
-              stream: databaseReference
-                  .collection('contacts')
-                  .where('displayName', isEqualTo: widget.name)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Contact Information',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+            StreamBuilder(
+                stream: databaseReference
+                    .collection('contacts')
+                    .where('displayName', isEqualTo: widget.name)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Colors.amber));
+                  return Container(
+                    height: 150,
+                    padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                    child: Column(children: <Widget>[
+                      ListTile(
+                        leading: Icon(Icons.phone),
+                        title: Text('Phone Number'),
+                        subtitle:
+                            Text(snapshot.data.documents[0]['phoneNumber']),
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.email),
+                        title: Text('Email Address'),
+                        subtitle:
+                            Text(snapshot.data.documents[0]['emailAddress']),
+                      ),
+                    ]),
+                  );
+                }),
+            Divider(
+              thickness: 0.8,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+              child: Row(children: <Widget>[
+                Text(
+                  'Recent Trips',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey,
+                  ),
+                ),
+                Spacer(),
+                Text('Sorting by: ', style: TextStyle(color: Colors.grey)),
+                Text(sortDesc ? 'Most Recent' : 'Least Recent',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600])),
+                IconButton(
+                  icon: Icon(Icons.filter_list),
+                  color: Colors.grey,
+                  onPressed: () {
+                    setState(() {
+                      sortDesc = !sortDesc;
+                    });
+                  },
+                  tooltip: 'Sort by date',
+                ),
+              ]),
+            ),
+            StreamBuilder(
+              stream: sortDesc
+                ? databaseReference
+                  .collection('trips')
+                  .where('passengers', arrayContains: widget.name)
+                  .orderBy('date', descending: true)
+                  .snapshots()
+                : databaseReference
+                  .collection('trips')
+                  .where('passengers', arrayContains: widget.name)
+                  .orderBy('date')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData)
                   return CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
-                return Container(
-                  height: 150,
-                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                  child: Column(children: <Widget>[
-                    ListTile(
-                      leading: Icon(Icons.phone),
-                      title: Text('Phone Number'),
-                      subtitle: Text(snapshot.data.documents[0]['phoneNumber']),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.email),
-                      title: Text('Email Address'),
-                      subtitle:
-                          Text(snapshot.data.documents[0]['emailAddress']),
-                    ),
-                  ]),
-                );
-              }),
-          Divider(
-            thickness: 0.8,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-            child: Row(children: <Widget>[
-              Text(
-                'Recent Trips',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
-              ),
-              Spacer(),
-              Text('Sorting by: ', style: TextStyle(color: Colors.grey)),
-              Text(sortDesc ? 'Most Recent' : 'Least Recent',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.grey[600])),
-              IconButton(
-                icon: Icon(Icons.filter_list),
-                color: Colors.grey,
-                onPressed: () {
-                  setState(() {
-                    sortDesc = !sortDesc;
-                  });
-                },
-                tooltip: 'Sort by date',
-              ),
-            ]),
-          ),
-          StreamBuilder(
-              stream: sortDesc
-                  ? databaseReference
-                      .collection('trips')
-                      .where('passengers', arrayContains: widget.name)
-                      .orderBy('date', descending: true)
-                      .snapshots()
-                  : databaseReference
-                      .collection('trips')
-                      .where('passengers', arrayContains: widget.name)
-                      .orderBy('date')
-                      .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData)
-                  return CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.amber));
-                return Expanded(child: _cardListView(context, snapshot));
-              }),
-        ]));
+                    valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.amber));
+                  return Expanded(child: _cardListView(context, snapshot));
+              }
+            )
+          ]
+        )
+      )
+    );
   }
 
   Widget _cardListView(
