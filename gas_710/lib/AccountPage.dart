@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gas_710/SettingsPage.dart';
 import 'package:gas_710/auth.dart';
-import 'package:gas_710/main.dart';
+import 'package:gas_710/NavigationDrawer.dart';
 
 class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       drawer: new DrawerCodeOnly(), // provides nav drawer
+       drawer: NavigationDrawer(), // provides nav drawer
       appBar: new AppBar(
         title: new Text("Account Page"),
         backgroundColor: Colors.purple,
@@ -30,14 +30,12 @@ class AccountPage extends StatelessWidget {
                 'NAME',
                 style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54),
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 name,
                 style: TextStyle(
                     fontSize: 25,
-                    color: Colors.deepPurple,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
@@ -45,14 +43,12 @@ class AccountPage extends StatelessWidget {
                 'EMAIL',
                 style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54),
+                    fontWeight: FontWeight.bold),
               ),
               Text(
                 email,
                 style: TextStyle(
                     fontSize: 25,
-                    color: Colors.deepPurple,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 40),
@@ -66,7 +62,7 @@ class AccountPage extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Sign Out',
-                    style: TextStyle(fontSize: 25, color: Colors.black),
+                    style: TextStyle(fontSize: 25),
                   ),
                 ),
                 elevation: 5,

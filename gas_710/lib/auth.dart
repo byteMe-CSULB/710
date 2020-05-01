@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -44,9 +45,22 @@ Future<String> signInWithGoogle() async {
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
   signedIn = true;
+  sharedLoginStatus(signedIn);
   firebaseUser = currentUser;
   addToDatabase(currentUser);
   return 'signInWithGoogle succeeded: $user';
+}
+
+Future sharedLoginStatus(bool value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('signedIn', value);
+  if(value) {
+    await prefs.setString('gName', name);
+    await prefs.setString('gEmail', email);
+    await prefs.setString('gImage', imageUrl);
+  } else {
+    prefs?.clear();
+  }
 }
 
 void addToDatabase(FirebaseUser currentUser) async {
@@ -62,6 +76,6 @@ void addToDatabase(FirebaseUser currentUser) async {
 void signOutGoogle() async {
   await googleSignIn.signOut();
   signedIn = false;
-
+  sharedLoginStatus(signedIn);
   print("User Sign Out");
 }

@@ -29,26 +29,17 @@ class _MyHomePageState extends State<AddPassengersPage> {
   Color tFloatingButtonColor;
   IconData tIcon;
 
+  Permission _contactPermission = Permission.contacts;
+  PermissionStatus _contactPermissionStatus = PermissionStatus.undetermined;
+
   @override
   void initState() {
     super.initState();
-    _getContactPermission().then((granted) {
-      if (granted == PermissionStatus.granted) {
+    _listenForPermissionStatus();
+    requestPermission(Permission.contacts)
+    .then((PermissionStatus status){
+      if(status == PermissionStatus.granted) {
         refreshContacts();
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Oops!'),
-            content: const Text('Permission to read contacts is not granted.'),
-            actions: <Widget>[
-              FlatButton(
-                child: const Text('OK'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
       }
     });
     //Initialize button on screen
@@ -57,39 +48,56 @@ class _MyHomePageState extends State<AddPassengersPage> {
     tIcon = icon;
   }
 
+  void _listenForPermissionStatus() async {
+    final status = await _contactPermission.status;
+    setState(() => _contactPermissionStatus = status);
+  }
+
+  Future<PermissionStatus> requestPermission(Permission permission) async {
+    final status = await permission.request();
+    setState((){
+      _contactPermissionStatus = status;
+    });
+    return status;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new WillPopScope(
-        onWillPop: _onBackPressed,
-        child: new Scaffold(
-          appBar: new AppBar(
-            title: new Text('Passengers'),
-            backgroundColor: Colors.purple,
-          ),
-          body: !_isLoading
-              ? Container(
-                  child: ListView.builder(
-                    itemCount: _uiCustomContacts?.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      CustomContact _contact = _uiCustomContacts[index];
-                      var _phonesList = _contact.contact.phones.toList();
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Passengers'),
+          backgroundColor: Colors.purple,
+        ),
+        body: _contactPermissionStatus == PermissionStatus.granted ? !_isLoading
+            ? Container(
+                child: ListView.builder(
+                  itemCount: _uiCustomContacts?.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    CustomContact _contact = _uiCustomContacts[index];
+                    var _phonesList = _contact.contact.phones.toList();
 
-                      return _buildListTile(_contact, _phonesList);
-                    },
-                  ),
-                )
-              : Center(
-                  child: CircularProgressIndicator(),
+                    return _buildListTile(_contact, _phonesList);
+                  },
                 ),
-          floatingActionButton: new FloatingActionButton.extended(
-            backgroundColor: tFloatingButtonColor,
-            onPressed: _onSubmit,
-            icon: Icon(tIcon),
-            label: Text(tFloatingButtonLabel),
-          ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
-        ));
+              )
+            : Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                ),
+              )
+            : Center(child: Text('Enable contacts permission to continue')),
+        floatingActionButton: new FloatingActionButton.extended(
+          backgroundColor: tFloatingButtonColor,
+          onPressed: _onSubmit,
+          icon: Icon(tIcon),
+          label: Text(tFloatingButtonLabel),
+        ),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.centerFloat,
+      )
+    );
   }
 
   //when tapping button
@@ -168,21 +176,6 @@ class _MyHomePageState extends State<AddPassengersPage> {
       _uiCustomContacts = _allContacts;
       _isLoading = false;
     });
-  }
-
-  Future<PermissionStatus> _getContactPermission() async {
-    PermissionStatus permission = await PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.contacts);
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.disabled) {
-      Map<PermissionGroup, PermissionStatus> permissionStatus =
-          await PermissionHandler()
-              .requestPermissions([PermissionGroup.contacts]);
-      return permissionStatus[PermissionGroup.contacts] ??
-          PermissionStatus.unknown;
-    } else {
-      return permission;
-    }
   }
 
   //Override back button
