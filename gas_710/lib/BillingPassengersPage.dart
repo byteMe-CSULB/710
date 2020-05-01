@@ -26,9 +26,8 @@ class BillingPassengersPage extends StatefulWidget {
 }
 
 class _BillingPassengersPageState extends State<BillingPassengersPage> {
-  // TODO: modify defaultTextMessage string
   String defaultTextMessage =
-      "This is a default test message! Cost: \$"; // Default text message
+      "this is a reminder of what you owe for our recent trips! Cost: \$"; // Default text message
   List<String> recipentsPhoneNumber = []; // List of phone numbers to text
   final databaseReference = signedIn
       ? Firestore.instance.collection('userData').document(firebaseUser.email)
@@ -302,9 +301,9 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new Text("Pressing \'Okay\' will send you to the texting app. \n"),
-          new Text("Phone Number: $phoneNumber \n"),
-          new Text("Message: $defaultTextMessage $bill"),
+          Text("Pressing \'Okay\' will send you to your default SMS app. \n"),
+          Text("Phone Number: $phoneNumber \n"),
+          Text("Message: \"Hey $personName, $defaultTextMessage $bill\""),
         ],
       ),
       actions: <Widget>[
@@ -312,21 +311,27 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          textColor: Colors.red,
-          child: const Text('Cancel'),
+          child: Text('Cancel',
+            style: TextStyle(
+              color: MediaQuery.of(context).platformBrightness ==
+                Brightness.light
+                  ? Colors.black
+                  : Colors.white
+            )
+          )
         ),
-        new FlatButton(
+        new RaisedButton(
           onPressed: () {
             Navigator.of(context).pop();
             //Add their phone in the list
             recipentsPhoneNumber.add(phoneNumber);
             // Open message app
             _sendSMS(
-                defaultTextMessage + bill.toString(), recipentsPhoneNumber);
+                "Hey $personName," + defaultTextMessage + bill.toString(), recipentsPhoneNumber);
             recipentsPhoneNumber.clear();
           },
-          textColor: Theme.of(context).primaryColor,
-          child: const Text('Okay'),
+          child: Text('Okay'),
+          color: Colors.amber,
         ),
       ],
     );
