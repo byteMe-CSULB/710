@@ -384,20 +384,6 @@ class _BillContactPageState extends State<BillContactPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.0)),
                       onPressed:
-                          () {}, // this should edit the individual trip i.e change location, miles, passengers, etc.
-                      child: Column(
-                        children: <Widget>[
-                          Icon(Icons.create),
-                          Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 2.0)),
-                          Text('Edit')
-                        ],
-                      )),
-                  FlatButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0)),
-                      onPressed:
                           () {}, // this should share this individual trip with the contact
                       child: Column(
                         children: <Widget>[
@@ -560,12 +546,13 @@ class _BillContactPageState extends State<BillContactPage> {
                         Navigator.of(context).pop();
                       },
                       child: Text('Cancel',
-                          style: TextStyle(
-                              color:
-                                  MediaQuery.of(context).platformBrightness ==
-                                          Brightness.light
-                                      ? Colors.black
-                                      : Colors.white)),
+                        style: TextStyle(
+                          color:
+                            MediaQuery.of(context).platformBrightness == Brightness.light
+                              ? Colors.black
+                              : Colors.white
+                        )
+                      ),
                     ),
                     new RaisedButton(
                       color: Colors.red,
