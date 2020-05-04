@@ -99,6 +99,7 @@ class _BillingPageState extends State<BillingPage> {
                 }
                 String tripLocation =
                     snapshot.data.documents[index]['location'].toString();
+                String driver = snapshot.data.documents[index]['driverName'];
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -106,6 +107,7 @@ class _BillingPageState extends State<BillingPage> {
                               passengerList: passengerList,
                               priceOwedPassengerList: priceOwedPassengerList,
                               tripLocation: tripLocation,
+                              driver: driver
                             )));
               },
             ),
