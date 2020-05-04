@@ -36,7 +36,6 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        drawer: NavigationDrawer(), // provides nav drawer
         appBar: new AppBar(
           title: new Text(
             widget.tripLocation ?? 'Billing Page',
