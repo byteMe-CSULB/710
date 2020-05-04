@@ -18,7 +18,7 @@ class BillContactPage extends StatefulWidget {
       @required this.name,
       @required this.money,
       @required this.avatar})
-      : super(key: key); // eventually we should add more keys
+      : super(key: key);
 
   @override
   _BillContactPageState createState() => _BillContactPageState();
@@ -439,12 +439,19 @@ class _BillContactPageState extends State<BillContactPage> {
 
   _generatePdf(context, AsyncSnapshot<QuerySnapshot> snapshot) async {
     var snapshotLength = snapshot.data.documents.length;
+    var totalCost = 0.0;
     List<Trip> trips = [];
     for (int i = 0; i < snapshotLength; i++) {
       DateTime myDateTime = snapshot.data.documents[i]['date'].toDate();
       String dateTime = DateFormat.yMMMMd().format(myDateTime).toString();
       String location = snapshot.data.documents[i]['location'];
-      String price = snapshot.data.documents[i]['price'].toString();
+      String price;
+      if(snapshot.data.documents[i]['driverName'] == widget.name) {
+        price = '-' + snapshot.data.documents[i]['pricePerPassenger'].toString();
+      } else {
+        price = snapshot.data.documents[i]['pricePerPassenger'].toString();
+      }
+      totalCost += double.parse(price);
       String mile = snapshot.data.documents[i]['miles'].toString();
       Trip individualTrip = Trip(dateTime, location, mile, price);
       trips.add(individualTrip);
@@ -460,7 +467,8 @@ class _BillContactPageState extends State<BillContactPage> {
     pdf.addPage(pdfLib.MultiPage(
         build: (context) => [
               pdfLib.Text('Contact Name - ${widget.name}'),
-              pdfLib.Table.fromTextArray(context: context, data: data)
+              pdfLib.Table.fromTextArray(context: context, data: data),
+              pdfLib.Text('Total Amount Due - \$${totalCost.toStringAsFixed(2)}')
             ]));
 
     final Directory dir = await getExternalStorageDirectory();
