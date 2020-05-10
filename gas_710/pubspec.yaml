@@ -62,6 +62,7 @@ dependencies:
   expansion_tile_card: ^1.0.3   # https://pub.dev/packages/expansion_tile_card
   introduction_screen: ^1.0.8   # https://pub.dev/packages/introduction_screen
   shared_preferences: ^0.5.6+3  # https://pub.dev/packages/shared_preferences
+  flutter_launcher_icons: ^0.7.5 # https://pub.dev/packages/flutter_launcher_icons
 
   # SMS Texting
   flutter_sms: 2.0.0+2         # https://pub.dev/packages/flutter_sms
@@ -70,6 +71,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+flutter_icons:
+  image_path: "assets/logo.png"
+  android: true
+  ios: false
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
