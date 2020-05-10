@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:gas_710/AddPassengersPage.dart';
 import 'package:gas_710/NavigationDrawer.dart';
+import 'package:gas_710/widgets/PassengerWidget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -342,120 +343,77 @@ class _NavigationPageState extends State<NavigationPage>
                           ),
                           Expanded(
                             child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: _theme == 'Dark'
-                                      ? Colors.grey[900]
-                                      : Colors.grey[100],
-                                ),
-                                child: passengers > 0
-                                    ? ListView.builder(
-                                        itemCount: contacts.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          String displayName =
-                                              contacts[index].displayName;
-                                          String phone =
-                                              contacts[index].phones.isEmpty
-                                                  ? ""
-                                                  : contacts[index]
-                                                      .phones
-                                                      .first
-                                                      .value
-                                                      .toString();
-                                          final item =
-                                              displayName + " - " + phone;
-                                          return Dismissible(
-                                            key: Key(item),
-                                            child: Card(
-                                              elevation: 4.0,
-                                              child: ListTile(
-                                                leading: (contacts[index]
-                                                                .avatar !=
-                                                            null &&
-                                                        contacts[index]
-                                                                .avatar
-                                                                .length >
-                                                            0)
-                                                    ? CircleAvatar(
-                                                        backgroundImage:
-                                                            MemoryImage(
-                                                                contacts[index]
-                                                                    .avatar),
-                                                        maxRadius: 30,
-                                                      )
-                                                    : CircleAvatar(
-                                                        child: Text(
-                                                            contacts[index]
-                                                                .initials(),
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize: 36,
-                                                            )),
-                                                        backgroundColor:
-                                                            Colors.purple,
-                                                        maxRadius: 30,
-                                                      ),
-                                                title: Text(
-                                                  displayName,
-                                                  style: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                subtitle: Text(phone == ""
-                                                    ? noPhoneError
-                                                    : phone),
-                                                trailing: Text(
-                                                    (index + 1).toString()),
-                                                onLongPress: () {
-                                                  setState(() {
-                                                    _driver = contacts[index];
-                                                    userDriving = false;
-                                                  });
-                                                  Scaffold.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              '$item has been assigned as driver')));
-                                                },
-                                              ),
-                                            ),
-                                            onDismissed: (direction) {
-                                              setState(() {
-                                                if (_driver ==
-                                                    contacts[index]) {
-                                                  userDriving = true;
-                                                  getUserProfile();
-                                                  Scaffold.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              "You are the driver")));
-                                                }
-                                                contacts.removeAt(index);
-                                                passengers--;
-                                                setCostPP();
-                                              });
-                                              Scaffold.of(context).showSnackBar(
-                                                  SnackBar(
-                                                      content: Text(
-                                                          "$item removed")));
-                                            },
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: _theme == 'Dark'
+                                  ? Colors.grey[900]
+                                  : Colors.grey[100],
+                              ),
+                              child: passengers > 0
+                                ? ListView.builder(
+                                  itemCount: contacts.length,
+                                  itemBuilder: (context, index) {
+                                    return PassengerWidget( 
+                                      passenger: contacts[index],
+                                      index: index,
+                                      onLongPress: () {
+                                        final Contact passenger = contacts[index];
+                                        setState(() {
+                                          _driver = passenger;
+                                          userDriving = false;
+                                        });
+                                        Scaffold.of(context)
+                                          .showSnackBar(SnackBar(
+                                            content: Text(
+                                              '${passenger.displayName} has been assigned as driver'
+                                            )
+                                          )
+                                        );
+                                      },
+                                      onDismissed: (_) {
+                                        final Contact passenger = contacts[index];
+                                        setState(() {
+                                          if (_driver == passenger) {
+                                            userDriving = true;
+                                            getUserProfile();
+                                            Scaffold.of(context)
+                                              .showSnackBar(SnackBar(
+                                                content: Text(
+                                                  "You are the driver"
+                                                )
+                                              )
+                                            );
+                                          }
+                                          contacts.removeAt(index);
+                                          passengers--;
+                                          setCostPP();
+                                        });
+                                        Scaffold.of(context).
+                                          showSnackBar(
+                                            SnackBar(content:
+                                              Text(
+                                                "${passenger.displayName} removed"
+                                              )
+                                            )
                                           );
-                                        },
-                                        scrollDirection: Axis.vertical,
-                                      )
-                                    : Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          'Try adding some contacts!',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontSize: 18.0,
-                                              color: Colors.grey[400]),
-                                        ),
-                                      )),
-                          ),
+                                      },
+                                    );
+                                  },
+                                  scrollDirection: Axis.vertical,
+                                )
+                                : Align(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      'Try adding some contacts!',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: Colors.grey[400]
+                                      ),
+                                    ),
+                                )
+                              ),
+                            ),
                         ],
                       )),
                 ),
