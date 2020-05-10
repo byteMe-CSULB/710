@@ -36,8 +36,12 @@ class SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            FlutterLogo( // eventually we should replace this with our actual logo
-              size: 100
+            Image.asset(
+              "assets/logo.png",
+              height: 200
+            ),
+            SizedBox(
+              height: 10,
             ),
             Text('710 by byteMe')
           ]
