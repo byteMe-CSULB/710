@@ -9,6 +9,7 @@ import 'package:gas_710/PdfViewPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'dart:collection';
 
 class BillContactPage extends StatefulWidget {
@@ -383,8 +384,9 @@ class _BillContactPageState extends State<BillContactPage> {
                   FlatButton(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.0)),
-                      onPressed:
-                          () {}, // this should share this individual trip with the contact
+                      onPressed: () {
+                        _shareSelectedTrip(snapshot, index);
+                      }, // this should share this individual trip with the contact
                       child: Column(
                         children: <Widget>[
                           Icon(Icons.share),
@@ -475,6 +477,25 @@ class _BillContactPageState extends State<BillContactPage> {
       MaterialPageRoute(
         builder: (_) => PdfViewPage(path: path),
       ),
+    );
+  }
+
+  _shareSelectedTrip(AsyncSnapshot<QuerySnapshot> snapshot, index) async {
+    DateTime myDateTime = snapshot.data.documents[index]['date'].toDate();
+    String dateTime = DateFormat.yMMMMd().format(myDateTime).toString();
+    String location = snapshot.data.documents[index]['location'];
+    String price = snapshot.data.documents[index]['priceperPassenger'].toString();
+    String mile = snapshot.data.documents[index]['miles'].toString();
+
+    String bill = 'Date: $dateTime\n'
+        'Price: $price\n'
+        'Location: $location\n'
+        'Miles: $mile\n';
+
+    // Using FlutterShare with input to prepare message and share.
+    await FlutterShare.share(
+          title: 'Individual Trip: $dateTime',
+          text: bill
     );
   }
 
