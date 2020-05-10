@@ -4,7 +4,6 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gas_710/BillContactPage.dart';
 import 'package:gas_710/WebViewPage.dart';
-import 'package:gas_710/NavigationDrawer.dart';
 import 'package:gas_710/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gas_710/SettingsPage.dart';
@@ -13,13 +12,15 @@ import 'package:flutter_sms/flutter_sms_platform.dart';
 class BillingPassengersPage extends StatefulWidget {
   final passengerList,
       priceOwedPassengerList,
-      tripLocation; // required keys from BillingPassengersPage.dart
+      tripLocation,
+      driver; // required keys from BillingPassengersPage.dart
   const BillingPassengersPage(
       {Key key,
       @required this.passengerList,
       @required this.priceOwedPassengerList,
-      @required this.tripLocation})
-      : super(key: key);
+      @required this.tripLocation,
+      @required this.driver
+      }) : super(key: key);
 
   @override
   _BillingPassengersPageState createState() => _BillingPassengersPageState();
@@ -36,37 +37,37 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        drawer: NavigationDrawer(), // provides nav drawer
-        appBar: new AppBar(
-          title: new Text(
-            widget.tripLocation ?? 'Billing Page',
-            maxLines: 3,
-          ),
-          backgroundColor: Colors.purple,
+      appBar: new AppBar(
+        title: new Text(
+          widget.tripLocation ?? 'Billing Page',
+          maxLines: 3,
         ),
-        body: signedIn
-            ? StreamBuilder(
-                stream: databaseReference
-                    .collection('contacts')
-                    .where('displayName', whereIn: widget.passengerList)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return Center(
-                        child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.amber)));
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Expanded(child: _listView(snapshot)),
-                      ],
-                    ),
-                  );
-                })
-            : _signedOut(context));
+        backgroundColor: Colors.purple,
+      ),
+      body: signedIn
+        ? StreamBuilder(
+          stream: databaseReference
+            .collection('contacts')
+            .where('displayName', whereIn: widget.passengerList)
+            .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData)
+              return Center(
+                  child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.amber)));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Expanded(child: _listView(snapshot)),
+                ],
+              ),
+            );
+          })
+      : _signedOut(context)
+    );
   }
 
   _listView(AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -104,7 +105,7 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
                   style: TextStyle(fontSize: 24.0),
                 ),
                 subtitle: Text(
-                  '\$' +
+                  (widget.passengerList.contains(widget.driver) ? "-\$" : "\$") + 
                       widget.priceOwedPassengerList[
                               snapshot.data.documents[index]['displayName']]
                           .toString(),
@@ -128,9 +129,15 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
                   String contactName =
                       snapshot.data.documents[index]['displayName'];
                   String dollars;
-                  dollars = widget.priceOwedPassengerList[
+                  if(widget.passengerList.contains(widget.driver)) {
+                    dollars = "-" + widget.priceOwedPassengerList[
                           snapshot.data.documents[index]['displayName']]
-                      .toString();
+                      .toString(); 
+                  } else {
+                    dollars = widget.priceOwedPassengerList[
+                          snapshot.data.documents[index]['displayName']]
+                      .toString(); 
+                  }
                   var avatar;
                   if (snapshot.data.documents[index]['avatar'] != 'none') {
                     avatar = Uint8List.fromList(
