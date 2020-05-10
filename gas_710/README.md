@@ -20,7 +20,7 @@ carpool receipt.
 - Mobile Data
 - A Google Account
 
-## Installion
+## Installation
 1. Clone our [repository](https://github.com/taylor-meyer/710) using the terminal ``git clone https://github.com/taylor-meyer.git``
 2. Open in Android Studio or Visual Studio Code
 3. Connect an Android or iOS device
