@@ -29,7 +29,6 @@ class _BillContactPageState extends State<BillContactPage> {
   final databaseReference =
       Firestore.instance.collection('userData').document(firebaseUser.email);
   bool sortDesc = true;
-
   Permission _storagePermission = Permission.storage;
   PermissionStatus _storagePermissionStatus = PermissionStatus.undetermined;
 
@@ -118,7 +117,7 @@ class _BillContactPageState extends State<BillContactPage> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                image: (widget.avatar.toString() != 'none' &&
+                    image: (widget.avatar.toString() != 'none' &&
                         (widget.avatar != null && widget.avatar.length > 0))
                     ? MemoryImage(widget.avatar)
                     : AssetImage('assets/noAvatar.jpg'),
@@ -500,7 +499,7 @@ class _BillContactPageState extends State<BillContactPage> {
     DateTime myDateTime = snapshot.data.documents[index]['date'].toDate();
     String dateTime = DateFormat.yMMMMd().format(myDateTime).toString();
     String location = snapshot.data.documents[index]['location'];
-    String price = snapshot.data.documents[index]['priceperPassenger'].toString();
+    String price = snapshot.data.documents[index]['pricePerPassenger'].toString();
     String mile = snapshot.data.documents[index]['miles'].toString();
 
     String bill = 'Date: $dateTime\n'
