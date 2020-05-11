@@ -269,6 +269,7 @@ class _BillContactPageState extends State<BillContactPage> {
                   ? (index + 1).toString() + '\n Paid'
                   : (index + 1)
                       .toString(), // for quick ordering, essentially should be in chronological order
+              textAlign: TextAlign.center,
             ),
             title: Text(
               trips[index],
@@ -368,6 +369,21 @@ class _BillContactPageState extends State<BillContactPage> {
                               .document(tripId[index])
                               .updateData(
                                   {'passengersOwed': passengersOwedList});
+                          Fluttertoast.showToast(
+                            msg: 'Marked ${widget.name} as paid for this trip!',
+                            toastLength: Toast.LENGTH_LONG,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIos: 1,
+                            fontSize: 16.0,
+                          );
+                        } else {
+                          Fluttertoast.showToast(
+                            msg: 'Marked ${widget.name} has already paid for this trip!',
+                            toastLength: Toast.LENGTH_LONG,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIos: 1,
+                            fontSize: 16.0,
+                          );
                         }
                       },
                       // this should keep the bill in firebase
