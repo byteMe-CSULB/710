@@ -16,7 +16,7 @@ class InfoPage extends StatelessWidget {
           title: new Text("Info Page"),
           backgroundColor: Colors.purple,
         ),
-        body: StreamBuilder(
+        body: signedIn ? StreamBuilder(
           stream: userReference.collection('trips').snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData)
@@ -44,7 +44,25 @@ class InfoPage extends StatelessWidget {
               ],
             );
           }
-        )
+        ) : _signedOut(context)
+    );
+  }
+
+  Widget _signedOut(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'That can\'t be right..?\nSign in to see your information!',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 24.0
+            ),
+            textAlign: TextAlign.center,
+          )
+        ],
+      )
     );
   }
 
