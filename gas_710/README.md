@@ -108,6 +108,9 @@ Select any of the options available and then go back to the hamburger menu, this
 
 From the settings page of your phone, outside the 710 app, search for the dark theme. Simply toggle it and come back to the app to see how the app now reflects a dark theme to save your eyes from strain. If you would like to switch back to light theme, do the same steps and untoggle the switch!
 
+# For Developers
+710 was built on Flutter using the Dart language. Inspect our `pubsec.yaml` to see all imported packages. [Installation](#Installation) is the same for any user. Be aware, although Flutter was meant to be one code base for two platforms, iOS is not ready for the world to see. None of us had a MacOS device to test it on. Be sure to provide your own [API keys](https://cloud.google.com/). 
+
 ## Support
 Any issues or features you'd like? [Open a ticket in our repository](https://github.com/taylor-meyer/710/issues/new).
 
