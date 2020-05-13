@@ -31,7 +31,7 @@
 5. [View your bills](#View-your-bills) 
 6. [Create PDF receipt](#Create-PDF-receipt)
 7. [Send or request money](#Send-or-request-money)
-8. [Toggle dark theme](#Dark-theme)
+8. [Toggle dark theme](#Toggle-dark-theme)
 
 # Signing In
 Your first time starting the app, you should be met with a sign-in with Google button. Simply press the button and select an account you would like to use. We do not gather any information from your Google account, we only require your email, name, and profile picture.
@@ -80,7 +80,7 @@ Then once all is reviewed, you can press `Open GoogleMaps` to be taken to Google
 # Adding contacts
 First, this is under the assumption that your phone is filled with contacts on the system level Phone/Contacts app. If you don't have any, add some before we get started. Once you have your contacts, [head to the Start trip page](#Navigating-through-the-menu), then press the button at the bottom right. To see your contacts, you have to grant us the permission to look at the list of your contacts, this includes names, numbers, emails and more (we only care about those three though). From here select any of the contacts you would like to use for your trip and then confirm that it's all correct.
 
-INSERT IMAGE OF ADD CONTACTS PAGE IN NAVIGATION PAGE
+<img src="images/AddPassenger.png" width="200" >
 
 # View your bills
 Open up the hamburger menu and go to `Billing`. First, you should have already have a bill, if not [start your very first trip](#Search-for-locations). From here select any trip that is listed, you'll then be able to see any passenger that came along with you. Tap again once more if you want to see a detailed view on the passenger and scroll down for any other trips you two have shared.
@@ -105,6 +105,7 @@ Select any of the options available and then go back to the hamburger menu, this
 
 # Toggle Dark Theme
 :warning: _This feature is only for those with Android 10+_
+
 From the settings page of your phone, outside the 710 app, search for the dark theme. Simply toggle it and come back to the app to see how the app now reflects a dark theme to save your eyes from strain. If you would like to switch back to light theme, do the same steps and untoggle the switch!
 
 ## Support
