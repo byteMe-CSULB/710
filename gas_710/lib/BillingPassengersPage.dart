@@ -114,9 +114,9 @@ class _BillingPassengersPageState extends State<BillingPassengersPage> {
                 trailing: Wrap(
                   spacing: 10, // space between two icons
                   children: <Widget>[
-                    (snapshot.data.documents[index]['bill'] > 0)
-                        ? _requestButton(context)
-                        : _payButton(context),
+                    widget.passengerList.contains(widget.driver)
+                        ? _payButton(context)
+                        : _requestButton(context),
                     _textButton(
                         context,
                         snapshot.data.documents[index]['displayName'],

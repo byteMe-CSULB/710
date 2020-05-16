@@ -24,7 +24,7 @@ double CAMERA_ZOOM = 13;
 double CAMERA_TILT = 0;
 double CAMERA_BEARING = 0;
 LatLng SOURCE_LOCATION = LatLng(33.783022, -118.112858); // CSULB :)
-const googlePlacesAPIKey = "AIzaSyD71HMbuRIt7smNaNek_R0OXBRHJMtj_fo";
+const googlePlacesAPIKey = "Google-Places-API-Key";
 
 GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: googlePlacesAPIKey);
 
@@ -51,7 +51,7 @@ class _NavigationPageState extends State<NavigationPage>
   // which generates every polyline between start and finish
   PolylinePoints polylinePoints = PolylinePoints();
 
-  String googleAPIKey = "AIzaSyDX4p3BL6ceYnQma0S6vMCYQVRKD5P-JT4";
+  String googleAPIKey = "Google-Maps-API-Key";
 
   // for my custom icons
   BitmapDescriptor sourceIcon;
