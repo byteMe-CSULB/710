@@ -21,7 +21,13 @@
 1. Clone our [repository](https://github.com/taylor-meyer/710) using the terminal, enter `git clone https://github.com/taylor-meyer.git` if you have Git installed. Else, press that green button to download the repository.
 2. Open in either Android Studio or Visual Studio Code
 3. Connect an Android device or start an Android Virtual Emulator (Android Studio)
-4. Type `flutter run` in the terminal. _If you are using a physical Android device, keep it plugged in_ 
+4. Head on over to [Google Cloud](https://cloud.google.com/) and get these 4 api keys:
+    - Google Maps Android SDK
+    - Google Maps iOS SDK (_if you want iOS port to work_)
+    - Google Places Key
+    - Google Maps Geo Key
+5. Replace all `API_Key` placeholders
+6. Type `flutter run` in the terminal. _If you are using a physical Android device, keep it plugged in_ 
 
 # How To Use The App
 1. [Signing in](#Signing-In)
