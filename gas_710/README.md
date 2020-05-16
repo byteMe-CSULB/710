@@ -18,7 +18,7 @@
 - A Google Account
 
 # Installation
-1. Clone our [repository](https://github.com/taylor-meyer/710) using the terminal, enter `git clone https://github.com/taylor-meyer.git` if you have Git installed. Else, press that green button to download the repository.
+1. Clone our [repository](https://github.com/byteMe-CSULB/710) using the terminal, enter `git clone https://github.com/byteMe-CSULB/710.git` if you have Git installed. Else, press that green button to download the repository.
 2. Open in either Android Studio or Visual Studio Code
 3. Connect an Android device or start an Android Virtual Emulator (Android Studio)
 4. Head on over to [Google Cloud](https://cloud.google.com/) and get these 4 api keys:
@@ -118,7 +118,7 @@ From the settings page of your phone, outside the 710 app, search for the dark t
 710 was built on Flutter using the Dart language. Inspect our `pubsec.yaml` to see all imported packages. [Installation](#Installation) is the same for any user. Be aware, although Flutter was meant to be one code base for two platforms, iOS is not ready for the world to see. None of us had a MacOS device to test it on. Be sure to provide your own [API keys](https://cloud.google.com/). 
 
 ## Support
-Any issues or features you'd like? [Open a ticket in our repository](https://github.com/taylor-meyer/710/issues/new).
+Any issues or features you'd like? [Open a ticket in our repository](https://github.com/byteMe-CSULB/710/issues/new).
 
 ## Team Members
 - Meng Cha
